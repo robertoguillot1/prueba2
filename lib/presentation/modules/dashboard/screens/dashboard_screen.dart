@@ -5,11 +5,11 @@ import '../../../../core/di/dependency_injection.dart';
 import '../cubits/dashboard_cubit.dart';
 import '../cubits/dashboard_state.dart';
 import '../widgets/summary_card_widget.dart';
-import '../../bovinos/list/bovinos_list_screen.dart';
-import '../../porcinos/list/cerdos_list_screen.dart';
-import '../../ovinos/list/ovejas_list_screen.dart';
-import '../../avicultura/list/gallinas_list_screen.dart';
-import '../../trabajadores/list/trabajadores_list_screen.dart';
+import '../../bovinos/screens/bovino_menu_screen.dart';
+import '../../porcinos/screens/porcicultura_menu_screen.dart';
+import '../../ovinos/screens/caprinos_menu_screen.dart';
+import '../../avicultura/screens/avicultura_menu_screen.dart';
+import '../../trabajadores/screens/trabajadores_menu_screen.dart';
 
 /// Pantalla principal del Dashboard Operativo Inteligente
 class DashboardScreen extends StatefulWidget {
@@ -160,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => BovinosListScreen(farmId: widget.farmId),
+                      builder: (_) => BovinoMenuScreen(farmId: widget.farmId),
                     ),
                   );
                 },
@@ -174,7 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CerdosListScreen(farmId: widget.farmId),
+                      builder: (_) => PorciculturaMenuScreen(farmId: widget.farmId),
                     ),
                   );
                 },
@@ -188,7 +188,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => GallinasListScreen(farmId: widget.farmId),
+                      builder: (_) => AviculturaMenuScreen(farmId: widget.farmId),
                     ),
                   );
                 },
@@ -202,7 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => OvejasListScreen(farmId: widget.farmId),
+                      builder: (_) => CaprinosMenuScreen(farmId: widget.farmId),
                     ),
                   );
                 },
@@ -216,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TrabajadoresListScreen(farmId: widget.farmId),
+                      builder: (_) => TrabajadoresMenuScreen(farmId: widget.farmId),
                     ),
                   );
                 },

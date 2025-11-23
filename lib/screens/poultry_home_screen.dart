@@ -12,8 +12,13 @@ import 'layer_batch_detail_screen.dart';
 
 class PoultryHomeScreen extends StatefulWidget {
   final Farm farm;
+  final int initialTabIndex;
 
-  const PoultryHomeScreen({super.key, required this.farm});
+  const PoultryHomeScreen({
+    super.key,
+    required this.farm,
+    this.initialTabIndex = 0,
+  });
 
   @override
   State<PoultryHomeScreen> createState() => _PoultryHomeScreenState();
@@ -25,7 +30,11 @@ class _PoultryHomeScreenState extends State<PoultryHomeScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
   }
 
   @override

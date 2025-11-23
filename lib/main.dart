@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -16,6 +17,11 @@ import 'core/di/dependency_injection.dart';
 // Screens existentes
 import 'screens/login_screen.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/farms_list_screen.dart';
+
+// Nuevo Dashboard
+import 'presentation/modules/dashboard/screens/dashboard_screen.dart';
+import 'presentation/modules/dashboard/cubits/dashboard_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -154,11 +160,30 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
               ? ThemeMode.system 
               : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
           home: authProvider.isAuthenticated
-              ? const MainNavigationScreen()
+              ? _buildAuthenticatedHome(farmProvider)
               : const LoginScreen(),
           debugShowCheckedModeBanner: false,
         );
       },
+    );
+  }
+
+  /// Construye la pantalla principal cuando el usuario está autenticado
+  Widget _buildAuthenticatedHome(FarmProvider farmProvider) {
+    // Si no hay finca seleccionada, mostrar la pantalla de selección de fincas
+    if (farmProvider.currentFarm == null) {
+      return const FarmsListScreen();
+    }
+
+    final farmId = farmProvider.currentFarm!.id;
+
+    // Crear el DashboardCubit usando DependencyInjection
+    final dashboardCubit = DependencyInjection.createDashboardCubit(farmId);
+
+    // Envolver DashboardScreen en BlocProvider
+    return BlocProvider<DashboardCubit>.value(
+      value: dashboardCubit,
+      child: DashboardScreen(farmId: farmId),
     );
   }
 }
