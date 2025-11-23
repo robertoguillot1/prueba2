@@ -5,6 +5,7 @@ import '../../../../presentation/widgets/custom_date_picker.dart';
 import '../../../../presentation/widgets/custom_dropdown.dart';
 import '../../../../presentation/widgets/form_section.dart';
 import '../../../../core/validators/form_validators.dart';
+import 'cattle_selector_field.dart';
 
 /// Widget reutilizable para formulario de Bovino
 class BovinoForm extends StatefulWidget {
@@ -12,6 +13,7 @@ class BovinoForm extends StatefulWidget {
   final String farmId;
   final GlobalKey<FormState> formKey;
   final Function(Bovino) onSave;
+  final List<Bovino>? availableBovinos; // Lista de bovinos disponibles para selección de padres
 
   const BovinoForm({
     super.key,
@@ -19,6 +21,7 @@ class BovinoForm extends StatefulWidget {
     required this.farmId,
     required this.formKey,
     required this.onSave,
+    this.availableBovinos,
   });
 
   @override
@@ -43,6 +46,8 @@ class _BovinoFormState extends State<BovinoForm> {
   HealthStatus _healthStatus = HealthStatus.sano;
   BreedingStatus? _breedingStatus;
   int? _previousCalvings;
+  Bovino? _selectedPadre;
+  Bovino? _selectedMadre;
 
   @override
   void initState() {
@@ -70,6 +75,62 @@ class _BovinoFormState extends State<BovinoForm> {
       _healthStatus = bovino.healthStatus;
       _breedingStatus = bovino.breedingStatus;
       _previousCalvings = bovino.previousCalvings;
+      
+      // Cargar padres si existen (buscarlos en la lista disponible)
+      if (widget.availableBovinos != null && widget.availableBovinos!.isNotEmpty) {
+        if (bovino.idPadre != null) {
+          try {
+            _selectedPadre = widget.availableBovinos!
+                .firstWhere((b) => b.id == bovino.idPadre);
+            // Verificar que no sea el mismo animal
+            if (_selectedPadre?.id == bovino.id) {
+              _selectedPadre = null;
+            }
+          } catch (e) {
+            // Si no se encuentra en la lista, crear un bovino temporal con los datos guardados
+            if (bovino.nombrePadre != null) {
+              _selectedPadre = Bovino(
+                id: bovino.idPadre!,
+                farmId: bovino.farmId,
+                identification: bovino.nombrePadre,
+                name: bovino.nombrePadre,
+                category: BovinoCategory.toro,
+                gender: BovinoGender.male,
+                currentWeight: 0,
+                birthDate: DateTime.now(),
+                productionStage: ProductionStage.levante,
+                healthStatus: HealthStatus.sano,
+              );
+            }
+          }
+        }
+        if (bovino.idMadre != null) {
+          try {
+            _selectedMadre = widget.availableBovinos!
+                .firstWhere((b) => b.id == bovino.idMadre);
+            // Verificar que no sea el mismo animal
+            if (_selectedMadre?.id == bovino.id) {
+              _selectedMadre = null;
+            }
+          } catch (e) {
+            // Si no se encuentra en la lista, crear un bovino temporal con los datos guardados
+            if (bovino.nombreMadre != null) {
+              _selectedMadre = Bovino(
+                id: bovino.idMadre!,
+                farmId: bovino.farmId,
+                identification: bovino.nombreMadre,
+                name: bovino.nombreMadre,
+                category: BovinoCategory.vaca,
+                gender: BovinoGender.female,
+                currentWeight: 0,
+                birthDate: DateTime.now(),
+                productionStage: ProductionStage.levante,
+                healthStatus: HealthStatus.sano,
+              );
+            }
+          }
+        }
+      }
     } else {
       _birthDate = DateTime.now();
     }
@@ -113,6 +174,10 @@ class _BovinoFormState extends State<BovinoForm> {
           : int.tryParse(_partosController.text),
       raza: _razaController.text.trim().isEmpty ? null : _razaController.text.trim(),
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      idPadre: _selectedPadre?.id,
+      nombrePadre: _selectedPadre?.name ?? _selectedPadre?.identification,
+      idMadre: _selectedMadre?.id,
+      nombreMadre: _selectedMadre?.name ?? _selectedMadre?.identification,
       createdAt: widget.initialBovino?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -202,6 +267,51 @@ class _BovinoFormState extends State<BovinoForm> {
               ),
             ],
           ),
+          // Sección de Genealogía
+          if (widget.availableBovinos != null && widget.availableBovinos!.isNotEmpty)
+            FormSection(
+              title: 'Genealogía (Padres)',
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  'Vincula los padres de este animal si están registrados en el inventario.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CattleSelectorField(
+                  label: 'Padre (Sire)',
+                  hint: 'Selecciona el padre',
+                  prefixIcon: Icons.male,
+                  selectedBovino: _selectedPadre,
+                  availableBovinos: widget.availableBovinos!,
+                  sexFilter: SexFilter.male,
+                  excludeBovinoId: widget.initialBovino?.id,
+                  onSelect: (bovino) {
+                    setState(() {
+                      _selectedPadre = bovino;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                CattleSelectorField(
+                  label: 'Madre (Dam)',
+                  hint: 'Selecciona la madre',
+                  prefixIcon: Icons.female,
+                  selectedBovino: _selectedMadre,
+                  availableBovinos: widget.availableBovinos!,
+                  sexFilter: SexFilter.female,
+                  excludeBovinoId: widget.initialBovino?.id,
+                  onSelect: (bovino) {
+                    setState(() {
+                      _selectedMadre = bovino;
+                    });
+                  },
+                ),
+              ],
+            ),
           FormSection(
             title: 'Peso y Etapa',
             children: [

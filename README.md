@@ -1,489 +1,511 @@
-# 🌾 Gestión de Fincas - Sistema Completo de Ganadería
+# 🐄 App Ganadera - Gestión Integral de Fincas
 
-Una aplicación móvil completa desarrollada en Flutter para la gestión integral de fincas ganaderas, incluyendo múltiples tipos de animales, trabajadores, control financiero, vacunación y análisis de producción.
+Aplicación Flutter profesional para la gestión completa de fincas ganaderas, desarrollada con **Clean Architecture**, **MVVM** y **Provider** para el manejo de estado.
 
-## 📱 Características Principales
+## 📋 Tabla de Contenidos
 
-### 🏡 **Gestión de Fincas**
-- **Crear, editar y eliminar fincas** con información completa
-- **Perfiles independientes** - cada finca funciona como un entorno separado
-- **Personalización visual** con colores distintivos para cada finca
-- **Información detallada**: nombre, ubicación, descripción, fecha de creación
-- **Módulos personalizables** con ordenamiento personalizado
+- [Características](#-características)
+- [Arquitectura](#-arquitectura)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Módulos Implementados](#-módulos-implementados)
+- [Instalación](#-instalación)
+- [Configuración](#-configuración)
+- [Uso](#-uso)
+- [API REST](#-api-rest)
+- [Modo Offline/Online](#-modo-offlineonline)
+- [Autenticación](#-autenticación)
+- [Fotos y Multimedia](#-fotos-y-multimedia)
+- [Reportes](#-reportes)
+- [Funcionalidades Inteligentes](#-funcionalidades-inteligentes)
+- [UI/UX](#-uiux)
+- [Dependencias](#-dependencias)
+- [Plataformas Soportadas](#-plataformas-soportadas)
+- [Notas Importantes](#-notas-importantes)
 
-### 👷‍♂️ **Módulo de Trabajadores**
-- **Registro completo de trabajadores** con datos personales y laborales
-- **Tipos de contrato**:
-  - Indefinido/Fijo (salario quincenal)
-  - Prestación de Servicios/Contrato (pago por actividades)
-- **Campos incluidos**:
-  - Nombre completo
-  - Cédula o identificación
-  - Cargo o función en la finca
-  - Salario (quincenal o por actividad)
-  - Fecha de ingreso
-  - Estado (activo/inactivo)
-- **Búsqueda avanzada** por nombre, cédula o cargo
-- **Perfil individual** con historial completo de pagos y préstamos
+## ✨ Características
 
-### 💰 **Módulo de Pagos**
-- **Registro detallado de pagos** con múltiples tipos:
-  - Pago completo (auto-completa con salario neto)
-  - Anticipo
-- **Información incluida**:
-  - Fecha del pago
-  - Monto pagado
-  - Observaciones
-  - Tipo de pago
-- **Cálculo automático** de salario neto (salario - préstamos pendientes)
-- **Historial cronológico** de todos los pagos
-- **Edición y eliminación** de pagos registrados
+### 🎯 Gestión Completa de Animales
+- **Ovinos**: Gestión de ovejas con seguimiento reproductivo, partos y pesos
+- **Bovinos**: Control de ganado bovino con producción de leche, vacunas y pesos
+- **Porcinos**: Administración de cerdos con etapas de alimentación
+- **Avicultura**: Gestión de gallinas con producción de huevos y lotes
 
-### 💵 **Módulo de Préstamos**
-- **Registro completo de préstamos** a trabajadores
-- **Campos incluidos**:
-  - Fecha del préstamo
-  - Monto prestado
-  - Descripción o motivo
-  - Estado (pendiente/pagado)
-  - Fecha de pago (si aplica)
-  - Notas adicionales
-- **Impacto automático en salarios**: Los préstamos pendientes se deducen del salario neto
-- **Restauración automática** del salario al pagar préstamos
-- **Seguimiento completo** del estado de cada préstamo
-- **Edición y eliminación** de préstamos
+### 👷 Gestión de Trabajadores
+- Registro completo de trabajadores
+- Control de asistencia y tareas
+- Seguimiento de rendimiento
 
-### 🐷 **Módulo de Porcicultura**
-- **Inventario completo de cerdos** con información detallada
-- **Registro de animales** con:
-  - Identificación única
-  - Género (Macho/Hembra)
-  - Fecha de nacimiento
-  - Peso actual
-  - Etapa de alimentación (Inicio, Levante, Engorde)
-  - Notas adicionales
-- **Perfil individual** de cada cerdo
-- **Control de peso** con registro histórico
-- **Sistema de vacunación**:
-  - Registro de vacunas aplicadas
-  - Historial completo de vacunación
-  - Próximas dosis programadas
-  - Módulo centralizado de vacunas
-- **Gestión de Alimento**:
-  - Análisis de consumo por etapa
-  - Registro de compras de alimento
-  - Cálculo de días hasta que se acabe el alimento
-  - Costos de alimentación
+### 📊 Funcionalidades Avanzadas
+- **Modo Offline/Online**: Sincronización automática cuando hay conexión
+- **Autenticación Profesional**: Sistema de login con roles (admin, trabajador, invitado)
+- **Fotos y Multimedia**: Captura y almacenamiento de fotos por animal
+- **Reportes PDF y CSV**: Exportación de inventarios y reportes de producción
+- **Gráficas y Dashboards**: Visualización de datos con `fl_chart`
+- **Cálculos Inteligentes**: Ganancia de peso, fechas probables de parto, alertas automáticas
 
-### 🐐🐑 **Módulo de Control Ovino/Caprino (Chivos/Ovejas)**
-- **Inventario completo** de chivos y ovejas
-- **Registro de animales** con:
-  - Chapeta (identificador visual obligatorio)
-  - Tipo (Chivo/Oveja)
-  - Género (Macho/Hembra)
-  - Estado reproductivo (solo hembras):
-    - Vacía
-    - Gestante
-    - Lactancia
-  - Fecha de monta (si está gestante)
-  - Fecha probable de parto (calculada automáticamente: +150 días)
-- **Alertas visuales**:
-  - Alerta cuando faltan menos de 10 días para el parto
-  - Tarjetas destacadas para animales próximos a parir
-- **Sistema de vacunación**:
-  - Registro de vacunas aplicadas
-  - Historial completo por animal
-  - Módulo centralizado de vacunas
-- **Perfil individual** de cada animal con historial completo
+## 🏗️ Arquitectura
 
-### 🐄 **Módulo de Ganado (Cattle)**
-- **Inventario completo** de ganado bovino
-- **Registro de animales** con información detallada
-- **Control de peso** con registros históricos
-- **Sistema de vacunación** completo
-- **Producción de leche**:
-  - Registro diario de producción
-  - Análisis de producción
-  - Seguimiento de rendimiento
-- **Eventos reproductivos**:
-  - Montas
-  - Partos
-  - Gestaciones
-- **Transferencias y viajes** del ganado
+La aplicación sigue los principios de **Clean Architecture** y **MVVM**:
 
-### 🐔 **Módulo de Avicultura**
+```
+┌─────────────────────────────────────────┐
+│         PRESENTATION LAYER              │
+│  (Screens, ViewModels, Widgets)        │
+└─────────────────┬───────────────────────┘
+                  │
+┌─────────────────▼───────────────────────┐
+│          DOMAIN LAYER                   │
+│  (Entities, Repositories, Use Cases)   │
+└─────────────────┬───────────────────────┘
+                  │
+┌─────────────────▼───────────────────────┐
+│           DATA LAYER                    │
+│  (Models, Data Sources, Repositories) │
+└─────────────────────────────────────────┘
+```
 
-#### **Pollos de Engorde (BroilerBatch)**
-- **Gestión por lotes** (no animales individuales)
-- **Registro de lotes** con:
-  - Nombre del lote
-  - Fecha de ingreso
-  - Cantidad inicial y actual de pollos
-  - Edad inicial en días
-  - Peso promedio actual (en gramos)
-  - Meta de peso (en gramos, por defecto 3000g = 3kg)
-  - Meta de sacrificio (días, por defecto 45)
-  - Costo de compra del lote
-- **Control automático de alimentación**:
-  - Tabla de consumo diario por día de vida
-  - Etapas de alimentación:
-    - Preinicio (días 2-11): 26.4g/ave/día
-    - Inicio (días 12-21): 62.7g/ave/día
-    - Engorde (días 22-34): 154.2g/ave/día
-    - Finalizador (días 35-42): 161.4g/ave/día
-  - Sugerencia automática de tipo de alimento según etapa
-  - Cálculo de bultos necesarios por etapa (40kg por bulto)
-- **Stock de alimento automático**:
-  - Disminuye automáticamente según consumo diario
-  - Actualización en tiempo real
-  - Alertas cuando el stock es bajo
-- **Sistema financiero completo**:
-  - Registro de gastos por categoría:
-    - Alimento
-    - Medicina
-    - Vacunas
-    - Insumos
-    - Mano de Obra
-    - Otros
-  - Registro de ventas del lote
-  - Balance financiero detallado:
-    - Ingresos (venta del lote)
-    - Egresos desglosados por categoría
-    - Utilidad neta (verde si hay ganancia, rojo si hay pérdida)
-  - Gráfico circular de distribución de gastos
-  - Cálculo de rentabilidad y costo de producción por pollo
-- **Estadísticas y gráficos**:
-  - Curva de crecimiento (peso vs días de vida)
-  - Gráfico de mortalidad (vivos vs muertos)
-  - Progreso del lote con barra visual
-  - Comparación peso actual vs peso esperado
-- **Cierre de lote**:
-  - Registro de venta con peso total, precio por kilo y cantidad vendida
-  - Cálculo automático de total de venta
-  - Cambio de estado a "Cerrado/Vendido"
+### Capas
 
-#### **Gallinas Ponedoras (LayerBatch)**
-- **Gestión por lotes** de gallinas ponedoras
-- **Registro de lotes** con:
-  - Fecha de nacimiento
-  - Fecha de ingreso al lote
-  - Cantidad de gallinas
-  - Precio por cartón de huevos
-- **Registro diario de producción**:
-  - Cantidad de huevos recogidos
-  - Cantidad de huevos rotos
-  - Alimento consumido (kg)
-  - Observaciones
-- **Análisis de producción**:
-  - Conversión automática a cartones (30 huevos = 1 cartón)
-  - Porcentaje de postura calculado automáticamente
-  - Alertas visuales por rendimiento:
-    - Verde: >90% (Excelente)
-    - Amarillo: 70-90% (Normal)
-    - Rojo: <70% (Alerta)
-  - Estimación de ganancia diaria
-- **Estadísticas y gráficos**:
-  - Curva de postura (porcentaje vs semanas de vida)
-  - Alertas visuales en caídas bruscas de producción (>5%)
-  - Análisis de tendencias
+1. **Presentation Layer**: 
+   - Screens (UI)
+   - ViewModels (lógica de presentación)
+   - Widgets reutilizables
 
-### 💉 **Sistema de Vacunación**
-- **Módulos de vacunación** para:
-  - Cerdos
-  - Chivos/Ovejas
-  - Ganado
-- **Registro completo** de vacunas con:
-  - Nombre de la vacuna
-  - Fecha de aplicación
-  - Número de lote
-  - Próxima dosis programada
-  - Administrado por
-  - Observaciones
-- **Historial por animal** en el perfil individual
-- **Vista centralizada** de todas las vacunas por tipo de animal
-- **Alertas** de próximas vacunas programadas
+2. **Domain Layer**:
+   - Entities (objetos de negocio puros)
+   - Repositories (interfaces)
+   - Use Cases (lógica de negocio)
 
-### 📊 **Gestión de Alimento**
-- **Módulo unificado** de análisis y costos de alimento
-- **Registro de compras**:
-  - Fecha de compra
-  - Cantidad y unidad (kg, toneladas, bultos)
-  - Precio total
-  - Proveedor
-- **Análisis de consumo**:
-  - Consumo diario por etapa de alimentación
-  - Días hasta que se acabe el alimento
-  - Inventario actual en kg y bultos
-- **Costos de alimentación**:
-  - Registro de gastos en alimento
-  - Análisis de costos por tipo de animal
-  - Tendencias de precios
+3. **Data Layer**:
+   - Models (DTOs que extienden entities)
+   - Data Sources (local y remoto)
+   - Repository Implementations
 
-### 📈 **Estadísticas y Análisis**
-- **Dashboard completo** con métricas clave por módulo
-- **Gráficos interactivos**:
-  - Curvas de crecimiento (pollos)
-  - Curvas de postura (gallinas)
-  - Gráficos de mortalidad
-  - Distribución de gastos (gráficos circulares)
-  - Análisis financiero por lote
-- **Resúmenes mensuales**:
-  - Total de pagos
-  - Total de préstamos pendientes
-  - Producción total
-  - Análisis de rentabilidad
-
-### 💸 **Gastos y Finanzas**
-- **Registro de gastos normales** de la finca
-- **Categorización** de gastos
-- **Análisis financiero** por categoría
-- **Control de gastos** por módulo (especialmente en avicultura)
-
-## 🛠️ **Tecnologías Utilizadas**
-
-- **Flutter**: Framework de desarrollo móvil multiplataforma
-- **Provider**: Gestión de estado de la aplicación
-- **SharedPreferences**: Almacenamiento local de datos
-- **FL Chart**: Gráficos y visualizaciones avanzadas
-- **Intl**: Formateo de fechas, monedas y números
-- **Material Design 3**: Diseño moderno y consistente
-- **Firebase** (opcional): Sincronización en la nube
-
-## 📁 **Estructura del Proyecto**
+## 📁 Estructura del Proyecto
 
 ```
 lib/
-├── models/
-│   ├── farm.dart                    # Modelo de finca
-│   ├── worker.dart                  # Modelo de trabajador
-│   ├── payment.dart                 # Modelo de pago
-│   ├── loan.dart                    # Modelo de préstamo
-│   ├── pig.dart                     # Modelo de cerdo
-│   ├── pig_vaccine.dart             # Modelo de vacuna de cerdo
-│   ├── goat_sheep.dart              # Modelo de chivo/oveja
-│   ├── goat_sheep_vaccine.dart      # Modelo de vacuna de chivo/oveja
-│   ├── cattle.dart                   # Modelo de ganado
-│   ├── cattle_vaccine.dart           # Modelo de vacuna de ganado
-│   ├── broiler_batch.dart           # Modelo de lote de pollos de engorde
-│   ├── layer_batch.dart              # Modelo de lote de gallinas ponedoras
-│   ├── layer_production_record.dart  # Modelo de registro de producción
-│   ├── batch_expense.dart           # Modelo de gasto de lote
-│   ├── batch_sale.dart              # Modelo de venta de lote
-│   ├── food_purchase.dart           # Modelo de compra de alimento
-│   └── expense.dart                 # Modelo de gasto general
-├── providers/
-│   ├── farm_provider.dart           # Gestión de estado principal
-│   └── auth_provider.dart           # Gestión de autenticación
-├── screens/
-│   ├── farms_list_screen.dart       # Listado de fincas
-│   ├── farm_profile_screen.dart     # Perfil de finca
-│   ├── workers_list_screen.dart     # Listado de trabajadores
-│   ├── worker_profile_screen.dart   # Perfil de trabajador
-│   ├── pigs_inventory_screen.dart   # Inventario de cerdos
-│   ├── pig_profile_screen.dart      # Perfil de cerdo
-│   ├── goat_sheep_inventory_screen.dart  # Inventario de chivos/ovejas
-│   ├── goat_sheep_home_screen.dart  # Home de chivos/ovejas
-│   ├── poultry_home_screen.dart     # Home de avicultura
-│   ├── broiler_batch_detail_screen.dart  # Detalle de lote de engorde
-│   ├── layer_batch_detail_screen.dart    # Detalle de lote de ponedoras
-│   ├── batch_balance_screen.dart    # Balance financiero de lote
-│   └── ... (más pantallas)
-└── widgets/
-    ├── broiler_growth_chart.dart    # Gráfico de crecimiento
-    ├── broiler_mortality_chart.dart # Gráfico de mortalidad
-    ├── layer_production_chart.dart  # Gráfico de producción
-    ├── batch_financial_summary.dart # Resumen financiero
-    └── ... (más widgets)
+├── core/
+│   ├── config/              # Configuración (API, endpoints)
+│   ├── di/                  # Dependency Injection
+│   ├── errors/              # Failures y manejo de errores
+│   ├── network/             # ConnectivityService
+│   ├── providers/           # ThemeProvider
+│   ├── services/            # AuthService, PhotoService, ReportService
+│   ├── theme/               # AppTheme (light/dark)
+│   └── utils/               # Validators, Calculations, Result, etc.
+│
+├── data/
+│   ├── database/            # AppDatabase (SQLite)
+│   ├── datasources/
+│   │   ├── local/           # Data Sources locales (SQLite)
+│   │   └── remote/          # Data Sources remotos (API REST)
+│   ├── models/              # Modelos (DTOs)
+│   ├── repositories_impl/   # Implementaciones de repositorios
+│   ├── repositories/
+│   │   └── hybrid/          # Repositorios híbridos (online/offline)
+│   └── sync/                # SyncManager
+│
+├── domain/
+│   ├── entities/            # Entidades de dominio
+│   ├── repositories/        # Interfaces de repositorios
+│   └── usecases/            # Casos de uso
+│
+└── presentation/
+    ├── modules/             # Módulos por funcionalidad
+    │   ├── ovinos/
+    │   │   ├── create/
+    │   │   ├── details/
+    │   │   ├── edit/
+    │   │   ├── list/
+    │   │   ├── viewmodels/
+    │   │   └── widgets/
+    │   ├── bovinos/
+    │   ├── porcinos/
+    │   ├── avicultura/
+    │   └── trabajadores/
+    ├── screens/
+    │   ├── auth/             # LoginScreen
+    │   ├── dashboard/        # DashboardScreen
+    │   └── home/             # HomeScreen (navegación)
+    └── widgets/              # Widgets reutilizables
+        ├── charts/           # Gráficas
+        └── photo/            # Widgets de fotos
 ```
 
-## 🚀 **Funcionalidades Destacadas**
+## 🎯 Módulos Implementados
 
-### **Sistema de Perfiles Independientes**
-- Cada finca mantiene sus propios datos completamente separados
-- Múltiples tipos de animales por finca
-- Configuración individual por finca
+### 1. Ovinos (Ovejas)
+- ✅ CRUD completo
+- ✅ Seguimiento reproductivo (vacía, gestante, lactante)
+- ✅ Registro de partos
+- ✅ Control de pesos
+- ✅ Cálculo de fecha probable de parto
+- ✅ Alertas de partos próximos
 
-### **Gestión Financiera Avanzada**
-- Cálculo automático de salarios netos
-- Sistema financiero completo para lotes de pollos
-- Análisis de rentabilidad detallado
-- Control de gastos por categoría
+### 2. Bovinos
+- ✅ CRUD completo
+- ✅ Producción de leche
+- ✅ Registro de vacunas
+- ✅ Control de pesos
+- ✅ Seguimiento reproductivo
+- ✅ Genealogía (padre/madre)
 
-### **Control Automático de Alimentación**
-- Tablas de consumo automáticas según edad/etapa
-- Sugerencias de tipo de alimento según etapa
-- Cálculo de bultos necesarios
-- Stock automático que disminuye según consumo
+### 3. Porcinos (Cerdos)
+- ✅ CRUD completo
+- ✅ Etapas de alimentación
+- ✅ Control de pesos
+- ✅ Cálculo de días hasta destete
 
-### **Sistema de Alertas Inteligentes**
-- Alertas de partos próximos (chivos/ovejas)
-- Alertas de stock bajo de alimento
-- Alertas de producción baja (gallinas)
-- Alertas de próximas vacunas
+### 4. Avicultura (Gallinas)
+- ✅ CRUD completo
+- ✅ Producción de huevos
+- ✅ Gestión de lotes
+- ✅ Control de mortalidad
+- ✅ Alimentación
 
-### **Visualización de Datos**
-- Gráficos interactivos con FL Chart
-- Curvas de crecimiento y producción
-- Análisis financiero visual
-- Dashboards por módulo
+### 5. Trabajadores
+- ✅ CRUD completo
+- ✅ Control de asistencia
+- ✅ Registro de tareas
+- ✅ Cálculo de horas trabajadas
+- ✅ Seguimiento de rendimiento
 
-### **Interfaz Intuitiva**
-- Diseño moderno con Material Design 3
-- Navegación fluida entre módulos
-- Búsqueda y filtrado avanzado
-- Confirmaciones de seguridad para acciones críticas
-- Formularios inteligentes con validación en tiempo real
+## 🚀 Instalación
 
-## 📱 **Experiencia de Usuario**
+### Requisitos Previos
+- Flutter SDK >= 3.0.0
+- Dart SDK >= 3.0.0
 
-### **Flujo Principal por Módulo**
+### Pasos
 
-#### **Trabajadores**
-1. Crear finca
-2. Registrar trabajadores con tipo de contrato
-3. Registrar pagos quincenales o por actividad
-4. Gestionar préstamos cuando sea necesario
-5. Analizar estadísticas financieras
-
-#### **Porcicultura**
-1. Registrar cerdos con información completa
-2. Registrar vacunas aplicadas
-3. Registrar compras de alimento
-4. Analizar consumo y costos
-
-#### **Chivos/Ovejas**
-1. Registrar animales con chapeta
-2. Gestionar estado reproductivo
-3. Registrar vacunas
-4. Monitorear partos próximos
-
-#### **Avicultura - Pollos de Engorde**
-1. Crear lote con información inicial
-2. El sistema calcula automáticamente el consumo según edad
-3. Registrar gastos (alimento, medicina, etc.)
-4. El stock disminuye automáticamente
-5. Registrar venta al cerrar el lote
-6. Ver balance financiero completo
-
-#### **Avicultura - Gallinas Ponedoras**
-1. Crear lote de gallinas
-2. Registrar producción diaria
-3. Analizar porcentaje de postura
-4. Ver gráficos de producción
-
-### **Características de Usabilidad**
-- **Pantallas de estado vacío** con guías para el usuario
-- **Validación robusta** de formularios
-- **Mensajes informativos** y confirmaciones
-- **Navegación contextual** entre módulos relacionados
-- **Búsqueda rápida** en listados extensos
-- **Actualización automática** de datos calculados
-
-## 🔧 **Instalación y Configuración**
-
-1. **Clonar el repositorio**
+1. **Clonar el repositorio**:
    ```bash
-   git clone [url-del-repositorio]
+   git clone <url-del-repositorio>
    cd ganaderia
    ```
 
-2. **Instalar dependencias**
+2. **Instalar dependencias**:
    ```bash
    flutter pub get
    ```
 
-3. **Ejecutar la aplicación**
+3. **Configurar Firebase** (opcional):
+   - Copiar `firebase_options.dart` a `lib/`
+   - O crear uno nuevo con `flutterfire configure`
+
+4. **Ejecutar la aplicación**:
    ```bash
    flutter run
    ```
 
-4. **Configurar Firebase** (opcional)
-   - Seguir las instrucciones en `FIREBASE_SETUP.md`
-   - Configurar Firestore para sincronización en la nube
+## ⚙️ Configuración
 
-## 📊 **Métricas y Análisis**
+### API REST
 
-La aplicación proporciona análisis completos incluyendo:
+Edita `lib/core/config/api_config.dart`:
 
-### **Financiero**
-- Resumen mensual de pagos y gastos
-- Análisis por trabajador con métricas individuales
-- Estado de préstamos con seguimiento detallado
-- Rentabilidad por lote de pollos
-- Costos de producción
+```dart
+class ApiConfig {
+  static const String baseUrl = 'https://tu-api.com/v1';
+  static const Duration timeout = Duration(seconds: 30);
+}
+```
 
-### **Producción**
-- Producción de leche (ganado)
-- Producción de huevos (gallinas)
-- Crecimiento de pollos (gráficos)
-- Mortalidad por lote
+### Autenticación
 
-### **Alimentación**
-- Consumo diario por tipo de animal
-- Días hasta que se acabe el alimento
-- Costos de alimentación
-- Bultos necesarios por etapa
+La aplicación soporta autenticación con tokens JWT. El token se almacena automáticamente en `SharedPreferences` y se incluye en todas las peticiones.
 
-### **Salud**
-- Historial de vacunación
-- Próximas vacunas programadas
-- Alertas de salud
+### Tema
 
-## 🎯 **Casos de Uso**
+El tema se puede cambiar desde la configuración de la aplicación. Soporta modo claro y oscuro con detección automática del sistema.
 
-- **Fincas ganaderas** que necesitan gestionar múltiples tipos de animales
-- **Granjas avícolas** con producción de pollos de engorde y gallinas ponedoras
-- **Fincas porcinas** con control de alimentación y vacunación
-- **Fincas mixtas** con ganado, cerdos, aves y pequeños rumiantes
-- **Empresas rurales** con personal y control financiero
-- **Cooperativas** que manejan múltiples propiedades
-- **Administradores** que requieren control detallado de producción y finanzas
+## 📖 Uso
 
-## 🔒 **Seguridad y Privacidad**
+### Navegación Principal
 
-- **Datos locales**: Toda la información se almacena localmente por defecto
-- **Sin conexión**: Funciona completamente offline
-- **Firebase opcional**: Sincronización en la nube cuando se configura
-- **Confirmaciones**: Acciones críticas requieren confirmación
-- **Validación**: Entrada de datos validada en tiempo real
-- **Backup automático**: Respaldos locales automáticos
+La aplicación tiene una navegación inferior con las siguientes secciones:
 
-## 📝 **Notas Técnicas**
+1. **Dashboard**: Vista general con resumen y gráficas
+2. **Ovinos**: Gestión de ovejas
+3. **Bovinos**: Gestión de ganado bovino
+4. **Porcinos**: Gestión de cerdos
+5. **Avicultura**: Gestión de gallinas
+6. **Trabajadores**: Gestión de personal
 
-### **Unidades de Medida**
-- **Peso de pollos**: Se almacena en gramos, se muestra en kg
-- **Alimento**: Se almacena en kg, se calcula en bultos (40kg)
-- **Consumo**: Se calcula en gramos por ave por día
+### Operaciones CRUD
 
-### **Cálculos Automáticos**
-- **Stock de alimento**: Disminuye automáticamente según consumo diario
-- **Consumo de pollos**: Se calcula según tabla por día de vida
-- **Fecha de parto**: Se calcula automáticamente (+150 días desde monta)
-- **Salario neto**: Se calcula automáticamente (salario - préstamos)
+Cada módulo permite:
+- **Listar**: Ver todos los registros con búsqueda y filtros
+- **Crear**: Agregar nuevos registros con validaciones
+- **Editar**: Modificar registros existentes
+- **Eliminar**: Borrar registros con confirmación
+- **Detalles**: Ver información completa con historial
 
-### **Etapas de Alimentación**
-- **Pollos de Engorde**:
-  - Preinicio: Días 2-11
-  - Inicio: Días 12-21
-  - Engorde: Días 22-34
-  - Finalizador: Días 35-42
-- **Cerdos**:
-  - Inicio
-  - Levante
-  - Engorde
+## 🌐 API REST
 
-## 🆕 **Versión Actual**
+### Configuración
 
-Esta versión incluye:
-- ✅ Módulo completo de Porcicultura
-- ✅ Módulo completo de Control Ovino/Caprino
-- ✅ Módulo completo de Avicultura (Engorde y Ponedoras)
-- ✅ Sistema financiero para lotes
-- ✅ Control automático de stock y alimentación
-- ✅ Sistema de vacunación completo
-- ✅ Gráficos y estadísticas avanzadas
-- ✅ Gestión unificada de alimento
+La aplicación está preparada para conectarse a una API REST. Para activarla:
+
+1. Configura la URL base en `lib/core/config/api_config.dart`
+2. Los Remote Data Sources están listos para usar
+3. El `ApiClient` maneja automáticamente:
+   - Serialización/deserialización JSON
+   - Manejo de errores
+   - Timeouts
+   - Autenticación con tokens
+
+### Endpoints
+
+La aplicación espera los siguientes endpoints:
+
+```
+GET    /farms/{farmId}/ovinos
+GET    /farms/{farmId}/ovinos/{id}
+POST   /farms/{farmId}/ovinos
+PUT    /farms/{farmId}/ovinos/{id}
+DELETE /farms/{farmId}/ovinos/{id}
+
+GET    /farms/{farmId}/bovinos
+GET    /farms/{farmId}/bovinos/{id}
+POST   /farms/{farmId}/bovinos
+PUT    /farms/{farmId}/bovinos/{id}
+DELETE /farms/{farmId}/bovinos/{id}
+
+# Similar para porcinos, avicultura, trabajadores
+```
+
+## 📱 Modo Offline/Online
+
+### Funcionamiento
+
+La aplicación implementa un sistema híbrido:
+
+- **Con Internet**: Usa la API REST
+- **Sin Internet**: Usa base de datos local (SQLite)
+- **Sincronización**: Cuando vuelve la conexión, sincroniza automáticamente
+
+### Base de Datos Local
+
+- **Móvil/Desktop**: SQLite con `sqflite`
+- **Web**: No disponible (usa solo modo online)
+
+### SyncManager
+
+El `SyncManager` se encarga de:
+- Detectar cambios en la conectividad
+- Sincronizar operaciones pendientes
+- Resolver conflictos
+- Limpiar operaciones sincronizadas
+
+## 🔐 Autenticación
+
+### Roles
+
+- **Admin**: Acceso completo
+- **Trabajador**: Crear/editar registros
+- **Invitado**: Solo lectura
+
+### Funcionalidades
+
+- Login con email y contraseña
+- Persistencia de sesión
+- Logout
+- Recuperación de contraseña (opcional)
+
+## 📸 Fotos y Multimedia
+
+### Características
+
+- Captura de fotos desde cámara
+- Selección desde galería
+- Compresión automática de imágenes
+- Almacenamiento local
+- Sincronización con servidor (cuando hay conexión)
+
+### Uso
+
+En las pantallas de detalles de cada animal, hay un botón para tomar/seleccionar fotos. Las fotos se guardan localmente y se suben al servidor cuando hay conexión.
+
+## 📊 Reportes
+
+### Tipos de Reportes
+
+1. **PDF**:
+   - Reporte de inventario por módulo
+   - Reporte de producción
+   - Reporte sanitario
+
+2. **CSV**:
+   - Exportación de datos para análisis en Excel
+
+### Generación
+
+Los reportes se generan desde el Dashboard o desde las pantallas de lista de cada módulo.
+
+## 🧠 Funcionalidades Inteligentes
+
+### Cálculos Automáticos
+
+#### Ovinos/Bovinos
+- Ganancia diaria de peso
+- Fecha probable de parto
+- Clasificación por edad (cría, novillo, adulto)
+- Alertas de peso bajo
+- Días restantes hasta parto
+
+#### Porcinos
+- Índice de conversión alimenticia
+- Días hasta destete
+- Peso estimado según edad
+
+#### Avicultura
+- Producción diaria/semanal/mensual de huevos
+- Alertas de baja producción
+- Consumo de alimento por lote
+
+#### Trabajadores
+- Horas trabajadas
+- Rendimiento
+- Registro de tareas
+
+## 🎨 UI/UX
+
+### Material 3
+
+La aplicación usa Material Design 3 con:
+- Cards modernas con bordes redondeados
+- ListView.separated para mejor separación visual
+- Chips para estados
+- Iconos consistentes
+- Animaciones sutiles
+
+### Tema
+
+- Modo claro y oscuro
+- Detección automática del sistema
+- Persistencia de preferencias
+
+### Widgets Reutilizables
+
+- `CustomButton`: Botones estilizados
+- `InfoCard`: Tarjetas de información
+- `StatusChip`: Chips de estado
+- `SearchBar`: Barra de búsqueda
+- `PhotoDisplayWidget`: Visualización de fotos
+- `LoadingWidget`, `ErrorWidget`, `EmptyStateWidget`: Estados de carga
+
+## 📦 Dependencias Principales
+
+```yaml
+# State Management
+provider: ^6.1.1
+
+# HTTP & API
+http: ^1.1.0
+
+# Database
+sqflite: ^2.3.0
+path: ^1.8.3
+
+# Connectivity
+connectivity_plus: ^5.0.2
+
+# Image Handling
+image_picker: ^1.0.7
+image: ^4.1.3
+
+# PDF & CSV
+pdf: ^3.10.7
+csv: ^5.0.2
+
+# Charts
+fl_chart: ^0.66.0
+
+# Local Storage
+shared_preferences: ^2.2.2
+
+# Firebase (opcional)
+firebase_core: ^2.24.2
+firebase_auth: ^4.15.3
+cloud_firestore: ^4.13.6
+
+# Utilities
+intl: ^0.19.0
+```
+
+## 🖥️ Plataformas Soportadas
+
+- ✅ **Android**: Soporte completo
+- ✅ **iOS**: Soporte completo
+- ✅ **Web**: Modo online solamente (sin base de datos local)
+- ✅ **Windows**: Soporte completo
+- ✅ **Linux**: Soporte completo
+- ✅ **macOS**: Soporte completo
+
+## ⚠️ Notas Importantes
+
+### Web
+
+- La base de datos local (SQLite) **no está disponible en web**
+- En web, la aplicación funciona solo en **modo online**
+- Para usar la base de datos local, ejecuta la app en móvil o desktop
+
+### Base de Datos
+
+- En móvil/desktop: SQLite funciona normalmente
+- En web: Se desactiva automáticamente y se usa solo la API
+
+### Sincronización
+
+- Las operaciones offline se guardan en una cola de sincronización
+- Cuando hay conexión, se sincronizan automáticamente
+- Los conflictos se resuelven dando prioridad al servidor
+
+### Fotos
+
+- Las fotos se guardan localmente primero
+- Se suben al servidor cuando hay conexión
+- En web, las fotos se suben inmediatamente
+
+## 🔧 Desarrollo
+
+### Estructura de Commits
+
+Se recomienda usar commits semánticos:
+- `feat:` Nueva funcionalidad
+- `fix:` Corrección de bugs
+- `docs:` Documentación
+- `refactor:` Refactorización
+- `test:` Tests
+- `chore:` Tareas de mantenimiento
+
+### Testing
+
+```bash
+# Ejecutar tests
+flutter test
+
+# Análisis de código
+flutter analyze
+
+# Formatear código
+flutter format .
+```
+
+## 📝 Licencia
+
+[Especificar licencia]
+
+## 👥 Contribuidores
+
+[Agregar contribuidores]
+
+## 📞 Soporte
+
+Para reportar bugs o solicitar funcionalidades, abre un issue en el repositorio.
 
 ---
 
-**Desarrollado con Flutter** - Una solución completa para la gestión moderna de fincas ganaderas. 🚀
+**Desarrollado con ❤️ usando Flutter**

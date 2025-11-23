@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../viewmodels/bovinos_viewmodel.dart';
 import '../edit/bovino_edit_screen.dart';
+import '../widgets/pedigree_tree_widget.dart';
 import '../../../../domain/entities/bovinos/bovino.dart';
 import '../../../../presentation/widgets/info_card.dart';
 import '../../../../presentation/widgets/status_chip.dart';
@@ -89,6 +90,14 @@ class BovinoDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
+    final viewModel = context.watch<BovinosViewModel>();
+    
+    // Asegurar que los bovinos estén cargados
+    if (viewModel.bovinos.isEmpty && !viewModel.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        viewModel.loadBovinos(farmId);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -308,6 +317,119 @@ class BovinoDetailsScreen extends StatelessWidget {
                 child: Text(bovino.notes!),
               ),
             ],
+            // Descendencia (Hijos)
+            Consumer<BovinosViewModel>(
+              builder: (context, viewModel, child) {
+                final children = viewModel.bovinos.where((b) =>
+                  b.idPadre == bovino.id || b.idMadre == bovino.id
+                ).toList();
+                
+                if (children.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    Text(
+                      'Descendencia',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...children.map((child) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: child.gender == BovinoGender.female
+                              ? Colors.pink.shade100
+                              : Colors.blue.shade100,
+                          child: Icon(
+                            child.gender == BovinoGender.female
+                                ? Icons.female
+                                : Icons.male,
+                            color: child.gender == BovinoGender.female
+                                ? Colors.pink.shade700
+                                : Colors.blue.shade700,
+                          ),
+                        ),
+                        title: Text(
+                          child.name ?? child.identification ?? 'Sin nombre',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${_getCategoryString(child.category)} - ${child.gender == BovinoGender.female ? 'Hembra' : 'Macho'}',
+                            ),
+                            if (child.raza != null && child.raza!.isNotEmpty)
+                              Text('Raza: ${child.raza}'),
+                            Text(
+                              'Nacimiento: ${dateFormat.format(child.birthDate)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        trailing: child.idPadre == bovino.id
+                            ? Chip(
+                                label: const Text('Hijo'),
+                                avatar: const Icon(Icons.male, size: 16),
+                                backgroundColor: Colors.blue.shade50,
+                              )
+                            : Chip(
+                                label: const Text('Hija'),
+                                avatar: const Icon(Icons.female, size: 16),
+                                backgroundColor: Colors.pink.shade50,
+                              ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BovinoDetailsScreen(
+                                bovino: child,
+                                farmId: farmId,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )),
+                  ],
+                );
+              },
+            ),
+            // Genealogía
+            const SizedBox(height: 24),
+            Text(
+              'Genealogía',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              height: 600,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: PedigreeTreeWidget(
+                  bovino: bovino,
+                  farmId: farmId,
+                ),
+              ),
+            ),
             const SizedBox(height: 32),
             // Botones de acción
             Row(

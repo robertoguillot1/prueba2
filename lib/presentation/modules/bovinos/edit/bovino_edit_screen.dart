@@ -22,6 +22,24 @@ class BovinoEditScreen extends StatefulWidget {
 class _BovinoEditScreenState extends State<BovinoEditScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cargar bovinos si la lista está vacía
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = context.read<BovinosViewModel>();
+      if (viewModel.bovinos.isEmpty) {
+        setState(() => _isLoading = true);
+        viewModel.loadBovinos(widget.farmId).then((_) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+          }
+        });
+      }
+    });
+  }
 
   Future<void> _handleSave(Bovino bovino) async {
     if (!_formKey.currentState!.validate()) {
@@ -61,6 +79,15 @@ class _BovinoEditScreenState extends State<BovinoEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<BovinosViewModel>();
+    
+    if (_isLoading || viewModel.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Editar Bovino')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Bovino'),
@@ -70,6 +97,7 @@ class _BovinoEditScreenState extends State<BovinoEditScreen> {
         farmId: widget.farmId,
         formKey: _formKey,
         onSave: _handleSave,
+        availableBovinos: viewModel.bovinos,
       ),
     );
   }
