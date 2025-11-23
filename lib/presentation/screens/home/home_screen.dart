@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/di/dependency_injection.dart';
 import '../../modules/ovinos/list/ovejas_list_screen.dart';
 import '../../modules/bovinos/list/bovinos_list_screen.dart';
 import '../../modules/porcinos/list/cerdos_list_screen.dart';
 import '../../modules/avicultura/list/gallinas_list_screen.dart';
 import '../../modules/trabajadores/list/trabajadores_list_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../dashboard/viewmodels/dashboard_viewmodel.dart';
 
 /// Pantalla principal con navegación inferior
 class HomeScreen extends StatefulWidget {
@@ -39,11 +42,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => DependencyInjection.createDashboardViewModel(),
+        ),
+      ],
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -83,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Trabajadores',
           ),
         ],
+      ),
       ),
     );
   }

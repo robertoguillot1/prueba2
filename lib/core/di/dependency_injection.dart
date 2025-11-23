@@ -36,11 +36,13 @@ import '../../domain/usecases/trabajadores/delete_trabajador.dart';
 import '../../domain/usecases/trabajadores/get_trabajadores_activos.dart';
 import '../../domain/usecases/avicultura/get_all_gallinas.dart';
 import '../../domain/usecases/avicultura/create_gallina.dart';
+import '../../domain/usecases/porcinos/get_all_cerdos.dart';
 import '../../presentation/modules/ovinos/viewmodels/ovejas_viewmodel.dart';
 import '../../presentation/modules/bovinos/viewmodels/bovinos_viewmodel.dart';
 import '../../presentation/modules/porcinos/viewmodels/cerdos_viewmodel.dart';
 import '../../presentation/modules/trabajadores/viewmodels/trabajadores_viewmodel.dart';
 import '../../presentation/modules/avicultura/viewmodels/gallinas_viewmodel.dart';
+import '../../presentation/screens/dashboard/viewmodels/dashboard_viewmodel.dart';
 import '../../data/datasources/remote/api_client.dart';
 import '../../data/datasources/remote/ovinos/ovinos_remote_datasource.dart';
 import '../../data/datasources/remote/bovinos/bovinos_remote_datasource.dart';
@@ -217,6 +219,16 @@ class DependencyInjection {
     return GallinasViewModel(
       getAllGallinas: GetAllGallinas(_gallinasRepository!),
       createGallina: CreateGallina(_gallinasRepository!),
+    );
+  }
+  
+  static DashboardViewModel createDashboardViewModel() {
+    return DashboardViewModel(
+      getAllBovinos: GetAllBovinos(_bovinosRepository!),
+      getAllCerdos: GetAllCerdos(_cerdosRepository!),
+      getAllOvejas: GetAllOvejas(_ovejasRepository!),
+      getAllGallinas: GetAllGallinas(_gallinasRepository!),
+      getAllTrabajadores: GetAllTrabajadores(_trabajadoresRepository!),
     );
   }
   
