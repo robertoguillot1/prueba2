@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../providers/farm_provider.dart';
-import '../../../../screens/goat_sheep_vaccines_screen.dart';
 import '../list/ovejas_list_screen.dart';
 import '../create/oveja_create_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
@@ -23,15 +21,7 @@ class CaprinosMenuScreen extends StatelessWidget {
         title: const Text('Control Ovino/Caprino'),
         centerTitle: true,
       ),
-      body: Consumer<FarmProvider>(
-        builder: (context, farmProvider, child) {
-          // Obtener la finca actual
-          final farm = farmProvider.farms.firstWhere(
-            (f) => f.id == farmId,
-            orElse: () => farmProvider.currentFarm!,
-          );
-
-          return ListView(
+      body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               // Título descriptivo
@@ -69,12 +59,13 @@ class CaprinosMenuScreen extends StatelessWidget {
                 subtitle: 'Registrar y gestionar vacunas y tratamientos sanitarios',
                 color: Colors.blue,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => GoatSheepVaccinesScreen(farm: farm),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => GoatSheepVaccinesScreen(farm: farm),
+                  //   ),
+                  // );
+                  debugPrint('Funcionalidad pendiente: Control Sanitario');
                 },
               ),
               const SizedBox(height: 16),
@@ -129,9 +120,7 @@ class CaprinosMenuScreen extends StatelessWidget {
                 },
               ),
             ],
-          );
-        },
-      ),
+          ),
     );
   }
 

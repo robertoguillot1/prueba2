@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../list/bovinos_list_screen.dart';
 import '../create/bovino_create_screen.dart';
+import '../details/bovino_details_screen.dart';
 
 /// Pantalla de menú para el módulo de Bovinos
 class BovinoMenuScreen extends StatelessWidget {

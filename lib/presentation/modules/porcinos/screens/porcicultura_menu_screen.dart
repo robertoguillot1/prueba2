@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../providers/farm_provider.dart';
-import '../../../../screens/food_management_screen.dart';
-import '../../../../screens/pig_vaccines_screen.dart';
-import '../../../../screens/weight_history_screen.dart';
 import '../list/cerdos_list_screen.dart';
 import '../create/cerdo_create_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
@@ -25,15 +21,7 @@ class PorciculturaMenuScreen extends StatelessWidget {
         title: const Text('Gestión Porcina'),
         centerTitle: true,
       ),
-      body: Consumer<FarmProvider>(
-        builder: (context, farmProvider, child) {
-          // Obtener la finca actual
-          final farm = farmProvider.farms.firstWhere(
-            (f) => f.id == farmId,
-            orElse: () => farmProvider.currentFarm!,
-          );
-
-          return Padding(
+      body: Padding(
             padding: const EdgeInsets.all(16),
             child: GridView.count(
               crossAxisCount: 2,
@@ -66,12 +54,13 @@ class PorciculturaMenuScreen extends StatelessWidget {
                   subtitle: 'Gestionar alimentación e inventario de comida',
                   color: Colors.orange,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => FoodManagementScreen(farm: farm),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => FoodManagementScreen(farm: farm),
+                    //   ),
+                    // );
+                    debugPrint('Funcionalidad pendiente: Nutrición / Alimento');
                   },
                 ),
 
@@ -83,12 +72,13 @@ class PorciculturaMenuScreen extends StatelessWidget {
                   subtitle: 'Registrar y gestionar vacunas y tratamientos',
                   color: Colors.blue,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PigVaccinesScreen(farm: farm),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => PigVaccinesScreen(farm: farm),
+                    //   ),
+                    // );
+                    debugPrint('Funcionalidad pendiente: Sanidad / Vacunas');
                   },
                 ),
 
@@ -100,12 +90,13 @@ class PorciculturaMenuScreen extends StatelessWidget {
                   subtitle: 'Registrar y monitorear el peso de los cerdos',
                   color: Colors.purple,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WeightHistoryScreen(farm: farm),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => WeightHistoryScreen(farm: farm),
+                    //   ),
+                    // );
+                    debugPrint('Funcionalidad pendiente: Control de Peso');
                   },
                 ),
 
@@ -131,9 +122,7 @@ class PorciculturaMenuScreen extends StatelessWidget {
                 ),
               ],
             ),
-          );
-        },
-      ),
+          ),
     );
   }
 

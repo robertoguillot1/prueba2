@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/farm_provider.dart';
 
 // Importar pantallas de menú
 import '../../presentation/modules/bovinos/screens/bovino_menu_screen.dart';
@@ -23,20 +21,16 @@ import '../../presentation/modules/avicultura/list/gallinas_list_screen.dart';
 /// Las rutas principales apuntan a los menús intermedios,
 /// y las sub-rutas apuntan a las pantallas de lista específicas.
 class AppRouter {
-  /// Obtiene el farmId de los argumentos o del provider
+  /// Obtiene el farmId de los argumentos
   static String? _getFarmId(BuildContext context, Object? arguments) {
     // Intentar obtener farmId de los argumentos
     if (arguments is Map<String, dynamic> && arguments['farmId'] != null) {
       return arguments['farmId'] as String;
     }
     
-    // Si no está en los argumentos, intentar obtenerlo del provider
-    try {
-      final farmProvider = Provider.of<FarmProvider>(context, listen: false);
-      return farmProvider.currentFarm?.id;
-    } catch (e) {
-      return null;
-    }
+    // Si no está en los argumentos, retornar null
+    // TODO: Implementar lógica alternativa para obtener farmId si es necesario
+    return null;
   }
 
   /// Genera las rutas de la aplicación

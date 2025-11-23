@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../providers/farm_provider.dart';
-import '../../../../screens/payments_list_screen.dart';
-import '../../../../screens/loans_list_screen.dart';
-import '../../../../screens/workers_list_screen.dart';
 import '../list/trabajadores_list_screen.dart';
 import '../create/trabajador_create_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
@@ -25,15 +21,7 @@ class TrabajadoresMenuScreen extends StatelessWidget {
         title: const Text('Gestión de Trabajadores'),
         centerTitle: true,
       ),
-      body: Consumer<FarmProvider>(
-        builder: (context, farmProvider, child) {
-          // Obtener la finca actual
-          final farm = farmProvider.farms.firstWhere(
-            (f) => f.id == farmId,
-            orElse: () => farmProvider.currentFarm!,
-          );
-
-          return ListView(
+      body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               // Título descriptivo
@@ -71,12 +59,13 @@ class TrabajadoresMenuScreen extends StatelessWidget {
                 subtitle: 'Gestionar pagos, salarios y nómina de trabajadores',
                 color: Colors.green,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PaymentsListScreen(farm: farm),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => PaymentsListScreen(farm: farm),
+                  //   ),
+                  // );
+                  debugPrint('Funcionalidad pendiente: Registro de Pagos/Nómina');
                 },
               ),
               const SizedBox(height: 16),
@@ -89,12 +78,13 @@ class TrabajadoresMenuScreen extends StatelessWidget {
                 subtitle: 'Gestionar préstamos otorgados a trabajadores',
                 color: Colors.orange,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => LoansListScreen(farm: farm),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => LoansListScreen(farm: farm),
+                  //   ),
+                  // );
+                  debugPrint('Funcionalidad pendiente: Control de Préstamos');
                 },
               ),
               const SizedBox(height: 16),
@@ -120,9 +110,7 @@ class TrabajadoresMenuScreen extends StatelessWidget {
                 },
               ),
             ],
-          );
-        },
-      ),
+          ),
     );
   }
 
