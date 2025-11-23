@@ -165,3 +165,4 @@ csv: ^5.0.2
 - La sincronización offline/online está implementada
 - Los servicios están listos para usar
 
+
