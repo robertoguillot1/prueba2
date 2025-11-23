@@ -41,41 +41,10 @@ class _PigFormScreenState extends State<PigFormScreen> {
     _weightController = TextEditingController(
       text: widget.pigToEdit?.currentWeight.toString() ?? '',
     );
-    // Calcular etapa de alimentación basada en el peso
-    if (widget.pigToEdit != null) {
-      _feedingStage = _calculateFeedingStageFromWeight(widget.pigToEdit!.currentWeight);
-    } else {
-      _feedingStage = FeedingStage.inicio;
-    }
+    _feedingStage = widget.pigToEdit?.feedingStage ?? FeedingStage.inicio;
     _notesController = TextEditingController(
       text: widget.pigToEdit?.notes ?? '',
     );
-    
-    // Listener para actualizar etapa cuando cambia el peso
-    _weightController.addListener(_onWeightChanged);
-  }
-  
-  void _onWeightChanged() {
-    final weightText = _weightController.text;
-    if (weightText.isNotEmpty) {
-      final weight = double.tryParse(weightText);
-      if (weight != null && weight > 0) {
-        setState(() {
-          _feedingStage = _calculateFeedingStageFromWeight(weight);
-        });
-      }
-    }
-  }
-  
-  FeedingStage _calculateFeedingStageFromWeight(double weight) {
-    if (weight <= 24) {
-      return FeedingStage.inicio;
-    } else if (weight >= 25 && weight <= 69) {
-      return FeedingStage.levante;
-    } else if (weight >= 70) {
-      return FeedingStage.engorde;
-    }
-    return FeedingStage.inicio;
   }
 
   @override
@@ -312,13 +281,13 @@ class _PigFormScreenState extends State<PigFormScreen> {
                     ),
                     RadioListTile<FeedingStage>(
                       title: const Text('Levante'),
-                      value: FeedingStage.levante,
+                      value: FeedingStage.inicio,
                       groupValue: _feedingStage,
                       onChanged: (value) => setState(() => _feedingStage = value!),
                     ),
                     RadioListTile<FeedingStage>(
                       title: const Text('Engorde'),
-                      value: FeedingStage.engorde,
+                      value: FeedingStage.finalizacion,
                       groupValue: _feedingStage,
                       onChanged: (value) => setState(() => _feedingStage = value!),
                     ),

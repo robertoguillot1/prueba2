@@ -1,6 +1,7 @@
 enum PaymentType {
   full,
   advance,
+  partial,
 }
 
 extension PaymentTypeExtension on PaymentType {
@@ -10,6 +11,8 @@ extension PaymentTypeExtension on PaymentType {
         return 'Completo';
       case PaymentType.advance:
         return 'Anticipo';
+      case PaymentType.partial:
+        return 'Parcial';
     }
   }
 
@@ -19,6 +22,8 @@ extension PaymentTypeExtension on PaymentType {
         return 'complete';
       case PaymentType.advance:
         return 'advance';
+      case PaymentType.partial:
+        return 'partial';
     }
   }
 
@@ -28,8 +33,9 @@ extension PaymentTypeExtension on PaymentType {
       case 'full':
         return PaymentType.full;
       case 'advance':
-      case 'partial': // Compatibilidad con datos antiguos
         return PaymentType.advance;
+      case 'partial':
+        return PaymentType.partial;
       default:
         return PaymentType.values.firstWhere(
           (e) => e.value == value,
@@ -45,7 +51,7 @@ class Payment {
   final String farmId;
   final DateTime date;
   final double amount;
-  final String type; // 'complete', 'advance'
+  final String type; // 'complete', 'advance', 'partial'
   final String? notes;
 
   Payment({

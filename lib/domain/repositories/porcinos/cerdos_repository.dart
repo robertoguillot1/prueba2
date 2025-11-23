@@ -25,3 +25,4 @@ abstract class CerdosRepository {
   Future<Result<List<Cerdo>>> searchCerdos(String farmId, String query);
 }
 
+

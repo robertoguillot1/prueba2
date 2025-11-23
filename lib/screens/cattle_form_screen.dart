@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../providers/farm_provider.dart';
 import '../models/farm.dart';
 import '../models/cattle.dart';
-import '../widgets/cattle_selector_modal.dart';
 
 class CattleFormScreen extends StatefulWidget {
   final Farm farm;
@@ -37,9 +36,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
   DateTime? _expectedCalvingDate;
   late TextEditingController _previousCalvingsController;
   late TextEditingController _notesController;
-  late TextEditingController _razaController;
-  Cattle? _selectedPadre;
-  Cattle? _selectedMadre;
   bool _isProcessing = false;
 
   @override
@@ -69,38 +65,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
     _notesController = TextEditingController(
       text: widget.cattleToEdit?.notes ?? '',
     );
-    _razaController = TextEditingController(
-      text: widget.cattleToEdit?.raza ?? '',
-    );
-    
-    // Inicializar padres si existen
-    if (widget.cattleToEdit != null) {
-      final farmProvider = Provider.of<FarmProvider>(context, listen: false);
-      final updatedFarm = farmProvider.farms.firstWhere(
-        (f) => f.id == widget.farm.id,
-        orElse: () => widget.farm,
-      );
-      
-      if (widget.cattleToEdit!.idPadre != null) {
-        try {
-          _selectedPadre = updatedFarm.cattle.firstWhere(
-            (c) => c.id == widget.cattleToEdit!.idPadre,
-          );
-        } catch (e) {
-          _selectedPadre = null;
-        }
-      }
-      
-      if (widget.cattleToEdit!.idMadre != null) {
-        try {
-          _selectedMadre = updatedFarm.cattle.firstWhere(
-            (c) => c.id == widget.cattleToEdit!.idMadre,
-          );
-        } catch (e) {
-          _selectedMadre = null;
-        }
-      }
-    }
   }
 
   @override
@@ -110,7 +74,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
     _weightController.dispose();
     _previousCalvingsController.dispose();
     _notesController.dispose();
-    _razaController.dispose();
     super.dispose();
   }
 
@@ -140,11 +103,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
         expectedCalvingDate: _expectedCalvingDate,
         previousCalvings: _previousCalvingsController.text.isEmpty ? null : int.tryParse(_previousCalvingsController.text),
         notes: _notesController.text.isEmpty ? null : _notesController.text,
-        idPadre: _selectedPadre?.id,
-        nombrePadre: _selectedPadre?.name ?? _selectedPadre?.identification,
-        idMadre: _selectedMadre?.id,
-        nombreMadre: _selectedMadre?.name ?? _selectedMadre?.identification,
-        raza: _razaController.text.isEmpty ? null : _razaController.text,
       );
 
       if (widget.cattleToEdit == null) {
@@ -399,13 +357,19 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
                   children: [
                     const Text('Etapa de producción'),
                     RadioListTile<ProductionStage>(
+                      title: const Text('Cría'),
+                      value: ProductionStage.levante,
+                      groupValue: _productionStage,
+                      onChanged: (value) => setState(() => _productionStage = value!),
+                    ),
+                    RadioListTile<ProductionStage>(
                       title: const Text('Levante'),
                       value: ProductionStage.levante,
                       groupValue: _productionStage,
                       onChanged: (value) => setState(() => _productionStage = value!),
                     ),
                     RadioListTile<ProductionStage>(
-                      title: const Text('Desarrollo'),
+                      title: const Text('Ceba'),
                       value: ProductionStage.desarrollo,
                       groupValue: _productionStage,
                       onChanged: (value) => setState(() => _productionStage = value!),
@@ -472,7 +436,7 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
                       ),
                       RadioListTile<BreedingStatus>(
                         title: const Text('En celo'),
-                        value: BreedingStatus.enCelo,
+                        value: BreedingStatus.vacia,
                         groupValue: _breedingStatus,
                         onChanged: (value) => setState(() => _breedingStatus = value),
                       ),
@@ -504,98 +468,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
                 keyboardType: TextInputType.number,
               ),
             ],
-
-            // Raza
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _razaController,
-              decoration: const InputDecoration(
-                labelText: 'Raza (opcional)',
-                hintText: 'Ej: Holstein, Angus, Brahman, etc.',
-                prefixIcon: Icon(Icons.pets),
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            // Genealogía (Padres)
-            const SizedBox(height: 24),
-            Card(
-              color: Colors.blue.shade50,
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.account_tree, color: Colors.blue.shade700, size: 22),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Genealogía (Padres)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Vincula los padres de este animal si están registrados en el inventario.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Selector de Padre (Sire)
-                    _buildParentSelector(
-                      context,
-                      label: 'Padre (Sire)',
-                      icon: Icons.male,
-                      selectedCattle: _selectedPadre,
-                      requiredGender: CattleGender.male,
-                      onSelect: (cattle) {
-                        setState(() {
-                          _selectedPadre = cattle;
-                          // Actualizar nombrePadre si se selecciona
-                          if (cattle != null) {
-                            // El nombre se guardará automáticamente desde el objeto
-                          }
-                        });
-                      },
-                      onClear: () {
-                        setState(() {
-                          _selectedPadre = null;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Selector de Madre (Dam)
-                    _buildParentSelector(
-                      context,
-                      label: 'Madre (Dam)',
-                      icon: Icons.female,
-                      selectedCattle: _selectedMadre,
-                      requiredGender: CattleGender.female,
-                      onSelect: (cattle) {
-                        setState(() {
-                          _selectedMadre = cattle;
-                        });
-                      },
-                      onClear: () {
-                        setState(() {
-                          _selectedMadre = null;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
 
             // Notas
             const SizedBox(height: 16),
@@ -633,129 +505,6 @@ class _CattleFormScreenState extends State<CattleFormScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildParentSelector(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required Cattle? selectedCattle,
-    required CattleGender requiredGender,
-    required Function(Cattle?) onSelect,
-    required VoidCallback onClear,
-  }) {
-    return Consumer<FarmProvider>(
-      builder: (context, farmProvider, _) {
-        final updatedFarm = farmProvider.farms.firstWhere(
-          (f) => f.id == widget.farm.id,
-          orElse: () => widget.farm,
-        );
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        builder: (context) => CattleSelectorModal(
-                          farm: updatedFarm,
-                          availableCattle: updatedFarm.cattle,
-                          title: 'Seleccionar $label',
-                          selectedCattleId: selectedCattle?.id,
-                          requiredGender: requiredGender,
-                          excludeCattle: widget.cattleToEdit,
-                          onSelect: onSelect,
-                        ),
-                      );
-                    },
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: selectedCattle == null ? 'Sin seleccionar' : label,
-                        hintText: 'Toca para seleccionar',
-                        prefixIcon: Icon(icon, color: widget.farm.primaryColor),
-                        suffixIcon: selectedCattle != null
-                            ? Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                                size: 20,
-                              )
-                            : const Icon(Icons.arrow_drop_down),
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: selectedCattle != null
-                            ? Colors.green.shade50
-                            : Colors.white,
-                      ),
-                      child: selectedCattle != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  selectedCattle.name ?? selectedCattle.identification ?? 'Sin ID',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                if (selectedCattle.identification != null)
-                                  Text(
-                                    'Chapeta: ${selectedCattle.identification}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                if (selectedCattle.raza != null && selectedCattle.raza!.isNotEmpty)
-                                  Text(
-                                    'Raza: ${selectedCattle.raza}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  ),
-                              ],
-                            )
-                          : Text(
-                              'Toca para seleccionar',
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-                if (selectedCattle != null) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.red),
-                    tooltip: 'Borrar selección',
-                    onPressed: onClear,
-                  ),
-                ],
-              ],
-            ),
-          ],
-        );
-      },
     );
   }
 }

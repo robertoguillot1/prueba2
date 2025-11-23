@@ -25,3 +25,4 @@ abstract class PesoCerdoRepository {
   Future<Result<List<PesoCerdo>>> getRegistrosByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
+

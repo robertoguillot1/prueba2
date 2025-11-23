@@ -74,9 +74,6 @@ class Loan {
   DateTime get loanDate => date;
   DateTime? get paidDate => paymentDate;
 
-  // Getter para obtener el nombre de visualización del estado
-  String get statusDisplayName => status.displayName;
-
   Loan copyWith({
     String? id,
     String? workerId,

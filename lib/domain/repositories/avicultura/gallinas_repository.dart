@@ -25,3 +25,4 @@ abstract class GallinasRepository {
   Future<Result<List<Gallina>>> searchGallinas(String farmId, String query);
 }
 
+

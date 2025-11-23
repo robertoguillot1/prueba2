@@ -5,3 +5,4 @@ export 'peso_bovino_model.dart';
 export 'vacunas_bovino_model.dart';
 export 'partos_bovino_model.dart';
 
+

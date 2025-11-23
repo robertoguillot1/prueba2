@@ -174,8 +174,9 @@ class PaymentCard extends StatelessWidget {
       case 'complete':
         return 'Completo';
       case 'advance':
-      case 'partial': // Compatibilidad con datos antiguos
         return 'Anticipo';
+      case 'partial':
+        return 'Parcial';
       default:
         return type;
     }

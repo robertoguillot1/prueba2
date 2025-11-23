@@ -5,7 +5,6 @@ import '../providers/farm_provider.dart';
 import '../models/farm.dart';
 import '../models/worker.dart';
 import '../models/loan.dart';
-import '../models/payment.dart';
 import '../widgets/summary_card.dart';
 import 'payment_form_screen.dart';
 import 'worker_form_screen.dart';
@@ -359,71 +358,14 @@ class WorkerProfileScreen extends StatelessWidget {
                                       color: Colors.grey[600],
                                     ),
                                   ),
-                                  if (payment.observations != null && payment.observations!.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Icon(
-                                            Icons.note,
-                                            size: 14,
-                                            color: Colors.blue[700],
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Expanded(
-                                            child: Text(
-                                              payment.observations!,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey[800],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),
-                            Row(
-                              children: [
-                                Text(
-                                  payment.typeDisplayName,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 16),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PaymentFormScreen(
-                                          farm: farm,
-                                          worker: worker,
-                                          paymentToEdit: payment,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  tooltip: 'Editar pago',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, size: 16, color: Colors.red),
-                                  onPressed: () => _confirmDeletePayment(context, payment, farm, worker),
-                                  tooltip: 'Eliminar pago',
-                                ),
-                              ],
+                            Text(
+                              payment.typeDisplayName,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -491,37 +433,6 @@ class WorkerProfileScreen extends StatelessWidget {
                                       color: Colors.grey[600],
                                     ),
                                   ),
-                                  if (loan.notes != null && loan.notes!.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Icon(
-                                            Icons.note,
-                                            size: 14,
-                                            color: Colors.orange[700],
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Expanded(
-                                            child: Text(
-                                              loan.notes!,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey[800],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),
@@ -534,7 +445,7 @@ class WorkerProfileScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    loan.statusDisplayName,
+                                    loan.status.displayName,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
@@ -574,40 +485,6 @@ class WorkerProfileScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  void _confirmDeletePayment(BuildContext context, Payment payment, Farm farm, Worker worker) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Pago'),
-        content: Text(
-          '¿Estás seguro de que quieres eliminar este pago de '
-          '${NumberFormat.currency(symbol: '\$', decimalDigits: 0).format(payment.amount)}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final provider = Provider.of<FarmProvider>(context, listen: false);
-              await provider.deletePayment(payment.id, farmId: farm.id);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Pago eliminado')),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
-              'Eliminar',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

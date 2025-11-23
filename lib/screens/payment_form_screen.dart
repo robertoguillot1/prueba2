@@ -31,32 +31,13 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
   DateTime _paymentDate = DateTime.now();
   PaymentType _paymentType = PaymentType.full;
   bool _isLoading = false;
-  double? _netSalaryAvailable;
 
   @override
   void initState() {
     super.initState();
     if (widget.paymentToEdit != null) {
       _initializeWithPayment();
-    } else {
-      // Calcular salario neto disponible para nuevo pago
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _calculateNetSalary();
-      });
     }
-  }
-
-  void _calculateNetSalary() {
-    final provider = Provider.of<FarmProvider>(context, listen: false);
-    final netSalary = provider.getWorkerNetSalary(widget.worker.id, farmId: widget.farm.id);
-    setState(() {
-      _netSalaryAvailable = netSalary;
-      // Si es pago completo y no hay monto, auto-completar
-      if (_paymentType == PaymentType.full && _amountController.text.isEmpty && netSalary > 0) {
-        final formattedAmount = NumberFormat('#,###').format(netSalary.toInt());
-        _amountController.text = formattedAmount;
-      }
-    });
   }
 
   void _initializeWithPayment() {
@@ -279,14 +260,6 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                         onChanged: (value) {
                           setState(() {
                             _paymentType = value!;
-                            // Auto-completar monto si es pago completo
-                            if (value == PaymentType.full && _netSalaryAvailable != null && _netSalaryAvailable! > 0) {
-                              final formattedAmount = NumberFormat('#,###').format(_netSalaryAvailable!.toInt());
-                              _amountController.text = formattedAmount;
-                            } else if (value == PaymentType.advance) {
-                              // Limpiar monto si cambia a anticipo
-                              _amountController.clear();
-                            }
                           });
                         },
                         activeColor: widget.farm.primaryColor,
@@ -295,32 +268,6 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                   ),
                 ),
               ),
-              if (_netSalaryAvailable != null && _paymentType == PaymentType.full) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, size: 20, color: Colors.blue[700]),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Salario neto disponible: ${NumberFormat.currency(symbol: '\$', decimalDigits: 0).format(_netSalaryAvailable)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue[700],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
               const SizedBox(height: 16),
 
               // Observations

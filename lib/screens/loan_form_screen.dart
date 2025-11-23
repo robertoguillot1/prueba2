@@ -296,7 +296,7 @@ class _LoanFormScreenState extends State<LoanFormScreen> {
                   child: Column(
                     children: LoanStatus.values.map((status) {
                       return RadioListTile<LoanStatus>(
-                        title: Text(status == LoanStatus.pending ? 'Pendiente' : 'Pagado'),
+                        title: Text(status.displayName),
                         value: status,
                         groupValue: _loanStatus,
                         onChanged: (value) {

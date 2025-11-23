@@ -83,7 +83,7 @@ class LoanCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      loan.statusDisplayName,
+                      loan.status.displayName,
                       style: TextStyle(
                         color: statusColor,
                         fontSize: 10,

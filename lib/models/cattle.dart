@@ -43,11 +43,10 @@ enum HealthStatus {
 }
 
 enum BreedingStatus {
-  vacia,      // Sin estado
-  enCelo,     // En celo
-  prenada,    // Gestante
-  lactante,   // Parida
-  seca,       // Seca
+  vacia,
+  prenada,
+  lactante,
+  seca,
 }
 
 extension BreedingStatusExtension on BreedingStatus {
@@ -55,9 +54,8 @@ extension BreedingStatusExtension on BreedingStatus {
   static BreedingStatus? fromString(String value) {
     switch (value) {
       case 'ninguno':
-        return BreedingStatus.vacia;
       case 'enCelo':
-        return BreedingStatus.enCelo;
+        return BreedingStatus.vacia;
       case 'gestante':
         return BreedingStatus.prenada;
       case 'parida':
@@ -74,25 +72,10 @@ extension BreedingStatusExtension on BreedingStatus {
   
   // Getters para compatibilidad
   bool get isNinguno => this == BreedingStatus.vacia;
-  bool get isEnCelo => this == BreedingStatus.enCelo;
+  bool get isEnCelo => this == BreedingStatus.vacia;
   bool get isGestante => this == BreedingStatus.prenada;
   bool get isParida => this == BreedingStatus.lactante;
   bool get isDescansando => this == BreedingStatus.seca;
-  
-  String get displayName {
-    switch (this) {
-      case BreedingStatus.vacia:
-        return 'Sin estado';
-      case BreedingStatus.enCelo:
-        return 'En celo';
-      case BreedingStatus.prenada:
-        return 'Gestante';
-      case BreedingStatus.lactante:
-        return 'Parida';
-      case BreedingStatus.seca:
-        return 'Seca';
-    }
-  }
 }
 
 class Cattle {
@@ -113,11 +96,6 @@ class Cattle {
   final int? previousCalvings;
   final String? notes;
   final String? photoUrl;
-  final String? idPadre; // ID del padre
-  final String? nombrePadre; // Nombre del padre (cache)
-  final String? idMadre; // ID de la madre
-  final String? nombreMadre; // Nombre de la madre (cache)
-  final String? raza; // Raza del animal
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -139,11 +117,6 @@ class Cattle {
     this.previousCalvings,
     this.notes,
     this.photoUrl,
-    this.idPadre,
-    this.nombrePadre,
-    this.idMadre,
-    this.nombreMadre,
-    this.raza,
     this.createdAt,
     this.updatedAt,
   });
@@ -199,8 +172,6 @@ class Cattle {
     switch (breedingStatus!) {
       case BreedingStatus.vacia:
         return 'Vacía';
-      case BreedingStatus.enCelo:
-        return 'En celo';
       case BreedingStatus.prenada:
         return 'Prenada';
       case BreedingStatus.lactante:
@@ -250,54 +221,6 @@ class Cattle {
     return expectedCalvingDate!.difference(now).inDays;
   }
 
-  // Getter para calcular la fecha probable de parto
-  DateTime? get fechaProbableParto {
-    // Si ya existe expectedCalvingDate, usarlo
-    if (expectedCalvingDate != null) return expectedCalvingDate;
-    
-    // Si hay fecha de inseminación, calcular (inseminación + 283 días)
-    if (inseminationDate != null) {
-      return inseminationDate!.add(const Duration(days: 283));
-    }
-    
-    return null;
-  }
-
-  // Getter para calcular la fecha de secado (60 días antes del parto)
-  DateTime? get fechaSecado {
-    final fechaParto = fechaProbableParto;
-    if (fechaParto == null) return null;
-    return fechaParto.subtract(const Duration(days: 60));
-  }
-
-  // Getter para calcular días hasta el secado
-  int? get diasHastaSecado {
-    final fechaSecadoCalculada = fechaSecado;
-    if (fechaSecadoCalculada == null) return null;
-    final now = DateTime.now();
-    return fechaSecadoCalculada.difference(now).inDays;
-  }
-
-  // Getter para verificar si necesita secado
-  // Solo si está preñada y no está seca (está en producción)
-  bool get necesitaSecado {
-    if (breedingStatus != BreedingStatus.prenada) return false;
-    if (breedingStatus == BreedingStatus.seca) return false; // Ya está seca
-    return fechaSecado != null;
-  }
-
-  // Getter para determinar el nivel de urgencia del secado
-  // Retorna: null (no necesita), 'warning' (15-30 días), 'urgent' (<15 días o pasado)
-  String? get nivelUrgenciaSecado {
-    if (!necesitaSecado) return null;
-    final dias = diasHastaSecado;
-    if (dias == null) return null;
-    
-    if (dias < 15) return 'urgent'; // Menos de 15 días o ya pasó
-    if (dias <= 30) return 'warning'; // Entre 15 y 30 días
-    return null; // Más de 30 días, no es urgente aún
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -317,11 +240,6 @@ class Cattle {
       'previousCalvings': previousCalvings,
       'notes': notes,
       'photoUrl': photoUrl,
-      'idPadre': idPadre,
-      'nombrePadre': nombrePadre,
-      'idMadre': idMadre,
-      'nombreMadre': nombreMadre,
-      'raza': raza,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -369,11 +287,6 @@ class Cattle {
       previousCalvings: json['previousCalvings'] as int?,
       notes: json['notes'] as String?,
       photoUrl: json['photoUrl'] as String?,
-      idPadre: json['idPadre'] as String?,
-      nombrePadre: json['nombrePadre'] as String?,
-      idMadre: json['idMadre'] as String?,
-      nombreMadre: json['nombreMadre'] as String?,
-      raza: json['raza'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -401,11 +314,6 @@ class Cattle {
     int? previousCalvings,
     String? notes,
     String? photoUrl,
-    String? idPadre,
-    String? nombrePadre,
-    String? idMadre,
-    String? nombreMadre,
-    String? raza,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -427,11 +335,6 @@ class Cattle {
       previousCalvings: previousCalvings ?? this.previousCalvings,
       notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
-      idPadre: idPadre ?? this.idPadre,
-      nombrePadre: nombrePadre ?? this.nombrePadre,
-      idMadre: idMadre ?? this.idMadre,
-      nombreMadre: nombreMadre ?? this.nombreMadre,
-      raza: raza ?? this.raza,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

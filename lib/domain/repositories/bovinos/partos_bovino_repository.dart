@@ -25,3 +25,4 @@ abstract class PartosBovinoRepository {
   Future<Result<List<PartosBovino>>> getPartosByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
+

@@ -25,3 +25,4 @@ abstract class TrabajadoresRepository {
   Future<Result<List<Trabajador>>> searchTrabajadores(String farmId, String query);
 }
 
+

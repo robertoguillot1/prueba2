@@ -42,3 +42,4 @@ class EnfermedadOveja {
   bool get isActiva => !curada;
 }
 
+

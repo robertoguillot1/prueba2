@@ -25,3 +25,4 @@ abstract class EnfermedadesOvejaRepository {
   Future<Result<List<EnfermedadOveja>>> getEnfermedadesActivas(String farmId);
 }
 
+

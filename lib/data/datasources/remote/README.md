@@ -40,3 +40,4 @@ Para activar el uso de la API REST en lugar del almacenamiento local:
 - Los errores se convierten automáticamente en `Failure` apropiados
 - El timeout por defecto es de 30 segundos (configurable)
 
+

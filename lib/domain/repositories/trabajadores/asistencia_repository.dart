@@ -25,3 +25,4 @@ abstract class AsistenciaRepository {
   Future<Result<List<Asistencia>>> getAsistenciasByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
+
