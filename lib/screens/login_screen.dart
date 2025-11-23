@@ -161,6 +161,7 @@ class _LoginScreenState extends State<LoginScreen>
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
+                                color: Colors.black,
                               ),
                               decoration: InputDecoration(
                                 labelText: 'Correo electrónico',

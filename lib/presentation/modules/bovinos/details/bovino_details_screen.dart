@@ -2,15 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../viewmodels/bovinos_viewmodel.dart';
+import '../viewmodels/eventos_reproductivos_viewmodel.dart';
 import '../edit/bovino_edit_screen.dart';
 import '../widgets/pedigree_tree_widget.dart';
+import '../widgets/reproduction_timeline_widget.dart';
+import '../widgets/evento_reproductivo_form_screen.dart';
 import '../../../../domain/entities/bovinos/bovino.dart';
+import '../../../../domain/entities/bovinos/evento_reproductivo.dart';
+import '../../../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
+import '../../../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
+import '../../../../data/datasources/bovinos/eventos_reproductivos_datasource.dart';
+import '../../../../core/utils/result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../presentation/widgets/info_card.dart';
 import '../../../../presentation/widgets/status_chip.dart';
 import '../../../../presentation/widgets/custom_button.dart';
 
 /// Pantalla de detalles de un Bovino
-class BovinoDetailsScreen extends StatelessWidget {
+class BovinoDetailsScreen extends StatefulWidget {
   final Bovino bovino;
   final String farmId;
 
@@ -20,12 +29,69 @@ class BovinoDetailsScreen extends StatelessWidget {
     required this.farmId,
   });
 
+  @override
+  State<BovinoDetailsScreen> createState() => _BovinoDetailsScreenState();
+}
+
+class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<EventoReproductivo> _eventos = [];
+  bool _isLoadingEventos = false;
+  EventosReproductivosRepository? _eventosRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    // Inicializar repositorio de eventos
+    _initEventosRepository();
+    _loadEventos();
+  }
+
+  Future<void> _initEventosRepository() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dataSource = EventosReproductivosDataSourceImpl(prefs);
+    _eventosRepository = EventosReproductivosRepositoryImpl(dataSource);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadEventos() async {
+    if (_eventosRepository == null) {
+      await _initEventosRepository();
+    }
+    
+    if (_eventosRepository == null) return;
+    
+    setState(() => _isLoadingEventos = true);
+    final result = await _eventosRepository!.getEventosByAnimal(
+      widget.bovino.id,
+      widget.farmId,
+    );
+    if (mounted) {
+      setState(() {
+        _isLoadingEventos = false;
+        switch (result) {
+          case Success<List<EventoReproductivo>>(:final data):
+            _eventos = data;
+          case Error<List<EventoReproductivo>>():
+            _eventos = [];
+        }
+      });
+    }
+  }
+
   Future<bool> _confirmDelete(BuildContext context, BovinosViewModel viewModel) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Eliminación'),
-        content: Text('¿Estás seguro de eliminar a ${bovino.name ?? bovino.identification}?'),
+        content: Text('¿Estás seguro de eliminar a ${widget.bovino.name ?? widget.bovino.identification}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -49,9 +115,9 @@ class BovinoDetailsScreen extends StatelessWidget {
     final confirmed = await _confirmDelete(context, viewModel);
     if (!confirmed) return;
 
-    final success = await viewModel.deleteBovinoEntity(bovino.id, farmId);
+    final success = await viewModel.deleteBovinoEntity(widget.bovino.id, widget.farmId);
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,11 +143,11 @@ class BovinoDetailsScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider.value(
           value: context.read<BovinosViewModel>(),
-          child: BovinoEditScreen(bovino: bovino, farmId: farmId),
+          child: BovinoEditScreen(bovino: widget.bovino, farmId: widget.farmId),
         ),
       ),
     ).then((result) {
-      if (result == true && context.mounted) {
+      if (result == true && mounted) {
         Navigator.pop(context, true);
       }
     });
@@ -95,13 +161,21 @@ class BovinoDetailsScreen extends StatelessWidget {
     // Asegurar que los bovinos estén cargados
     if (viewModel.bovinos.isEmpty && !viewModel.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        viewModel.loadBovinos(farmId);
+        viewModel.loadBovinos(widget.farmId);
       });
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(bovino.name ?? bovino.identification ?? 'Bovino'),
+        title: Text(widget.bovino.name ?? widget.bovino.identification ?? 'Bovino'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.info), text: 'Información'),
+            Tab(icon: Icon(Icons.favorite), text: 'Reproducción'),
+            Tab(icon: Icon(Icons.account_tree), text: 'Genealogía'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -118,7 +192,26 @@ class BovinoDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildInfoTab(dateFormat, viewModel),
+          _buildReproductionTab(),
+          _buildPedigreeTab(),
+        ],
+      ),
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToNewEvent(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Nuevo Evento'),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildInfoTab(DateFormat dateFormat, BovinosViewModel viewModel) {
+    return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,16 +222,16 @@ class BovinoDetailsScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: _getHealthColor(bovino.healthStatus),
+                    backgroundColor: _getHealthColor(widget.bovino.healthStatus),
                     child: Icon(
-                      bovino.gender == BovinoGender.female ? Icons.pets : Icons.pets_outlined,
+                      widget.bovino.gender == BovinoGender.female ? Icons.pets : Icons.pets_outlined,
                       color: Colors.white,
                       size: 50,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    bovino.name ?? bovino.identification ?? 'Sin nombre',
+                    widget.bovino.name ?? widget.bovino.identification ?? 'Sin nombre',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -150,18 +243,18 @@ class BovinoDetailsScreen extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     children: [
                       StatusChip(
-                        label: _getCategoryString(bovino.category),
+                        label: _getCategoryString(widget.bovino.category),
                         color: Colors.blue,
                       ),
                       StatusChip(
-                        label: bovino.gender == BovinoGender.female ? 'Hembra' : 'Macho',
+                        label: widget.bovino.gender == BovinoGender.female ? 'Hembra' : 'Macho',
                         color: Colors.purple,
                       ),
                       StatusChip(
-                        label: _getHealthString(bovino.healthStatus),
-                        color: _getHealthColor(bovino.healthStatus),
+                        label: _getHealthString(widget.bovino.healthStatus),
+                        color: _getHealthColor(widget.bovino.healthStatus),
                       ),
-                      if (bovino.needsSpecialCare)
+                      if (widget.bovino.needsSpecialCare)
                         StatusChip(
                           label: 'Cuidados Especiales',
                           color: Colors.orange,
@@ -181,50 +274,50 @@ class BovinoDetailsScreen extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 16),
-            if (bovino.identification != null)
+            if (widget.bovino.identification != null)
               InfoCard(
                 label: 'Identificación',
-                value: bovino.identification!,
+                value: widget.bovino.identification!,
                 icon: Icons.tag,
               ),
-            if (bovino.identification != null) const SizedBox(height: 8),
+            if (widget.bovino.identification != null) const SizedBox(height: 8),
             InfoCard(
               label: 'Fecha de Nacimiento',
-              value: dateFormat.format(bovino.birthDate),
+              value: dateFormat.format(widget.bovino.birthDate),
               icon: Icons.calendar_today,
             ),
             const SizedBox(height: 8),
             InfoCard(
               label: 'Edad',
-              value: '${bovino.ageInYears} años',
+              value: '${widget.bovino.ageInYears} años',
               icon: Icons.cake,
             ),
             const SizedBox(height: 8),
             InfoCard(
               label: 'Peso Actual',
-              value: '${bovino.currentWeight.toStringAsFixed(1)} kg',
+              value: '${widget.bovino.currentWeight.toStringAsFixed(1)} kg',
               icon: Icons.monitor_weight,
             ),
-            if (bovino.raza != null) ...[
+            if (widget.bovino.raza != null) ...[
               const SizedBox(height: 8),
               InfoCard(
                 label: 'Raza',
-                value: bovino.raza!,
+                value: widget.bovino.raza!,
                 icon: Icons.agriculture,
               ),
             ],
             const SizedBox(height: 8),
             InfoCard(
               label: 'Etapa de Producción',
-              value: _getProductionStageString(bovino.productionStage),
+              value: _getProductionStageString(widget.bovino.productionStage),
               icon: Icons.timeline,
             ),
             // Estado reproductivo
-            if (bovino.breedingStatus != null ||
-                bovino.lastHeatDate != null ||
-                bovino.inseminationDate != null ||
-                bovino.expectedCalvingDate != null ||
-                bovino.previousCalvings != null) ...[
+            if (widget.bovino.breedingStatus != null ||
+                widget.bovino.lastHeatDate != null ||
+                widget.bovino.inseminationDate != null ||
+                widget.bovino.expectedCalvingDate != null ||
+                widget.bovino.previousCalvings != null) ...[
               const SizedBox(height: 24),
               Text(
                 'Estado Reproductivo',
@@ -233,36 +326,36 @@ class BovinoDetailsScreen extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 16),
-              if (bovino.breedingStatus != null)
+              if (widget.bovino.breedingStatus != null)
                 InfoCard(
                   label: 'Estado',
-                  value: _getBreedingStatusString(bovino.breedingStatus!),
+                  value: _getBreedingStatusString(widget.bovino.breedingStatus!),
                   icon: Icons.favorite,
                 ),
-              if (bovino.lastHeatDate != null) ...[
+              if (widget.bovino.lastHeatDate != null) ...[
                 const SizedBox(height: 8),
                 InfoCard(
                   label: 'Última Fecha de Celo',
-                  value: dateFormat.format(bovino.lastHeatDate!),
+                  value: dateFormat.format(widget.bovino.lastHeatDate!),
                   icon: Icons.calendar_today,
                 ),
               ],
-              if (bovino.inseminationDate != null) ...[
+              if (widget.bovino.inseminationDate != null) ...[
                 const SizedBox(height: 8),
                 InfoCard(
                   label: 'Fecha de Inseminación',
-                  value: dateFormat.format(bovino.inseminationDate!),
+                  value: dateFormat.format(widget.bovino.inseminationDate!),
                   icon: Icons.medical_services,
                 ),
               ],
-              if (bovino.expectedCalvingDate != null) ...[
+              if (widget.bovino.expectedCalvingDate != null) ...[
                 const SizedBox(height: 8),
                 InfoCard(
                   label: 'Fecha Esperada de Parto',
-                  value: dateFormat.format(bovino.expectedCalvingDate!),
+                  value: dateFormat.format(widget.bovino.expectedCalvingDate!),
                   icon: Icons.pregnant_woman,
                 ),
-                if (bovino.daysUntilCalving != null && bovino.daysUntilCalving! >= 0) ...[
+                if (widget.bovino.daysUntilCalving != null && widget.bovino.daysUntilCalving! >= 0) ...[
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -277,7 +370,7 @@ class BovinoDetailsScreen extends StatelessWidget {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
-                            'Parto en ${bovino.daysUntilCalving} días',
+                            'Parto en ${widget.bovino.daysUntilCalving} días',
                             style: const TextStyle(
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
@@ -289,17 +382,17 @@ class BovinoDetailsScreen extends StatelessWidget {
                   ),
                 ],
               ],
-              if (bovino.previousCalvings != null) ...[
+              if (widget.bovino.previousCalvings != null) ...[
                 const SizedBox(height: 8),
                 InfoCard(
                   label: 'Partos Previos',
-                  value: bovino.previousCalvings.toString(),
+                  value: widget.bovino.previousCalvings.toString(),
                   icon: Icons.numbers,
                 ),
               ],
             ],
             // Notas
-            if (bovino.notes != null && bovino.notes!.isNotEmpty) ...[
+            if (widget.bovino.notes != null && widget.bovino.notes!.isNotEmpty) ...[
               const SizedBox(height: 24),
               Text(
                 'Notas',
@@ -314,14 +407,14 @@ class BovinoDetailsScreen extends StatelessWidget {
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(bovino.notes!),
+                child: Text(widget.bovino.notes!),
               ),
             ],
             // Descendencia (Hijos)
             Consumer<BovinosViewModel>(
               builder: (context, viewModel, child) {
                 final children = viewModel.bovinos.where((b) =>
-                  b.idPadre == bovino.id || b.idMadre == bovino.id
+                  b.idPadre == widget.bovino.id || b.idMadre == widget.bovino.id
                 ).toList();
                 
                 if (children.isEmpty) {
@@ -376,7 +469,7 @@ class BovinoDetailsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        trailing: child.idPadre == bovino.id
+                        trailing: child.idPadre == widget.bovino.id
                             ? Chip(
                                 label: const Text('Hijo'),
                                 avatar: const Icon(Icons.male, size: 16),
@@ -393,7 +486,7 @@ class BovinoDetailsScreen extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (context) => BovinoDetailsScreen(
                                 bovino: child,
-                                farmId: farmId,
+                                farmId: widget.farmId,
                               ),
                             ),
                           );
@@ -403,32 +496,6 @@ class BovinoDetailsScreen extends StatelessWidget {
                   ],
                 );
               },
-            ),
-            // Genealogía
-            const SizedBox(height: 24),
-            Text(
-              'Genealogía',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              height: 600,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: PedigreeTreeWidget(
-                  bovino: bovino,
-                  farmId: farmId,
-                ),
-              ),
             ),
             const SizedBox(height: 32),
             // Botones de acción
@@ -458,8 +525,59 @@ class BovinoDetailsScreen extends StatelessWidget {
             ),
           ],
         ),
+      );
+  }
+
+  Widget _buildReproductionTab() {
+    if (_isLoadingEventos) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadEventos,
+      child: ReproductionTimelineWidget(
+        eventos: _eventos,
+        onEventTap: (evento) {
+          // Opcional: mostrar detalles del evento
+        },
       ),
     );
+  }
+
+  Widget _buildPedigreeTab() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade300,
+        ),
+      ),
+      margin: const EdgeInsets.all(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: PedigreeTreeWidget(
+          bovino: widget.bovino,
+          farmId: widget.farmId,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToNewEvent(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EventoReproductivoFormScreen(
+          bovino: widget.bovino,
+          farmId: widget.farmId,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      _loadEventos();
+    }
   }
 
   Color _getHealthColor(HealthStatus status) {
