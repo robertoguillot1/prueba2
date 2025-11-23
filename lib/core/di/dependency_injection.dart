@@ -2,16 +2,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/datasources/ovinos/ovejas_datasource.dart';
 import '../../data/datasources/bovinos/bovinos_datasource.dart';
+import '../../data/datasources/bovinos/eventos_reproductivos_datasource.dart';
 import '../../data/datasources/porcinos/cerdos_datasource.dart';
 import '../../data/datasources/trabajadores/trabajadores_datasource.dart';
 import '../../data/datasources/avicultura/gallinas_datasource.dart';
 import '../../data/repositories_impl/ovinos/ovejas_repository_impl.dart';
 import '../../data/repositories_impl/bovinos/bovinos_repository_impl.dart';
+import '../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
 import '../../data/repositories_impl/porcinos/cerdos_repository_impl.dart';
 import '../../data/repositories_impl/trabajadores/trabajadores_repository_impl.dart';
 import '../../data/repositories_impl/avicultura/gallinas_repository_impl.dart';
 import '../../domain/repositories/ovinos/ovejas_repository.dart';
 import '../../domain/repositories/bovinos/bovinos_repository.dart';
+import '../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
 import '../../domain/repositories/porcinos/cerdos_repository.dart';
 import '../../domain/repositories/trabajadores/trabajadores_repository.dart';
 import '../../domain/repositories/avicultura/gallinas_repository.dart';
@@ -25,6 +28,12 @@ import '../../domain/usecases/bovinos/get_all_bovinos.dart';
 import '../../domain/usecases/bovinos/create_bovino.dart';
 import '../../domain/usecases/bovinos/update_bovino.dart';
 import '../../domain/usecases/bovinos/delete_bovino.dart';
+import '../../domain/usecases/bovinos/get_eventos_reproductivos_by_bovino.dart';
+import '../../domain/usecases/bovinos/get_bovinos_stream.dart';
+import '../../domain/usecases/porcinos/get_cerdos_stream.dart';
+import '../../domain/usecases/ovinos/get_ovejas_stream.dart';
+import '../../domain/usecases/avicultura/get_gallinas_stream.dart';
+import '../../domain/usecases/trabajadores/get_trabajadores_stream.dart';
 import '../../domain/usecases/porcinos/get_all_cerdos.dart';
 import '../../domain/usecases/porcinos/create_cerdo.dart';
 import '../../domain/usecases/porcinos/update_cerdo.dart';
@@ -39,6 +48,9 @@ import '../../domain/usecases/avicultura/create_gallina.dart';
 import '../../domain/usecases/porcinos/get_all_cerdos.dart';
 import '../../presentation/modules/ovinos/viewmodels/ovejas_viewmodel.dart';
 import '../../presentation/modules/bovinos/viewmodels/bovinos_viewmodel.dart';
+import '../../presentation/modules/bovinos/details/cubits/bovino_partos_cubit.dart';
+import '../../presentation/modules/bovinos/details/cubits/bovino_descendencia_cubit.dart';
+import '../../presentation/modules/dashboard/cubits/dashboard_cubit.dart';
 import '../../presentation/modules/porcinos/viewmodels/cerdos_viewmodel.dart';
 import '../../presentation/modules/trabajadores/viewmodels/trabajadores_viewmodel.dart';
 import '../../presentation/modules/avicultura/viewmodels/gallinas_viewmodel.dart';
@@ -91,6 +103,7 @@ class DependencyInjection {
   // Repositories
   static OvejasRepository? _ovejasRepository;
   static BovinosRepository? _bovinosRepository;
+  static EventosReproductivosRepository? _eventosReproductivosRepository;
   static CerdosRepository? _cerdosRepository;
   static TrabajadoresRepository? _trabajadoresRepository;
   static GallinasRepository? _gallinasRepository;
@@ -156,6 +169,9 @@ class DependencyInjection {
     // Inicializar Repositories
     _ovejasRepository = OvejasRepositoryImpl(_ovejasDataSource!);
     _bovinosRepository = BovinosRepositoryImpl(_bovinosDataSource!);
+    _eventosReproductivosRepository = EventosReproductivosRepositoryImpl(
+      EventosReproductivosDataSourceImpl(_sharedPreferences!),
+    );
     _cerdosRepository = CerdosRepositoryImpl(_cerdosDataSource!);
     _trabajadoresRepository = TrabajadoresRepositoryImpl(_trabajadoresDataSource!);
     _gallinasRepository = GallinasRepositoryImpl(_gallinasDataSource!);
@@ -171,6 +187,7 @@ class DependencyInjection {
   // Getters para Repositories
   static OvejasRepository get ovejasRepository => _ovejasRepository!;
   static BovinosRepository get bovinosRepository => _bovinosRepository!;
+  static EventosReproductivosRepository get eventosReproductivosRepository => _eventosReproductivosRepository!;
   static CerdosRepository get cerdosRepository => _cerdosRepository!;
   static TrabajadoresRepository get trabajadoresRepository => _trabajadoresRepository!;
   static GallinasRepository get gallinasRepository => _gallinasRepository!;
@@ -239,5 +256,52 @@ class DependencyInjection {
   static ConnectivityService get connectivityService => _connectivityService!;
   static SyncManager get syncManager => _syncManager!;
   static ApiClient get apiClient => _apiClient!;
+
+  // Factory methods para Cubits
+  /// Crea un BovinoPartosCubit para un farmId específico
+  static BovinoPartosCubit createBovinoPartosCubit(String farmId) {
+    return BovinoPartosCubit(
+      getEventos: GetEventosReproductivosByBovino(
+        repository: _eventosReproductivosRepository!,
+        farmId: farmId,
+      ),
+    );
+  }
+
+  /// Crea un BovinoDescendenciaCubit para un farmId específico
+  static BovinoDescendenciaCubit createBovinoDescendenciaCubit(String farmId) {
+    return BovinoDescendenciaCubit(
+      getBovinos: GetBovinosStream(
+        repository: _bovinosRepository!,
+        farmId: farmId,
+      ),
+    );
+  }
+
+  /// Crea un DashboardCubit para un farmId específico
+  static DashboardCubit createDashboardCubit(String farmId) {
+    return DashboardCubit(
+      getBovinosStream: GetBovinosStream(
+        repository: _bovinosRepository!,
+        farmId: farmId,
+      ),
+      getCerdosStream: GetCerdosStream(
+        repository: _cerdosRepository!,
+        farmId: farmId,
+      ),
+      getOvejasStream: GetOvejasStream(
+        repository: _ovejasRepository!,
+        farmId: farmId,
+      ),
+      getGallinasStream: GetGallinasStream(
+        repository: _gallinasRepository!,
+        farmId: farmId,
+      ),
+      getTrabajadoresStream: GetTrabajadoresStream(
+        repository: _trabajadoresRepository!,
+        farmId: farmId,
+      ),
+    );
+  }
 }
 

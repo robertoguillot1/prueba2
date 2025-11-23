@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../viewmodels/bovinos_viewmodel.dart';
 import '../viewmodels/eventos_reproductivos_viewmodel.dart';
@@ -9,11 +10,9 @@ import '../widgets/reproduction_timeline_widget.dart';
 import '../widgets/evento_reproductivo_form_screen.dart';
 import '../../../../domain/entities/bovinos/bovino.dart';
 import '../../../../domain/entities/bovinos/evento_reproductivo.dart';
-import '../../../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
-import '../../../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
-import '../../../../data/datasources/bovinos/eventos_reproductivos_datasource.dart';
-import '../../../../core/utils/result.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/di/dependency_injection.dart';
+import '../details/cubits/bovino_partos_cubit.dart';
+import '../details/cubits/bovino_descendencia_cubit.dart';
 import '../../../../presentation/widgets/info_card.dart';
 import '../../../../presentation/widgets/status_chip.dart';
 import '../../../../presentation/widgets/custom_button.dart';
@@ -36,54 +35,33 @@ class BovinoDetailsScreen extends StatefulWidget {
 class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<EventoReproductivo> _eventos = [];
-  bool _isLoadingEventos = false;
-  EventosReproductivosRepository? _eventosRepository;
+  late BovinoPartosCubit _partosCubit;
+  late BovinoDescendenciaCubit _descendenciaCubit;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    // Inicializar repositorio de eventos
-    _initEventosRepository();
-    _loadEventos();
-  }
-
-  Future<void> _initEventosRepository() async {
-    final prefs = await SharedPreferences.getInstance();
-    final dataSource = EventosReproductivosDataSourceImpl(prefs);
-    _eventosRepository = EventosReproductivosRepositoryImpl(dataSource);
+    
+    // Crear los Cubits usando DependencyInjection
+    _partosCubit = DependencyInjection.createBovinoPartosCubit(widget.farmId);
+    _descendenciaCubit = DependencyInjection.createBovinoDescendenciaCubit(widget.farmId);
+    
+    // Inicializar carga de datos reactivos después del primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Cargar partos
+      _partosCubit.cargarPartos(widget.bovino.id);
+      // Cargar descendencia
+      _descendenciaCubit.cargarDescendencia(widget.bovino.id);
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _partosCubit.close();
+    _descendenciaCubit.close();
     super.dispose();
-  }
-
-  Future<void> _loadEventos() async {
-    if (_eventosRepository == null) {
-      await _initEventosRepository();
-    }
-    
-    if (_eventosRepository == null) return;
-    
-    setState(() => _isLoadingEventos = true);
-    final result = await _eventosRepository!.getEventosByAnimal(
-      widget.bovino.id,
-      widget.farmId,
-    );
-    if (mounted) {
-      setState(() {
-        _isLoadingEventos = false;
-        switch (result) {
-          case Success<List<EventoReproductivo>>(:final data):
-            _eventos = data;
-          case Error<List<EventoReproductivo>>():
-            _eventos = [];
-        }
-      });
-    }
   }
 
   Future<bool> _confirmDelete(BuildContext context, BovinosViewModel viewModel) async {
@@ -165,48 +143,54 @@ class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.bovino.name ?? widget.bovino.identification ?? 'Bovino'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.info), text: 'Información'),
-            Tab(icon: Icon(Icons.favorite), text: 'Reproducción'),
-            Tab(icon: Icon(Icons.account_tree), text: 'Genealogía'),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<BovinoPartosCubit>.value(value: _partosCubit),
+        BlocProvider<BovinoDescendenciaCubit>.value(value: _descendenciaCubit),
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.bovino.name ?? widget.bovino.identification ?? 'Bovino'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.info), text: 'Información'),
+              Tab(icon: Icon(Icons.favorite), text: 'Reproducción'),
+              Tab(icon: Icon(Icons.account_tree), text: 'Genealogía'),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => _navigateToEdit(context),
+              tooltip: 'Editar',
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => _handleDelete(
+                context,
+                context.read<BovinosViewModel>(),
+              ),
+              tooltip: 'Eliminar',
+            ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => _navigateToEdit(context),
-            tooltip: 'Editar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _handleDelete(
-              context,
-              context.read<BovinosViewModel>(),
-            ),
-            tooltip: 'Eliminar',
-          ),
-        ],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildInfoTab(dateFormat, viewModel),
+            _buildReproductionTab(),
+            _buildPedigreeTab(),
+          ],
+        ),
+        floatingActionButton: _tabController.index == 1
+            ? FloatingActionButton.extended(
+                onPressed: () => _navigateToNewEvent(context),
+                icon: const Icon(Icons.add),
+                label: const Text('Nuevo Evento'),
+              )
+            : null,
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildInfoTab(dateFormat, viewModel),
-          _buildReproductionTab(),
-          _buildPedigreeTab(),
-        ],
-      ),
-      floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton.extended(
-              onPressed: () => _navigateToNewEvent(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Nuevo Evento'),
-            )
-          : null,
     );
   }
 
@@ -410,91 +394,124 @@ class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
                 child: Text(widget.bovino.notes!),
               ),
             ],
-            // Descendencia (Hijos)
-            Consumer<BovinosViewModel>(
-              builder: (context, viewModel, child) {
-                final children = viewModel.bovinos.where((b) =>
-                  b.idPadre == widget.bovino.id || b.idMadre == widget.bovino.id
-                ).toList();
-                
-                if (children.isEmpty) {
-                  return const SizedBox.shrink();
+            // Descendencia (Hijos) - Ahora usando BlocBuilder
+            BlocBuilder<BovinoDescendenciaCubit, BovinoDescendenciaState>(
+              builder: (context, state) {
+                if (state is BovinoDescendenciaLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
                 }
-                
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    Text(
-                      'Descendencia',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+
+                if (state is BovinoDescendenciaError) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red, size: 48),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error: ${state.message}',
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
                           ),
-                    ),
-                    const SizedBox(height: 16),
-                    ...children.map((child) => Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: child.gender == BovinoGender.female
-                              ? Colors.pink.shade100
-                              : Colors.blue.shade100,
-                          child: Icon(
-                            child.gender == BovinoGender.female
-                                ? Icons.female
-                                : Icons.male,
-                            color: child.gender == BovinoGender.female
-                                ? Colors.pink.shade700
-                                : Colors.blue.shade700,
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<BovinoDescendenciaCubit>().cargarDescendencia(widget.bovino.id);
+                            },
+                            child: const Text('Reintentar'),
                           ),
-                        ),
-                        title: Text(
-                          child.name ?? child.identification ?? 'Sin nombre',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${_getCategoryString(child.category)} - ${child.gender == BovinoGender.female ? 'Hembra' : 'Macho'}',
-                            ),
-                            if (child.raza != null && child.raza!.isNotEmpty)
-                              Text('Raza: ${child.raza}'),
-                            Text(
-                              'Nacimiento: ${dateFormat.format(child.birthDate)}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: child.idPadre == widget.bovino.id
-                            ? Chip(
-                                label: const Text('Hijo'),
-                                avatar: const Icon(Icons.male, size: 16),
-                                backgroundColor: Colors.blue.shade50,
-                              )
-                            : Chip(
-                                label: const Text('Hija'),
-                                avatar: const Icon(Icons.female, size: 16),
-                                backgroundColor: Colors.pink.shade50,
-                              ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BovinoDetailsScreen(
-                                bovino: child,
-                                farmId: widget.farmId,
-                              ),
-                            ),
-                          );
-                        },
+                        ],
                       ),
-                    )),
-                  ],
-                );
+                    ),
+                  );
+                }
+
+                if (state is BovinoDescendenciaLoaded) {
+                  if (state.hijos.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      Text(
+                        'Descendencia',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...state.hijos.map((child) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: child.gender == BovinoGender.female
+                                ? Colors.pink.shade100
+                                : Colors.blue.shade100,
+                            child: Icon(
+                              child.gender == BovinoGender.female
+                                  ? Icons.female
+                                  : Icons.male,
+                              color: child.gender == BovinoGender.female
+                                  ? Colors.pink.shade700
+                                  : Colors.blue.shade700,
+                            ),
+                          ),
+                          title: Text(
+                            child.name ?? child.identification ?? 'Sin nombre',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${_getCategoryString(child.category)} - ${child.gender == BovinoGender.female ? 'Hembra' : 'Macho'}',
+                              ),
+                              if (child.raza != null && child.raza!.isNotEmpty)
+                                Text('Raza: ${child.raza}'),
+                              Text(
+                                'Nacimiento: ${dateFormat.format(child.birthDate)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: child.idPadre == widget.bovino.id
+                              ? Chip(
+                                  label: const Text('Hijo'),
+                                  avatar: const Icon(Icons.male, size: 16),
+                                  backgroundColor: Colors.blue.shade50,
+                                )
+                              : Chip(
+                                  label: const Text('Hija'),
+                                  avatar: const Icon(Icons.female, size: 16),
+                                  backgroundColor: Colors.pink.shade50,
+                                ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BovinoDetailsScreen(
+                                  bovino: child,
+                                  farmId: widget.farmId,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )),
+                    ],
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
             const SizedBox(height: 32),
@@ -529,18 +546,113 @@ class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
   }
 
   Widget _buildReproductionTab() {
-    if (_isLoadingEventos) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return BlocBuilder<BovinoPartosCubit, BovinoPartosState>(
+      builder: (context, state) {
+        if (state is BovinoPartosLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return RefreshIndicator(
-      onRefresh: _loadEventos,
-      child: ReproductionTimelineWidget(
-        eventos: _eventos,
-        onEventTap: (evento) {
-          // Opcional: mostrar detalles del evento
-        },
-      ),
+        if (state is BovinoPartosError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Error: ${state.message}',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<BovinoPartosCubit>().cargarPartos(widget.bovino.id);
+                  },
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (state is BovinoPartosLoaded) {
+          if (state.partos.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.child_care_outlined, size: 64, color: Colors.grey.shade400),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sin registros de parto',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No se han registrado partos para este animal',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<BovinoPartosCubit>().cargarPartos(widget.bovino.id);
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.partos.length,
+              itemBuilder: (context, index) {
+                final parto = state.partos[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.purple.shade100,
+                      child: Icon(Icons.child_care, color: Colors.purple.shade700),
+                    ),
+                    title: Text(
+                      'Parto',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Fecha: ${DateFormat('dd/MM/yyyy').format(parto.fecha)}'),
+                        if (parto.notas != null && parto.notas!.isNotEmpty)
+                          Text('Notas: ${parto.notas}'),
+                        if (parto.nacioCria == true)
+                          Chip(
+                            label: const Text('Cría creada'),
+                            avatar: Icon(Icons.check_circle, size: 16),
+                            backgroundColor: Colors.green.shade50,
+                          ),
+                      ],
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Opcional: mostrar detalles del parto
+                    },
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        return const Center(child: CircularProgressIndicator());
+      },
     );
   }
 
@@ -576,7 +688,10 @@ class _BovinoDetailsScreenState extends State<BovinoDetailsScreen>
     );
 
     if (result == true && mounted) {
-      _loadEventos();
+      // Recargar partos cuando se crea un nuevo evento
+      _partosCubit.cargarPartos(widget.bovino.id);
+      // Recargar descendencia por si se creó una cría
+      _descendenciaCubit.cargarDescendencia(widget.bovino.id);
     }
   }
 
