@@ -41,3 +41,4 @@ Para activar el uso de la API REST en lugar del almacenamiento local:
 - El timeout por defecto es de 30 segundos (configurable)
 
 
+
