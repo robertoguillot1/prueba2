@@ -4,9 +4,13 @@ import '../entities/bovine_entity.dart';
 
 /// Contrato abstracto del repositorio para Bovinos
 abstract class CattleRepository {
-  /// Obtiene la lista de bovinos de una finca
+  /// Obtiene la lista de bovinos de una finca (consulta única)
   /// Retorna Either<Failure, List<BovineEntity>>
   Future<Either<Failure, List<BovineEntity>>> getCattleList(String farmId);
+
+  /// Obtiene un stream de bovinos para actualizaciones en tiempo real
+  /// Retorna Stream<List<BovineEntity>>
+  Stream<List<BovineEntity>> getCattleListStream(String farmId);
 
   /// Obtiene un bovino por su ID
   /// Retorna Either<Failure, BovineEntity>

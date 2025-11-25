@@ -14,10 +14,9 @@ class CattleRepositoryImpl implements CattleRepository {
   @override
   Future<Either<Failure, List<BovineEntity>>> getCattleList(String farmId) async {
     try {
-      // Convertir el stream a una lista usando first
-      final stream = remoteDataSource.getCattleList(farmId);
-      final snapshot = await stream.first;
-      return Right(snapshot);
+      // Usa el método del datasource que retorna Future
+      final result = await remoteDataSource.getCattleList(farmId);
+      return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
@@ -25,12 +24,14 @@ class CattleRepositoryImpl implements CattleRepository {
     }
   }
 
-  /// Obtiene un stream de bovinos (método adicional para actualizaciones en tiempo real)
+  @override
   Stream<List<BovineEntity>> getCattleListStream(String farmId) {
     try {
-      return remoteDataSource.getCattleList(farmId);
+      // Usa el método del datasource que retorna Stream para actualizaciones en tiempo real
+      return remoteDataSource.getCattleListStream(farmId);
     } catch (e) {
-      throw ServerFailure('Error al obtener el stream de bovinos: $e');
+      // En caso de error, retornar un stream con error
+      return Stream.error(ServerFailure('Error al obtener el stream de bovinos: $e'));
     }
   }
 
