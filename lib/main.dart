@@ -18,10 +18,6 @@ import 'core/di/dependency_injection.dart' as di;
 import 'presentation/cubits/auth/auth_cubit.dart';
 import 'presentation/cubits/auth/auth_state.dart';
 
-// Screens
-import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/modules/dashboard/screens/dashboard_screen.dart';
-
 // Router
 import 'config/router/app_router.dart';
 
@@ -162,37 +158,23 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
           primaryColor: primaryColor,
         );
 
-        return MaterialApp(
-          title: 'Gestión de Fincas',
-          theme: theme,
-          darkTheme: AppTheme.darkTheme(primaryColor),
-          themeMode: themeProvider.isSystemMode 
-              ? ThemeMode.system 
-              : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
-          onGenerateRoute: AppRouter.onGenerateRoute,
-          home: BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, authState) {
-              // Si está autenticado, mostrar Dashboard
-              if (authState is Authenticated) {
-                return DashboardScreen(farmId: 'default');
-              }
-              
-              // Si no está autenticado o hay error, mostrar Login
-              if (authState is Unauthenticated || authState is AuthError) {
-                return const LoginScreen();
-              }
-              
-              // Para cualquier otro estado (AuthLoading, AuthInitial), mostrar loading
-              return Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(
-                    color: primaryColor,
-                  ),
-                ),
-              );
-            },
-          ),
-          debugShowCheckedModeBanner: false,
+        return BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, authState) {
+            // Determinar la ruta inicial según el estado de autenticación
+            final initialRoute = authState is Authenticated ? '/farms' : '/';
+            
+            return MaterialApp(
+              title: 'Gestión de Fincas',
+              theme: theme,
+              darkTheme: AppTheme.darkTheme(primaryColor),
+              themeMode: themeProvider.isSystemMode 
+                  ? ThemeMode.system 
+                  : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
+              initialRoute: initialRoute,
+              onGenerateRoute: AppRouter.onGenerateRoute,
+              debugShowCheckedModeBanner: false,
+            );
+          },
         );
       },
     );

@@ -23,6 +23,9 @@ import '../../domain/entities/farm/farm.dart';
 // Importar Dashboard
 import '../../presentation/modules/dashboard/screens/dashboard_screen.dart';
 
+// Importar Login
+import '../../presentation/screens/auth/login_screen.dart';
+
 /// Router centralizado para la aplicación
 /// 
 /// Maneja todas las rutas nombradas de la aplicación.
@@ -66,6 +69,14 @@ class AppRouter {
     }
 
     switch (routeName) {
+      // ========== RUTA RAÍZ (LOGIN) ==========
+      
+      case '/':
+        return MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+          settings: settings,
+        );
+
       // ========== RUTAS PRINCIPALES (MENÚS) ==========
       
       case '/bovinos':
