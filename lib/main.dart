@@ -22,6 +22,9 @@ import 'presentation/cubits/auth/auth_state.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/modules/dashboard/screens/dashboard_screen.dart';
 
+// Router
+import 'config/router/app_router.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -166,6 +169,7 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
           themeMode: themeProvider.isSystemMode 
               ? ThemeMode.system 
               : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
+          onGenerateRoute: AppRouter.onGenerateRoute,
           home: BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
               // Si está autenticado, mostrar Dashboard

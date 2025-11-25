@@ -15,6 +15,14 @@ import '../../presentation/modules/porcinos/list/cerdos_list_screen.dart';
 import '../../presentation/modules/ovinos/list/ovejas_list_screen.dart';
 import '../../presentation/modules/avicultura/list/gallinas_list_screen.dart';
 
+// Importar pantallas de Fincas
+import '../../presentation/modules/farms/screens/farms_list_screen.dart';
+import '../../presentation/modules/farms/screens/farm_form_screen.dart';
+import '../../domain/entities/farm/farm.dart';
+
+// Importar Dashboard
+import '../../presentation/modules/dashboard/screens/dashboard_screen.dart';
+
 /// Router centralizado para la aplicación
 /// 
 /// Maneja todas las rutas nombradas de la aplicación.
@@ -111,6 +119,60 @@ class AppRouter {
       // Ruta genérica de avicultura (por compatibilidad)
       case '/avicultura/list':
         return buildRoute((farmId) => GallinasListScreen(farmId: farmId));
+
+      // ========== RUTA DE DASHBOARD ==========
+      
+      case '/dashboard':
+        return MaterialPageRoute(
+          builder: (_) {
+            // Extraer el farmId de los argumentos
+            if (arguments is Map<String, dynamic> && arguments['farmId'] != null) {
+              final farmId = arguments['farmId'] as String;
+              return DashboardScreen(farmId: farmId);
+            }
+            // Si no se proporciona el farmId, mostrar error
+            return Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: const Center(
+                child: Text('No se proporcionó el ID de la finca'),
+              ),
+            );
+          },
+          settings: settings,
+        );
+
+      // ========== RUTAS DE FINCAS ==========
+      
+      case '/farms':
+        return MaterialPageRoute(
+          builder: (_) => const FarmsListScreen(),
+          settings: settings,
+        );
+
+      case '/farms/create':
+        return MaterialPageRoute(
+          builder: (_) => const FarmFormScreen(),
+          settings: settings,
+        );
+
+      case '/farms/edit':
+        return MaterialPageRoute(
+          builder: (_) {
+            // Extraer el objeto Farm de los argumentos
+            if (arguments is Map<String, dynamic> && arguments['farm'] != null) {
+              final farm = arguments['farm'] as Farm;
+              return FarmFormScreen(farm: farm);
+            }
+            // Si no se proporciona la finca, mostrar error
+            return Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: const Center(
+                child: Text('No se proporcionó la finca para editar'),
+              ),
+            );
+          },
+          settings: settings,
+        );
 
       default:
         return null;

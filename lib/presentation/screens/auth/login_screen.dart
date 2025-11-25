@@ -59,7 +59,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthError) {
+        if (state is Authenticated) {
+          // Navegar a la lista de fincas después de un login exitoso
+          Navigator.of(context).pushReplacementNamed('/farms');
+        } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(

@@ -169,8 +169,10 @@ class FarmsListScreen extends StatelessWidget {
         onTap: () {
           // Establecer como finca actual y navegar al dashboard
           context.read<FarmsCubit>().setCurrentFarm(farm.id).then((_) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            Navigator.of(context).pushReplacementNamed('/dashboard', arguments: farm.id);
+            Navigator.of(context).pushReplacementNamed(
+              '/dashboard',
+              arguments: {'farmId': farm.id},
+            );
           });
         },
         borderRadius: BorderRadius.circular(12),
