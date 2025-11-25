@@ -36,8 +36,8 @@ class FarmsListScreen extends StatelessWidget {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => BlocProvider.value(
@@ -46,6 +46,8 @@ class FarmsListScreen extends StatelessWidget {
                         ),
                       ),
                     );
+                    // Si se creó una finca exitosamente, el stream se actualizará automáticamente
+                    // No necesitamos recargar manualmente
                   },
                   tooltip: 'Crear nueva finca',
                 ),
@@ -113,8 +115,8 @@ class FarmsListScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => BlocProvider.value(
@@ -123,6 +125,7 @@ class FarmsListScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
+                              // El stream se actualizará automáticamente
                             },
                             icon: const Icon(Icons.add),
                             label: const Text('Crear Finca'),

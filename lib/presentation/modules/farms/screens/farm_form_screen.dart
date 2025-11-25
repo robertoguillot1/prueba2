@@ -110,6 +110,7 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
       body: BlocListener<FarmFormCubit, FarmFormState>(
         listener: (context, state) {
           if (state is FarmFormSuccess) {
+            // Mostrar mensaje de éxito
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -132,7 +133,12 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
                 ),
               ),
             );
-            Navigator.pop(context, true);
+            // Cerrar la pantalla después de mostrar el mensaje
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (mounted) {
+                Navigator.pop(context, true);
+              }
+            });
           } else if (state is FarmFormError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

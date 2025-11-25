@@ -22,5 +22,8 @@ abstract class FarmRepository {
 
   /// Obtiene el ID de la finca actual del usuario
   Future<String?> getCurrentFarmId(String userId);
+
+  /// Obtiene todas las fincas de un usuario de forma inmediata (sin stream)
+  Future<List<Farm>> getFarms(String userId);
 }
 

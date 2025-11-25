@@ -23,6 +23,9 @@ abstract class FarmRemoteDataSource {
 
   /// Obtiene el ID de la finca actual del usuario
   Future<String?> getCurrentFarmId(String userId);
+
+  /// Obtiene todas las fincas de un usuario de forma inmediata (sin stream)
+  Future<List<FarmModel>> getFarms(String userId);
 }
 
 class FarmFirebaseDataSource implements FarmRemoteDataSource {
@@ -159,6 +162,27 @@ class FarmFirebaseDataSource implements FarmRemoteDataSource {
       return doc.data()?['currentFarmId'] as String?;
     } catch (e) {
       throw Exception('Error al obtener la finca actual: $e');
+    }
+  }
+
+  @override
+  Future<List<FarmModel>> getFarms(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('farms')
+          .orderBy('createdAt', descending: false)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => FarmModel.fromJson({
+                ...doc.data(),
+                'id': doc.id,
+              }))
+          .toList();
+    } catch (e) {
+      throw Exception('Error al obtener las fincas: $e');
     }
   }
 }

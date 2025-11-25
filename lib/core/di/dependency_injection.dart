@@ -290,13 +290,15 @@ class DependencyInjection {
   
   /// Crea una instancia de FarmsCubit para un usuario
   static FarmsCubit createFarmsCubit(String userId) {
+    final farmRepository = sl<FarmRepository>();
     return FarmsCubit(
       getFarmsStream: GetFarmsStream(
-        repository: sl<FarmRepository>(),
+        repository: farmRepository,
         userId: userId,
       ),
-      deleteFarmUseCase: DeleteFarm(sl<FarmRepository>()),
-      setCurrentFarmUseCase: SetCurrentFarm(sl<FarmRepository>()),
+      deleteFarmUseCase: DeleteFarm(farmRepository),
+      setCurrentFarmUseCase: SetCurrentFarm(farmRepository),
+      farmRepository: farmRepository,
       userId: userId,
     );
   }

@@ -91,5 +91,15 @@ class FarmRepositoryImpl implements FarmRepository {
       return null;
     }
   }
+
+  @override
+  Future<List<Farm>> getFarms(String userId) async {
+    try {
+      final farmModels = await _remoteDataSource.getFarms(userId);
+      return farmModels;
+    } catch (e) {
+      throw Exception('Error al obtener las fincas: $e');
+    }
+  }
 }
 
