@@ -10,6 +10,10 @@ abstract class AuthRepository {
   /// Lanza excepciones si hay error en la autenticación
   Future<void> signInWithEmailAndPassword(String email, String password);
 
+  /// Registra un nuevo usuario con email y contraseña
+  /// Lanza excepciones si hay error en el registro
+  Future<void> signUpWithEmailAndPassword(String email, String password);
+
   /// Cierra sesión del usuario actual
   Future<void> signOut();
 }

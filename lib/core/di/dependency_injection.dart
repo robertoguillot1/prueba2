@@ -60,6 +60,7 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/get_current_user.dart';
 import '../../domain/usecases/auth/sign_in.dart';
+import '../../domain/usecases/auth/sign_up.dart';
 import '../../domain/usecases/auth/sign_out.dart';
 import '../../domain/usecases/bovinos/get_bovinos_stream.dart';
 import '../../domain/usecases/porcinos/get_cerdos_stream.dart';
@@ -187,6 +188,7 @@ class DependencyInjection {
     // AUTH - Casos de Uso
     sl.registerLazySingleton(() => GetCurrentUser(sl<AuthRepository>()));
     sl.registerLazySingleton(() => SignIn(sl<AuthRepository>()));
+    sl.registerLazySingleton(() => SignUp(sl<AuthRepository>()));
     sl.registerLazySingleton(() => SignOut(sl<AuthRepository>()));
     
     // AUTH - Cubit (Factory para crear nueva instancia cada vez)
@@ -194,6 +196,7 @@ class DependencyInjection {
       () => AuthCubit(
         getCurrentUser: sl<GetCurrentUser>(),
         signInUseCase: sl<SignIn>(),
+        signUpUseCase: sl<SignUp>(),
         signOutUseCase: sl<SignOut>(),
       ),
     );

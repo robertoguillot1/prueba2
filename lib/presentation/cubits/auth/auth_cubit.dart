@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/entities/auth/user_entity.dart';
 import '../../../domain/usecases/auth/get_current_user.dart';
 import '../../../domain/usecases/auth/sign_in.dart';
+import '../../../domain/usecases/auth/sign_up.dart';
 import '../../../domain/usecases/auth/sign_out.dart';
 import 'auth_state.dart';
 
@@ -9,11 +9,13 @@ import 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   final GetCurrentUser getCurrentUser;
   final SignIn signInUseCase;
+  final SignUp signUpUseCase;
   final SignOut signOutUseCase;
 
   AuthCubit({
     required this.getCurrentUser,
     required this.signInUseCase,
+    required this.signUpUseCase,
     required this.signOutUseCase,
   }) : super(const AuthInitial());
 
@@ -48,6 +50,27 @@ class AuthCubit extends Cubit<AuthState> {
         emit(Authenticated(user));
       } else {
         emit(const AuthError('Error: No se pudo obtener el usuario después del login'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  /// Registra un nuevo usuario con email y contraseña
+  /// Emite AuthLoading, luego Authenticated si tiene éxito, o AuthError si falla
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    emit(const AuthLoading());
+    try {
+      await signUpUseCase.call(email: email, password: password);
+      // Después de registrar, obtener el usuario actual
+      final user = await getCurrentUser.call();
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(const AuthError('Error: No se pudo obtener el usuario después del registro'));
       }
     } catch (e) {
       emit(AuthError(e.toString()));

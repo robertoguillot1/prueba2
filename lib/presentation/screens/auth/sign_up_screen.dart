@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../presentation/cubits/auth/auth_cubit.dart';
 import '../../../presentation/cubits/auth/auth_state.dart';
-import 'sign_up_screen.dart';
+import 'login_screen.dart';
 
-/// Pantalla de inicio de sesión con diseño moderno
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+/// Pantalla de registro con diseño moderno
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -37,15 +39,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
     final authCubit = context.read<AuthCubit>();
-    await authCubit.signIn(
+    await authCubit.signUp(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
@@ -79,6 +82,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         }
       },
       child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text('Registro'),
+        ),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -114,14 +124,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.pets,
+                          Icons.person_add,
                           size: 64,
                           color: primaryColor,
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'App Ganadera',
+                        'Crear Cuenta',
                         style: theme.textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: primaryColor,
@@ -130,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Gestión Integral de Fincas',
+                        'Únete a App Ganadera',
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: Colors.grey.shade600,
                         ),
@@ -155,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     Text(
-                                      'Iniciar Sesión',
+                                      'Registro',
                                       style: theme.textTheme.headlineSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -197,11 +207,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       controller: _passwordController,
                                       obscureText: _obscurePassword,
                                       enabled: !isLoading,
-                                      textInputAction: TextInputAction.done,
-                                      onFieldSubmitted: (_) => _login(),
+                                      textInputAction: TextInputAction.next,
                                       decoration: InputDecoration(
                                         labelText: 'Contraseña',
-                                        hintText: '••••••••',
+                                        hintText: 'Mínimo 6 caracteres',
                                         prefixIcon: Icon(
                                           Icons.lock_outlined,
                                           color: primaryColor,
@@ -237,11 +246,56 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         return null;
                                       },
                                     ),
+                                    const SizedBox(height: 20),
+                                    TextFormField(
+                                      controller: _confirmPasswordController,
+                                      obscureText: _obscureConfirmPassword,
+                                      enabled: !isLoading,
+                                      textInputAction: TextInputAction.done,
+                                      onFieldSubmitted: (_) => _signUp(),
+                                      decoration: InputDecoration(
+                                        labelText: 'Confirmar Contraseña',
+                                        hintText: 'Repite tu contraseña',
+                                        prefixIcon: Icon(
+                                          Icons.lock_outlined,
+                                          color: primaryColor,
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscureConfirmPassword
+                                                ? Icons.visibility_outlined
+                                                : Icons.visibility_off_outlined,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                                            });
+                                          },
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        filled: true,
+                                        fillColor: isDark
+                                            ? Colors.grey.shade800
+                                            : Colors.grey.shade50,
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Confirma tu contraseña';
+                                        }
+                                        if (value != _passwordController.text) {
+                                          return 'Las contraseñas no coinciden';
+                                        }
+                                        return null;
+                                      },
+                                    ),
                                     const SizedBox(height: 32),
                                     SizedBox(
                                       height: 50,
                                       child: ElevatedButton(
-                                        onPressed: isLoading ? null : _login,
+                                        onPressed: isLoading ? null : _signUp,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: primaryColor,
                                           foregroundColor: Colors.white,
@@ -265,14 +319,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   const Text(
-                                                    'Iniciar Sesión',
+                                                    'Registrarse',
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       fontWeight: FontWeight.w600,
                                                     ),
                                                   ),
                                                   const SizedBox(width: 8),
-                                                  const Icon(Icons.arrow_forward, size: 20),
+                                                  const Icon(Icons.person_add, size: 20),
                                                 ],
                                               ),
                                       ),
@@ -282,21 +336,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          '¿No tienes cuenta? ',
+                                          '¿Ya tienes cuenta? ',
                                           style: theme.textTheme.bodyMedium,
                                         ),
                                         TextButton(
                                           onPressed: isLoading
                                               ? null
                                               : () {
-                                                  Navigator.of(context).push(
+                                                  Navigator.of(context).pushReplacement(
                                                     MaterialPageRoute(
-                                                      builder: (_) => const SignUpScreen(),
+                                                      builder: (_) => const LoginScreen(),
                                                     ),
                                                   );
                                                 },
                                           child: Text(
-                                            'Regístrate aquí',
+                                            'Inicia Sesión',
                                             style: TextStyle(
                                               color: primaryColor,
                                               fontWeight: FontWeight.w600,
@@ -310,14 +364,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               },
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Footer
-                      Text(
-                        'Versión 1.0.0',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade500,
                         ),
                       ),
                     ],

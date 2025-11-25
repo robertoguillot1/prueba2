@@ -42,6 +42,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> signUpWithEmailAndPassword(String email, String password) async {
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      // Re-lanzamos la excepción para que el caso de uso pueda manejarla
+      throw _handleFirebaseAuthException(e);
+    } catch (e) {
+      // Para otros tipos de errores, lanzamos una excepción genérica
+      throw Exception('Error al registrar usuario: $e');
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
@@ -75,6 +91,10 @@ class AuthRepositoryImpl implements AuthRepository {
         return Exception('Esta operación no está permitida.');
       case 'network-request-failed':
         return Exception('Error de conexión. Verifica tu internet.');
+      case 'email-already-in-use':
+        return Exception('Este correo electrónico ya está registrado.');
+      case 'weak-password':
+        return Exception('La contraseña es muy débil. Debe tener al menos 6 caracteres.');
       default:
         return Exception('Error de autenticación: ${e.message}');
     }

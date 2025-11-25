@@ -1,6 +1,7 @@
 /// Exportación centralizada de todos los use cases
 export 'auth/get_current_user.dart';
 export 'auth/sign_in.dart';
+export 'auth/sign_up.dart';
 export 'auth/sign_out.dart';
 export 'ovinos/get_all_ovejas.dart';
 export 'ovinos/get_oveja_by_id.dart';
