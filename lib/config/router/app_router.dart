@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 // Importar pantallas de menú
 import '../../presentation/modules/bovinos/screens/bovino_menu_screen.dart';
 import '../../presentation/modules/avicultura/screens/avicultura_menu_screen.dart';
+import '../../presentation/modules/ovinos/screens/caprinos_menu_screen.dart';
 // TODO: Importar cuando se creen estas pantallas de menú
 // import '../../presentation/modules/porcinos/screens/porcicultura_menu_screen.dart';
-// import '../../presentation/modules/ovinos/screens/caprinos_menu_screen.dart';
 // import '../../presentation/modules/trabajadores/screens/trabajadores_menu_screen.dart';
 
 // Importar pantallas de lista
