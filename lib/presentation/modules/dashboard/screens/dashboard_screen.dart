@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/dependency_injection.dart';
@@ -170,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               SummaryCardWidget(
-                faIcon: FontAwesomeIcons.pig,
+                icon: Icons.pets,
                 title: 'Porcinos',
                 total: state.totalCerdos,
                 color: Colors.pink,
@@ -198,7 +197,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               SummaryCardWidget(
-                faIcon: FontAwesomeIcons.goat,
+                icon: Icons.grass,
                 title: 'Ovinos',
                 total: state.totalOvejas,
                 color: Colors.grey,
