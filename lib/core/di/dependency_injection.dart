@@ -61,7 +61,13 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/get_current_user.dart';
 import '../../domain/usecases/auth/sign_in.dart';
 import '../../domain/usecases/auth/sign_out.dart';
+import '../../domain/usecases/bovinos/get_bovinos_stream.dart';
+import '../../domain/usecases/porcinos/get_cerdos_stream.dart';
+import '../../domain/usecases/ovinos/get_ovejas_stream.dart';
+import '../../domain/usecases/avicultura/get_gallinas_stream.dart';
+import '../../domain/usecases/trabajadores/get_trabajadores_stream.dart';
 import '../../presentation/cubits/auth/auth_cubit.dart';
+import '../../presentation/modules/dashboard/cubits/dashboard_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -251,6 +257,32 @@ class DependencyInjection {
     return GallinasViewModel(
       getAllGallinas: GetAllGallinas(_gallinasRepository!),
       createGallina: CreateGallina(_gallinasRepository!),
+    );
+  }
+  
+  /// Crea una instancia de DashboardCubit con todos los streams necesarios
+  static DashboardCubit createDashboardCubit(String farmId) {
+    return DashboardCubit(
+      getBovinosStream: GetBovinosStream(
+        repository: _bovinosRepository!,
+        farmId: farmId,
+      ),
+      getCerdosStream: GetCerdosStream(
+        repository: _cerdosRepository!,
+        farmId: farmId,
+      ),
+      getOvejasStream: GetOvejasStream(
+        repository: _ovejasRepository!,
+        farmId: farmId,
+      ),
+      getGallinasStream: GetGallinasStream(
+        repository: _gallinasRepository!,
+        farmId: farmId,
+      ),
+      getTrabajadoresStream: GetTrabajadoresStream(
+        repository: _trabajadoresRepository!,
+        farmId: farmId,
+      ),
     );
   }
   
