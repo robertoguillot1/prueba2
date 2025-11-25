@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
+import '../../../../presentation/modules/bovinos/screens/bovino_form_screen.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../cubit/cattle_cubit.dart';
 import '../cubit/cattle_state.dart';
@@ -174,26 +175,37 @@ class CattleListScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToCreateBovine(BuildContext context) {
-    // TODO: Navegar a la pantalla de crear bovino
-    debugPrint('Ir a crear vaca');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Formulario de creación próximamente'),
-        duration: Duration(seconds: 2),
+  Future<void> _navigateToCreateBovine(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BovinoFormScreen(
+          farmId: farmId,
+        ),
       ),
     );
+
+    if (result == true && context.mounted) {
+      // Recargar la lista después de crear
+      context.read<CattleCubit>().loadCattle(farmId);
+    }
   }
 
-  void _navigateToBovineDetail(BuildContext context, BovineEntity bovine) {
-    // TODO: Navegar a la pantalla de detalles
-    debugPrint('Navegar a detalle de: ${bovine.identifier}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Ver detalles de ${bovine.identifier}'),
-        duration: const Duration(seconds: 1),
+  Future<void> _navigateToBovineDetail(BuildContext context, BovineEntity bovine) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BovinoFormScreen(
+          farmId: farmId,
+          bovine: bovine, // Pasar el bovino para editar
+        ),
       ),
     );
+
+    if (result == true && context.mounted) {
+      // Recargar la lista después de editar
+      context.read<CattleCubit>().loadCattle(farmId);
+    }
   }
 }
 

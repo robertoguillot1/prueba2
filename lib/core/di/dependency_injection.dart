@@ -78,6 +78,7 @@ import '../../data/repositories/farm_repository_impl.dart';
 import '../../presentation/cubits/auth/auth_cubit.dart';
 import '../../presentation/modules/dashboard/cubits/dashboard_cubit.dart';
 import '../../presentation/modules/farms/cubits/farms_cubit.dart';
+import '../../presentation/modules/bovinos/cubits/form/bovino_form_cubit.dart';
 import '../../presentation/modules/farms/cubits/farm_form_cubit.dart';
 // Cattle Module (Clean Architecture)
 import '../../features/cattle/data/datasources/cattle_remote_datasource.dart';
@@ -376,6 +377,14 @@ class DependencyInjection {
       updateBovineUseCase: sl<UpdateBovine>(),
       deleteBovineUseCase: sl<DeleteBovine>(),
       repository: sl<CattleRepository>(),
+    );
+  }
+
+  /// Crea una instancia de BovinoFormCubit para el formulario
+  static BovinoFormCubit createBovinoFormCubit() {
+    return BovinoFormCubit(
+      addBovineUseCase: sl<AddBovine>(),
+      updateBovineUseCase: sl<UpdateBovine>(),
     );
   }
   
