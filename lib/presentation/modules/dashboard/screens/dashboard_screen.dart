@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/dependency_injection.dart';
+import '../../../../core/widgets/theme_switcher.dart';
 import '../cubits/dashboard_cubit.dart';
 import '../cubits/dashboard_state.dart';
 import '../widgets/summary_card_widget.dart';
@@ -51,6 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         appBar: AppBar(
           title: const Text('Dashboard Operativo'),
           actions: [
+            const ThemeSwitcher(),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
@@ -152,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             childAspectRatio: 1.1,
             children: [
               SummaryCardWidget(
-                icon: Icons.pets,
+                faIcon: FontAwesomeIcons.cow,
                 title: 'Bovinos',
                 total: state.totalBovinos,
                 color: Colors.brown,
@@ -166,7 +170,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               SummaryCardWidget(
-                icon: Icons.agriculture,
+                faIcon: FontAwesomeIcons.pig,
                 title: 'Porcinos',
                 total: state.totalCerdos,
                 color: Colors.pink,
@@ -194,7 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               SummaryCardWidget(
-                icon: Icons.pets_outlined,
+                faIcon: FontAwesomeIcons.goat,
                 title: 'Ovinos',
                 total: state.totalOvejas,
                 color: Colors.grey,

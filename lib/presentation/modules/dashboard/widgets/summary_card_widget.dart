@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Widget para mostrar una tarjeta de resumen en el dashboard
 class SummaryCardWidget extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final IconData? faIcon;
   final String title;
   final int total;
   final Color color;
@@ -10,12 +12,13 @@ class SummaryCardWidget extends StatelessWidget {
 
   const SummaryCardWidget({
     super.key,
-    required this.icon,
+    this.icon,
+    this.faIcon,
     required this.title,
     required this.total,
     required this.color,
     this.onTap,
-  });
+  }) : assert(icon != null || faIcon != null, 'Debe proporcionar icon o faIcon');
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +35,18 @@ class SummaryCardWidget extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 40,
-                color: color,
-              ),
+              if (faIcon != null)
+                FaIcon(
+                  faIcon!,
+                  size: 40,
+                  color: color,
+                )
+              else
+                Icon(
+                  icon!,
+                  size: 40,
+                  color: color,
+                ),
               const SizedBox(height: 8),
               Text(
                 title,
