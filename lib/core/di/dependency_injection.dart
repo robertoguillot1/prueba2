@@ -88,6 +88,7 @@ import '../../features/cattle/domain/usecases/get_bovine.dart';
 import '../../features/cattle/domain/usecases/add_bovine.dart';
 import '../../features/cattle/domain/usecases/update_bovine.dart';
 import '../../features/cattle/domain/usecases/delete_bovine.dart';
+import '../../features/cattle/presentation/cubit/cattle_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -363,6 +364,18 @@ class DependencyInjection {
         repository: _trabajadoresRepository!,
         farmId: farmId,
       ),
+    );
+  }
+
+  /// Crea una instancia de CattleCubit para una finca específica
+  static CattleCubit createCattleCubit() {
+    return CattleCubit(
+      getCattleListUseCase: sl<GetCattleList>(),
+      getBovineUseCase: sl<GetBovine>(),
+      addBovineUseCase: sl<AddBovine>(),
+      updateBovineUseCase: sl<UpdateBovine>(),
+      deleteBovineUseCase: sl<DeleteBovine>(),
+      repository: sl<CattleRepository>(),
     );
   }
   

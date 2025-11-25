@@ -1,5 +1,5 @@
 /// Exportación centralizada del módulo Cattle
-/// 
+///
 /// Este archivo facilita las importaciones del módulo completo
 /// en otras partes de la aplicación.
 
@@ -10,4 +10,8 @@ export 'domain/usecases/usecases.dart';
 
 // Data Layer
 export 'data/data.dart';
+
+// Presentation Layer
+export 'presentation/cubit/cubit.dart';
+export 'presentation/screens/screens.dart';
 

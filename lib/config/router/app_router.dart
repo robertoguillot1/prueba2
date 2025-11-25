@@ -15,6 +15,9 @@ import '../../presentation/modules/porcinos/list/cerdos_list_screen.dart';
 import '../../presentation/modules/ovinos/list/ovejas_list_screen.dart';
 import '../../presentation/modules/avicultura/list/gallinas_list_screen.dart';
 
+// Importar pantallas del módulo Cattle (Clean Architecture)
+import '../../features/cattle/presentation/screens/cattle_list_screen.dart';
+
 // Importar pantallas de Fincas
 import '../../presentation/modules/farms/screens/farms_list_screen.dart';
 import '../../presentation/modules/farms/screens/farm_form_screen.dart';
@@ -107,6 +110,10 @@ class AppRouter {
 
       case '/bovinos/list':
         return buildRoute((farmId) => BovinosListScreen(farmId: farmId));
+
+      // Nueva ruta para el módulo Cattle con Clean Architecture
+      case '/cattle/list':
+        return buildRoute((farmId) => CattleListScreen(farmId: farmId));
 
       case '/trabajadores/list':
         return buildRoute((farmId) => TrabajadoresListScreen(farmId: farmId));
