@@ -12,8 +12,11 @@ class ServerException implements Exception {
 
 /// Contrato abstracto para el datasource remoto de Bovinos
 abstract class CattleRemoteDataSource {
-  /// Obtiene un stream de todos los bovinos de una finca
-  Stream<List<BovineModel>> getCattleList(String farmId);
+  /// Obtiene la lista de bovinos de una finca (consulta única)
+  Future<List<BovineModel>> getCattleList(String farmId);
+
+  /// Obtiene un stream de bovinos para actualizaciones en tiempo real
+  Stream<List<BovineModel>> getCattleListStream(String farmId);
 
   /// Obtiene un bovino por su ID
   Future<BovineModel> getBovine(String farmId, String id);
@@ -36,8 +39,31 @@ class CattleRemoteDataSourceImpl implements CattleRemoteDataSource {
       : firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
-  Stream<List<BovineModel>> getCattleList(String farmId) {
+  Future<List<BovineModel>> getCattleList(String farmId) async {
     try {
+      // Consulta única - retorna Future
+      final snapshot = await firestore
+          .collection('farms')
+          .doc(farmId)
+          .collection('cattle')
+          .orderBy('createdAt', descending: false)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => BovineModel.fromJson({
+                ...doc.data(),
+                'id': doc.id,
+              }))
+          .toList();
+    } catch (e) {
+      throw ServerException('Error al obtener la lista de bovinos: $e');
+    }
+  }
+
+  @override
+  Stream<List<BovineModel>> getCattleListStream(String farmId) {
+    try {
+      // Stream para actualizaciones en tiempo real
       return firestore
           .collection('farms')
           .doc(farmId)
@@ -53,7 +79,7 @@ class CattleRemoteDataSourceImpl implements CattleRemoteDataSource {
             .toList();
       });
     } catch (e) {
-      throw ServerException('Error al obtener la lista de bovinos: $e');
+      throw ServerException('Error al obtener el stream de bovinos: $e');
     }
   }
 
@@ -163,4 +189,3 @@ class CattleRemoteDataSourceImpl implements CattleRemoteDataSource {
     }
   }
 }
-
