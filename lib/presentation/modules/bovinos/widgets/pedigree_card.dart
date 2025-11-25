@@ -22,12 +22,13 @@ class PedigreeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = primaryColor ?? theme.primaryColor;
+    final isDark = theme.brightness == Brightness.dark;
 
     if (bovino == null) {
       // Mostrar "Desconocido" si no hay datos
       return _buildUnknownCard(color);
     }
-
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -36,12 +37,14 @@ class PedigreeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isHighlighted
               ? color.withOpacity(0.1)
-              : Colors.white,
+              : theme.cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isHighlighted
                 ? color
-                : Colors.grey.shade300,
+                : isDark
+                    ? Colors.grey.shade700
+                    : Colors.grey.shade300,
             width: isHighlighted ? 2 : 1,
           ),
           boxShadow: [
