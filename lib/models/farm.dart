@@ -15,6 +15,14 @@ import 'cattle_transfer.dart';
 import 'cattle_trip.dart';
 import 'milk_production.dart';
 import 'reproduction_event.dart';
+import 'goat_sheep.dart';
+import 'pig_vaccine.dart';
+import 'goat_sheep_vaccine.dart';
+import 'broiler_batch.dart';
+import 'layer_batch.dart';
+import 'layer_production_record.dart';
+import 'batch_expense.dart';
+import 'batch_sale.dart';
 
 class Farm {
   final String id;
@@ -39,6 +47,14 @@ class Farm {
   final List<CattleTrip> cattleTrips;
   final List<MilkProduction> milkProductionRecords;
   final List<ReproductionEvent> reproductionEvents;
+  final List<GoatSheep> goatSheep;
+  final List<PigVaccine> pigVaccines;
+  final List<GoatSheepVaccine> goatSheepVaccines;
+  final List<BroilerBatch> broilerBatches;
+  final List<LayerBatch> layerBatches;
+  final List<LayerProductionRecord> layerProductionRecords;
+  final List<BatchExpense> batchExpenses;
+  final List<BatchSale> batchSales;
 
   Farm({
     required this.id,
@@ -63,6 +79,14 @@ class Farm {
     List<CattleTrip>? cattleTrips,
     List<MilkProduction>? milkProductionRecords,
     List<ReproductionEvent>? reproductionEvents,
+    List<GoatSheep>? goatSheep,
+    List<PigVaccine>? pigVaccines,
+    List<GoatSheepVaccine>? goatSheepVaccines,
+    List<BroilerBatch>? broilerBatches,
+    List<LayerBatch>? layerBatches,
+    List<LayerProductionRecord>? layerProductionRecords,
+    List<BatchExpense>? batchExpenses,
+    List<BatchSale>? batchSales,
   })  : workers = workers ?? [],
         payments = payments ?? [],
         loans = loans ?? [],
@@ -77,7 +101,15 @@ class Farm {
         cattleTransfers = cattleTransfers ?? [],
         cattleTrips = cattleTrips ?? [],
         milkProductionRecords = milkProductionRecords ?? [],
-        reproductionEvents = reproductionEvents ?? [];
+        reproductionEvents = reproductionEvents ?? [],
+        goatSheep = goatSheep ?? [],
+        pigVaccines = pigVaccines ?? [],
+        goatSheepVaccines = goatSheepVaccines ?? [],
+        broilerBatches = broilerBatches ?? [],
+        layerBatches = layerBatches ?? [],
+        layerProductionRecords = layerProductionRecords ?? [],
+        batchExpenses = batchExpenses ?? [],
+        batchSales = batchSales ?? [];
 
   Farm copyWith({
     String? id,
@@ -102,6 +134,14 @@ class Farm {
     List<CattleTrip>? cattleTrips,
     List<MilkProduction>? milkProductionRecords,
     List<ReproductionEvent>? reproductionEvents,
+    List<GoatSheep>? goatSheep,
+    List<PigVaccine>? pigVaccines,
+    List<GoatSheepVaccine>? goatSheepVaccines,
+    List<BroilerBatch>? broilerBatches,
+    List<LayerBatch>? layerBatches,
+    List<LayerProductionRecord>? layerProductionRecords,
+    List<BatchExpense>? batchExpenses,
+    List<BatchSale>? batchSales,
   }) {
     return Farm(
       id: id ?? this.id,
@@ -126,6 +166,14 @@ class Farm {
       cattleTrips: cattleTrips ?? this.cattleTrips,
       milkProductionRecords: milkProductionRecords ?? this.milkProductionRecords,
       reproductionEvents: reproductionEvents ?? this.reproductionEvents,
+      goatSheep: goatSheep ?? this.goatSheep,
+      pigVaccines: pigVaccines ?? this.pigVaccines,
+      goatSheepVaccines: goatSheepVaccines ?? this.goatSheepVaccines,
+      broilerBatches: broilerBatches ?? this.broilerBatches,
+      layerBatches: layerBatches ?? this.layerBatches,
+      layerProductionRecords: layerProductionRecords ?? this.layerProductionRecords,
+      batchExpenses: batchExpenses ?? this.batchExpenses,
+      batchSales: batchSales ?? this.batchSales,
     );
   }
 
@@ -153,6 +201,14 @@ class Farm {
       'cattleTrips': cattleTrips.map((c) => c.toJson()).toList(),
       'milkProductionRecords': milkProductionRecords.map((m) => m.toJson()).toList(),
       'reproductionEvents': reproductionEvents.map((r) => r.toJson()).toList(),
+      'goatSheep': goatSheep.map((g) => g.toJson()).toList(),
+      'pigVaccines': pigVaccines.map((v) => v.toJson()).toList(),
+      'goatSheepVaccines': goatSheepVaccines.map((v) => v.toJson()).toList(),
+      'broilerBatches': broilerBatches.map((b) => b.toJson()).toList(),
+      'layerBatches': layerBatches.map((l) => l.toJson()).toList(),
+      'layerProductionRecords': layerProductionRecords.map((r) => r.toJson()).toList(),
+      'batchExpenses': batchExpenses.map((e) => e.toJson()).toList(),
+      'batchSales': batchSales.map((s) => s.toJson()).toList(),
     };
   }
 
@@ -223,6 +279,38 @@ class Farm {
           [],
       reproductionEvents: (json['reproductionEvents'] as List<dynamic>?)
               ?.map((r) => ReproductionEvent.fromJson(r as Map<String, dynamic>))
+              .toList() ??
+          [],
+      goatSheep: (json['goatSheep'] as List<dynamic>?)
+              ?.map((g) => GoatSheep.fromJson(g as Map<String, dynamic>))
+              .toList() ??
+          [],
+      pigVaccines: (json['pigVaccines'] as List<dynamic>?)
+              ?.map((v) => PigVaccine.fromJson(v as Map<String, dynamic>))
+              .toList() ??
+          [],
+      goatSheepVaccines: (json['goatSheepVaccines'] as List<dynamic>?)
+              ?.map((v) => GoatSheepVaccine.fromJson(v as Map<String, dynamic>))
+              .toList() ??
+          [],
+      broilerBatches: (json['broilerBatches'] as List<dynamic>?)
+              ?.map((b) => BroilerBatch.fromJson(b as Map<String, dynamic>))
+              .toList() ??
+          [],
+      layerBatches: (json['layerBatches'] as List<dynamic>?)
+              ?.map((l) => LayerBatch.fromJson(l as Map<String, dynamic>))
+              .toList() ??
+          [],
+      layerProductionRecords: (json['layerProductionRecords'] as List<dynamic>?)
+              ?.map((r) => LayerProductionRecord.fromJson(r as Map<String, dynamic>))
+              .toList() ??
+          [],
+      batchExpenses: (json['batchExpenses'] as List<dynamic>?)
+              ?.map((e) => BatchExpense.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      batchSales: (json['batchSales'] as List<dynamic>?)
+              ?.map((s) => BatchSale.fromJson(s as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -318,5 +406,8 @@ class Farm {
         .where((e) => e.date.isAfter(firstDayOfMonth.subtract(const Duration(days: 1))))
         .fold(0.0, (sum, e) => sum + e.amount);
   }
+
+  // Getters calculados para chivos/ovejas
+  int get goatSheepCount => goatSheep.length;
 }
 

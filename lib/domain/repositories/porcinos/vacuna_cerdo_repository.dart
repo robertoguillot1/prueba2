@@ -25,5 +25,3 @@ abstract class VacunaCerdoRepository {
   Future<Result<List<VacunaCerdo>>> getVacunasPendientes(String farmId);
 }
 
-
-

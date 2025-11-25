@@ -68,11 +68,29 @@ class _WeightRecordFormScreenState extends State<WeightRecordFormScreen> {
 
       await farmProvider.addWeightRecord(record);
       
-      // Actualizar el peso del cerdo
+      // Calcular nueva etapa de alimentación basada en el nuevo peso
+      final newWeight = double.parse(_weightController.text);
+      final newFeedingStage = _calculateFeedingStageFromWeight(newWeight);
+      
+      // Actualizar el peso y la etapa de alimentación del cerdo
       final updatedPig = _selectedPig!.copyWith(
-        currentWeight: double.parse(_weightController.text),
+        currentWeight: newWeight,
+        feedingStage: newFeedingStage,
       );
       await farmProvider.updatePig(updatedPig);
+      
+      // Mostrar mensaje si cambió la etapa
+      if (_selectedPig!.feedingStage != newFeedingStage) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Etapa de alimentación actualizada a: ${_getStageName(newFeedingStage)}'),
+              backgroundColor: Colors.blue,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -214,6 +232,28 @@ class _WeightRecordFormScreenState extends State<WeightRecordFormScreen> {
         ),
       ),
     );
+  }
+  
+  FeedingStage _calculateFeedingStageFromWeight(double weight) {
+    if (weight <= 24) {
+      return FeedingStage.inicio;
+    } else if (weight >= 25 && weight <= 69) {
+      return FeedingStage.levante;
+    } else if (weight >= 70) {
+      return FeedingStage.engorde;
+    }
+    return FeedingStage.inicio;
+  }
+  
+  String _getStageName(FeedingStage stage) {
+    switch (stage) {
+      case FeedingStage.inicio:
+        return 'Inicio';
+      case FeedingStage.levante:
+        return 'Levante';
+      case FeedingStage.engorde:
+        return 'Engorde';
+    }
   }
 }
 

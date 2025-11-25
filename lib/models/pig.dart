@@ -5,18 +5,24 @@ enum PigGender {
 
 enum FeedingStage {
   inicio,
-  desarrollo,
-  finalizacion,
+  levante,
+  engorde,
 }
 
 extension FeedingStageExtension on FeedingStage {
-  // Mapeo de valores antiguos
-  static FeedingStage? fromString(String value) {
+  // Mapeo de valores antiguos para compatibilidad
+  static FeedingStage? _parseFeedingStage(String value) {
     switch (value) {
-      case 'levante':
+      case 'desarrollo':
+        return FeedingStage.levante;
+      case 'finalizacion':
+        return FeedingStage.engorde;
+      case 'inicio':
         return FeedingStage.inicio;
+      case 'levante':
+        return FeedingStage.levante;
       case 'engorde':
-        return FeedingStage.finalizacion;
+        return FeedingStage.engorde;
       default:
         return FeedingStage.values.firstWhere(
           (e) => e.name == value,
@@ -74,10 +80,7 @@ class Pig {
       ),
       birthDate: DateTime.parse(json['birthDate'] as String),
       currentWeight: (json['currentWeight'] as num).toDouble(),
-      feedingStage: FeedingStage.values.firstWhere(
-        (e) => e.name == json['feedingStage'],
-        orElse: () => FeedingStage.inicio,
-      ),
+      feedingStage: FeedingStageExtension._parseFeedingStage(json['feedingStage'] as String) ?? FeedingStage.inicio,
       notes: json['notes'] as String?,
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -96,10 +99,10 @@ class Pig {
     switch (feedingStage) {
       case FeedingStage.inicio:
         return 'Inicio';
-      case FeedingStage.desarrollo:
-        return 'Desarrollo';
-      case FeedingStage.finalizacion:
-        return 'Finalización';
+      case FeedingStage.levante:
+        return 'Levante';
+      case FeedingStage.engorde:
+        return 'Engorde';
     }
   }
 
@@ -109,9 +112,9 @@ class Pig {
     switch (feedingStage) {
       case FeedingStage.inicio:
         return baseConsumption * 0.8;
-      case FeedingStage.desarrollo:
+      case FeedingStage.levante:
         return baseConsumption;
-      case FeedingStage.finalizacion:
+      case FeedingStage.engorde:
         return baseConsumption * 1.2;
     }
   }

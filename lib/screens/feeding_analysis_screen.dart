@@ -188,9 +188,9 @@ class FeedingAnalysisScreen extends StatelessWidget {
     switch (stage) {
       case FeedingStage.inicio:
         return 'Inicio';
-      case FeedingStage.desarrollo:
-        return 'Desarrollo';
-      case FeedingStage.finalizacion:
+      case FeedingStage.levante:
+        return 'Levante';
+      case FeedingStage.engorde:
         return 'Engorde';
     }
   }

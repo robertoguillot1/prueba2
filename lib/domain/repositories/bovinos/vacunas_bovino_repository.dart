@@ -25,5 +25,3 @@ abstract class VacunasBovinoRepository {
   Future<Result<List<VacunasBovino>>> getVacunasPendientes(String farmId);
 }
 
-
-

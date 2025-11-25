@@ -136,5 +136,3 @@ class PartosOvejaDataSourceImpl implements PartosOvejaDataSource {
   }
 }
 
-
-

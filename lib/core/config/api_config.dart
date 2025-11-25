@@ -57,5 +57,3 @@ class ApiConfig {
   static String asistencia(String farmId) => '/farms/$farmId/trabajadores/asistencia';
 }
 
-
-

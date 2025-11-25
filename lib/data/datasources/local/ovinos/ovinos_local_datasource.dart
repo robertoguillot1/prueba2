@@ -109,5 +109,3 @@ class OvinosLocalDataSourceImpl implements OvinosLocalDataSource {
   }
 }
 
-
-

@@ -13,6 +13,7 @@ import 'cattle_weight_form_screen.dart';
 import 'milk_production_form_screen.dart';
 import 'reproductive_checkup_screen.dart';
 import 'cattle_weight_production_screen.dart';
+import '../widgets/lactation_curve_chart.dart';
 
 class CattleProfileScreen extends StatelessWidget {
   final Farm farm;
@@ -297,6 +298,13 @@ class CattleProfileScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                       ],
 
+                      // Alerta de Secado (solo para hembras preñadas en producción)
+                      if (cattle.gender == CattleGender.female && 
+                          cattle.necesitaSecado) ...[
+                        _buildDryOffAlert(cattle),
+                        const SizedBox(height: 16),
+                      ],
+
                       // Acciones rápidas (solo para hembras)
                       if (cattle.gender == CattleGender.female) ...[
                         Row(
@@ -485,6 +493,14 @@ class CattleProfileScreen extends StatelessWidget {
 
                       // Producción de leche (solo para hembras)
                       if (cattle.gender == CattleGender.female) ...[
+                        // Gráfico de Curva de Lactancia
+                        if (milkRecords.isNotEmpty) ...[
+                          LactationCurveChart(
+                            milkRecords: milkRecords,
+                            primaryColor: farm.primaryColor,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                         _buildSection(
                           context,
                           'Producción de Leche (${milkRecords.length})',
@@ -856,5 +872,125 @@ class CattleProfileScreen extends StatelessWidget {
 
     // Limitar el número de hijos mostrados
     return sortedChildren.take(AppConstants.maxChildrenDisplay).toList();
+  }
+
+  Widget _buildDryOffAlert(Cattle cattle) {
+    final nivelUrgencia = cattle.nivelUrgenciaSecado;
+    final fechaSecado = cattle.fechaSecado;
+    final diasHastaSecado = cattle.diasHastaSecado;
+
+    if (nivelUrgencia == null || fechaSecado == null) {
+      return const SizedBox.shrink();
+    }
+
+    final isUrgent = nivelUrgencia == 'urgent';
+    final isWarning = nivelUrgencia == 'warning';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isUrgent ? Colors.red.shade50 : Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isUrgent ? Colors.red.shade300 : Colors.orange.shade300,
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isUrgent ? Icons.warning : Icons.info_outline,
+                color: isUrgent ? Colors.red.shade700 : Colors.orange.shade700,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isUrgent ? '🔴 SECADO URGENTE' : '🟡 PLANIFICAR SECADO',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isUrgent ? Colors.red.shade700 : Colors.orange.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isUrgent
+                          ? '¡SECAR INMEDIATAMENTE!'
+                          : 'Planificar secado para el ${DateFormat('dd/MM/yyyy').format(fechaSecado)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (diasHastaSecado != null) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: isUrgent ? Colors.red.shade700 : Colors.orange.shade700,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        diasHastaSecado < 0
+                            ? 'La fecha de secado ya pasó hace ${diasHastaSecado.abs()} días'
+                            : 'Faltan $diasHastaSecado días para el secado',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isUrgent ? Colors.red.shade700 : Colors.orange.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Text(
+                  'El periodo de secado (60 días antes del parto) es crucial para que la vaca descanse y se prepare para el próximo parto.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                if (cattle.fechaProbableParto != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Fecha probable de parto: ${DateFormat('dd/MM/yyyy').format(cattle.fechaProbableParto!)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

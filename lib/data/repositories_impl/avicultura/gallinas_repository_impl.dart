@@ -93,5 +93,3 @@ class GallinasRepositoryImpl implements GallinasRepository {
   }
 }
 
-
-

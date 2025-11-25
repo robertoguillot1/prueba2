@@ -193,41 +193,60 @@ class ExpensesListScreen extends StatelessWidget {
                             ],
                           ],
                         ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              NumberFormat.currency(symbol: '\$', decimalDigits: 0)
-                                  .format(expense.amount),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
+                            Flexible(
+                              child: Text(
+                                NumberFormat.currency(symbol: '\$', decimalDigits: 0)
+                                    .format(expense.amount),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                                textAlign: TextAlign.end,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ExpenseFormScreen(
-                                          farm: updatedFarm,
-                                          expenseToEdit: expense,
+                            PopupMenuButton(
+                              icon: const Icon(Icons.more_vert),
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.edit, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('Editar'),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    Future.delayed(const Duration(milliseconds: 100), () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ExpenseFormScreen(
+                                            farm: updatedFarm,
+                                            expenseToEdit: expense,
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    });
                                   },
-                                  tooltip: 'Editar',
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                                  onPressed: () => _confirmDelete(context, farmProvider, expense),
-                                  tooltip: 'Eliminar',
+                                PopupMenuItem(
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.delete, size: 20, color: Colors.red),
+                                      SizedBox(width: 8),
+                                      Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    Future.delayed(const Duration(milliseconds: 100), () {
+                                      _confirmDelete(context, farmProvider, expense);
+                                    });
+                                  },
                                 ),
                               ],
                             ),

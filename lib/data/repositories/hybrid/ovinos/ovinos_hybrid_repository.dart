@@ -177,5 +177,3 @@ class OvinosHybridRepository implements OvejasRepository {
   }
 }
 
-
-

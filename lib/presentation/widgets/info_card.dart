@@ -65,6 +65,3 @@ class InfoCard extends StatelessWidget {
   }
 }
 
-
-
-

@@ -4,14 +4,14 @@ import 'package:intl/intl.dart';
 import '../providers/farm_provider.dart';
 import '../models/farm.dart';
 import '../widgets/summary_card.dart';
-import 'workers_list_screen.dart';
-import 'payments_list_screen.dart';
-import 'loans_list_screen.dart';
+import 'workers_home_screen.dart';
 import 'expenses_list_screen.dart';
 import 'farm_form_screen.dart';
 import 'farm_statistics_screen.dart';
 import 'pork_farming_home_screen.dart';
 import 'cattle_home_screen.dart';
+import 'goat_sheep_home_screen.dart';
+import 'poultry_home_screen.dart';
 
 class FarmProfileScreen extends StatelessWidget {
   final Farm farm;
@@ -164,8 +164,8 @@ class FarmProfileScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SummaryCard(
-                title: 'Trabajadores Activos',
-                value: '${farm.activeWorkersCount}',
+                title: 'Total Trabajadores',
+                value: '${farm.workers.length}',
                 color: Colors.blue,
                 icon: Icons.people,
               ),
@@ -173,11 +173,10 @@ class FarmProfileScreen extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: SummaryCard(
-                title: 'Total Pagado (Mes)',
-                value: NumberFormat.currency(symbol: '\$', decimalDigits: 0)
-                    .format(farm.totalPaidThisMonth),
-                color: Colors.green,
-                icon: Icons.payments,
+                title: 'Total Cerdos',
+                value: '${farm.pigsCount}',
+                color: Colors.pink[300]!,
+                icon: Icons.pets,
               ),
             ),
           ],
@@ -187,21 +186,19 @@ class FarmProfileScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SummaryCard(
-                title: 'Préstamos Pendientes',
-                value: NumberFormat.currency(symbol: '\$', decimalDigits: 0)
-                    .format(farm.totalPendingLoans),
-                color: Colors.orange,
-                icon: Icons.account_balance_wallet,
+                title: 'Total Ganado',
+                value: '${farm.cattleCount}',
+                color: Colors.brown,
+                icon: Icons.agriculture,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: SummaryCard(
-                title: 'Total Préstamos',
-                value: NumberFormat.currency(symbol: '\$', decimalDigits: 0)
-                    .format(farm.totalLoaned),
+                title: 'Total Chivos/Ovejas',
+                value: '${farm.goatSheepCount}',
                 color: Colors.purple,
-                icon: Icons.money_off,
+                icon: Icons.pets,
               ),
             ),
           ],
@@ -238,37 +235,7 @@ class FarmProfileScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => WorkersListScreen(farm: farm),
-                  ),
-                );
-              },
-            ),
-            _buildModuleButton(
-              context,
-              icon: Icons.payments,
-              title: 'Pagos',
-              subtitle: '${farm.payments.length} registros',
-              color: Colors.green,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentsListScreen(farm: farm),
-                  ),
-                );
-              },
-            ),
-            _buildModuleButton(
-              context,
-              icon: Icons.account_balance_wallet,
-              title: 'Préstamos',
-              subtitle: '${farm.loans.length} registros',
-              color: Colors.orange,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoansListScreen(farm: farm),
+                    builder: (context) => WorkersHomeScreen(farm: farm),
                   ),
                 );
               },
@@ -333,6 +300,36 @@ class FarmProfileScreen extends StatelessWidget {
                 );
               },
             ),
+            _buildModuleButton(
+              context,
+              icon: Icons.pets,
+              title: 'Control Chivos/Ovejas',
+              subtitle: '${farm.goatSheepCount} animales',
+              color: Colors.purple,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GoatSheepHomeScreen(farm: farm),
+                  ),
+                );
+              },
+            ),
+            _buildModuleButton(
+              context,
+              icon: Icons.egg,
+              title: 'Avicultura',
+              subtitle: '${farm.broilerBatches.length + farm.layerBatches.length} lotes',
+              color: Colors.orange,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PoultryHomeScreen(farm: farm),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ],
@@ -356,31 +353,39 @@ class FarmProfileScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 32, color: color),
+                child: Icon(icon, size: 28, color: color),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+              Flexible(
+                child: Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: 11,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),

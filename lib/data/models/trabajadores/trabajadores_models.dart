@@ -4,5 +4,3 @@ export 'tarea_model.dart';
 export 'asistencia_model.dart';
 export 'pago_model.dart';
 
-
-

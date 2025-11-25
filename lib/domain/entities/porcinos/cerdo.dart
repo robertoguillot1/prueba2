@@ -63,5 +63,3 @@ enum FeedingStage {
   engorde,
 }
 
-
-

@@ -33,6 +33,3 @@ class StatusChip extends StatelessWidget {
   }
 }
 
-
-
-

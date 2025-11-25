@@ -142,5 +142,3 @@ class TrabajadoresDataSourceImpl implements TrabajadoresDataSource {
   }
 }
 
-
-

@@ -22,6 +22,14 @@ import '../models/cattle_trip.dart';
 import '../models/milk_production.dart';
 import '../models/reproduction_event.dart';
 import '../models/module_item.dart';
+import '../models/goat_sheep.dart';
+import '../models/pig_vaccine.dart';
+import '../models/goat_sheep_vaccine.dart';
+import '../models/broiler_batch.dart';
+import '../models/layer_batch.dart';
+import '../models/layer_production_record.dart';
+import '../models/batch_expense.dart';
+import '../models/batch_sale.dart';
 // Temporalmente desactivado: import '../services/firestore_service.dart';
 
 class FarmProvider with ChangeNotifier {
@@ -892,6 +900,112 @@ class FarmProvider with ChangeNotifier {
     await updateFarm(updatedFarm);
   }
 
+  // Pig Vaccine management
+  Future<void> addPigVaccine(PigVaccine vaccine, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = List<PigVaccine>.from(farm.pigVaccines);
+    updatedVaccines.add(vaccine);
+    
+    final updatedFarm = farm.copyWith(pigVaccines: updatedVaccines);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updatePigVaccine(PigVaccine vaccine, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = List<PigVaccine>.from(farm.pigVaccines);
+    final index = updatedVaccines.indexWhere((v) => v.id == vaccine.id);
+    
+    if (index != -1) {
+      updatedVaccines[index] = vaccine;
+      final updatedFarm = farm.copyWith(pigVaccines: updatedVaccines);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deletePigVaccine(String vaccineId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = farm.pigVaccines.where((v) => v.id != vaccineId).toList();
+    final updatedFarm = farm.copyWith(pigVaccines: updatedVaccines);
+    await updateFarm(updatedFarm);
+  }
+
+  List<PigVaccine> getPigVaccines(String pigId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return [];
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.pigVaccines
+          .where((v) => v.pigId == pigId)
+          .toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // GoatSheep Vaccine management
+  Future<void> addGoatSheepVaccine(GoatSheepVaccine vaccine, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = List<GoatSheepVaccine>.from(farm.goatSheepVaccines);
+    updatedVaccines.add(vaccine);
+    
+    final updatedFarm = farm.copyWith(goatSheepVaccines: updatedVaccines);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateGoatSheepVaccine(GoatSheepVaccine vaccine, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = List<GoatSheepVaccine>.from(farm.goatSheepVaccines);
+    final index = updatedVaccines.indexWhere((v) => v.id == vaccine.id);
+    
+    if (index != -1) {
+      updatedVaccines[index] = vaccine;
+      final updatedFarm = farm.copyWith(goatSheepVaccines: updatedVaccines);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteGoatSheepVaccine(String vaccineId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedVaccines = farm.goatSheepVaccines.where((v) => v.id != vaccineId).toList();
+    final updatedFarm = farm.copyWith(goatSheepVaccines: updatedVaccines);
+    await updateFarm(updatedFarm);
+  }
+
+  List<GoatSheepVaccine> getGoatSheepVaccines(String animalId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return [];
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.goatSheepVaccines
+          .where((v) => v.animalId == animalId)
+          .toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Cattle Weight Record management
   Future<void> addCattleWeightRecord(CattleWeightRecord record, {String? farmId}) async {
     final targetFarmId = farmId ?? _currentFarm?.id;
@@ -1301,6 +1415,376 @@ class FarmProvider with ChangeNotifier {
       notifyListeners();
     } catch (e, stackTrace) {
       AppLogger.error('Error resetting modules order', e, stackTrace);
+    }
+  }
+
+  // ==================== CONTROL CHIVOS/OVEJAS MANAGEMENT ====================
+  
+  // GoatSheep management
+  Future<void> addGoatSheep(GoatSheep animal, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedGoatSheep = List<GoatSheep>.from(farm.goatSheep);
+    updatedGoatSheep.add(animal);
+    
+    final updatedFarm = farm.copyWith(goatSheep: updatedGoatSheep);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateGoatSheep(GoatSheep animal, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedGoatSheep = List<GoatSheep>.from(farm.goatSheep);
+    final index = updatedGoatSheep.indexWhere((a) => a.id == animal.id);
+    
+    if (index != -1) {
+      updatedGoatSheep[index] = animal;
+      final updatedFarm = farm.copyWith(goatSheep: updatedGoatSheep);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteGoatSheep(String animalId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedGoatSheep = farm.goatSheep.where((a) => a.id != animalId).toList();
+    final updatedFarm = farm.copyWith(goatSheep: updatedGoatSheep);
+    await updateFarm(updatedFarm);
+  }
+
+  GoatSheep? getGoatSheepById(String animalId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return null;
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.goatSheep.firstWhere((a) => a.id == animalId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // BroilerBatch management
+  Future<void> addBroilerBatch(BroilerBatch batch, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = List<BroilerBatch>.from(farm.broilerBatches);
+    updatedBatches.add(batch);
+    
+    final updatedFarm = farm.copyWith(broilerBatches: updatedBatches);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateBroilerBatch(BroilerBatch batch, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = List<BroilerBatch>.from(farm.broilerBatches);
+    final index = updatedBatches.indexWhere((b) => b.id == batch.id);
+    
+    if (index != -1) {
+      updatedBatches[index] = batch;
+      final updatedFarm = farm.copyWith(broilerBatches: updatedBatches);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteBroilerBatch(String batchId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = farm.broilerBatches.where((b) => b.id != batchId).toList();
+    final updatedFarm = farm.copyWith(broilerBatches: updatedBatches);
+    await updateFarm(updatedFarm);
+  }
+
+  BroilerBatch? getBroilerBatchById(String batchId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return null;
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      final batch = farm.broilerBatches.firstWhere((b) => b.id == batchId);
+      
+      // Si el batch está activo y tiene stock, actualizar automáticamente el stock
+      if (batch.estado == BatchStatus.activo && batch.ultimaActualizacionStock != null) {
+        final stockActualizado = batch.stockAlimentoActualKg;
+        // Solo actualizar si hay diferencia significativa (más de 0.1kg)
+        if ((batch.stockAlimentoKg - stockActualizado).abs() > 0.1) {
+          final batchActualizado = batch.copyWith(
+            stockAlimentoKg: stockActualizado,
+            ultimaActualizacionStock: DateTime.now(),
+          );
+          // Actualizar en memoria sin guardar (para no hacer persistencia en cada lectura)
+          final updatedBatches = List<BroilerBatch>.from(farm.broilerBatches);
+          final index = updatedBatches.indexWhere((b) => b.id == batchId);
+          if (index != -1) {
+            updatedBatches[index] = batchActualizado;
+            final updatedFarm = farm.copyWith(broilerBatches: updatedBatches);
+            _farms[_farms.indexWhere((f) => f.id == targetFarmId)] = updatedFarm;
+            notifyListeners();
+          }
+          return batchActualizado;
+        }
+      }
+      
+      return batch;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // LayerBatch management
+  Future<void> addLayerBatch(LayerBatch batch, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = List<LayerBatch>.from(farm.layerBatches);
+    updatedBatches.add(batch);
+    
+    final updatedFarm = farm.copyWith(layerBatches: updatedBatches);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateLayerBatch(LayerBatch batch, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = List<LayerBatch>.from(farm.layerBatches);
+    final index = updatedBatches.indexWhere((b) => b.id == batch.id);
+    
+    if (index != -1) {
+      updatedBatches[index] = batch;
+      final updatedFarm = farm.copyWith(layerBatches: updatedBatches);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteLayerBatch(String batchId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedBatches = farm.layerBatches.where((b) => b.id != batchId).toList();
+    final updatedFarm = farm.copyWith(layerBatches: updatedBatches);
+    await updateFarm(updatedFarm);
+    
+    // Eliminar registros de producción asociados
+    final updatedRecords = farm.layerProductionRecords
+        .where((r) => r.layerBatchId != batchId)
+        .toList();
+    await updateFarm(updatedFarm.copyWith(layerProductionRecords: updatedRecords));
+  }
+
+  LayerBatch? getLayerBatchById(String batchId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return null;
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.layerBatches.firstWhere((b) => b.id == batchId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // LayerProductionRecord management
+  Future<void> addLayerProductionRecord(LayerProductionRecord record, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedRecords = List<LayerProductionRecord>.from(farm.layerProductionRecords);
+    updatedRecords.add(record);
+    
+    final updatedFarm = farm.copyWith(layerProductionRecords: updatedRecords);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateLayerProductionRecord(LayerProductionRecord record, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedRecords = List<LayerProductionRecord>.from(farm.layerProductionRecords);
+    final index = updatedRecords.indexWhere((r) => r.id == record.id);
+    
+    if (index != -1) {
+      updatedRecords[index] = record;
+      final updatedFarm = farm.copyWith(layerProductionRecords: updatedRecords);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteLayerProductionRecord(String recordId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedRecords = farm.layerProductionRecords.where((r) => r.id != recordId).toList();
+    final updatedFarm = farm.copyWith(layerProductionRecords: updatedRecords);
+    await updateFarm(updatedFarm);
+  }
+
+  List<LayerProductionRecord> getLayerProductionRecordsByBatchId(String batchId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return [];
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.layerProductionRecords
+          .where((r) => r.layerBatchId == batchId)
+          .toList()
+        ..sort((a, b) => b.fecha.compareTo(a.fecha));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // BatchExpense management
+  Future<void> addBatchExpense(BatchExpense expense, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedExpenses = List<BatchExpense>.from(farm.batchExpenses);
+    updatedExpenses.add(expense);
+    
+    final updatedFarm = farm.copyWith(batchExpenses: updatedExpenses);
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateBatchExpense(BatchExpense expense, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedExpenses = List<BatchExpense>.from(farm.batchExpenses);
+    final index = updatedExpenses.indexWhere((e) => e.id == expense.id);
+    
+    if (index != -1) {
+      updatedExpenses[index] = expense;
+      final updatedFarm = farm.copyWith(batchExpenses: updatedExpenses);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteBatchExpense(String expenseId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedExpenses = farm.batchExpenses.where((e) => e.id != expenseId).toList();
+    final updatedFarm = farm.copyWith(batchExpenses: updatedExpenses);
+    await updateFarm(updatedFarm);
+  }
+
+  List<BatchExpense> getBatchExpensesByBatchId(String batchId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return [];
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.batchExpenses
+          .where((e) => e.batchId == batchId)
+          .toList()
+        ..sort((a, b) => b.fecha.compareTo(a.fecha));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // BatchSale management
+  Future<void> addBatchSale(BatchSale sale, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedSales = List<BatchSale>.from(farm.batchSales);
+    updatedSales.add(sale);
+    
+    // Marcar el lote como cerrado
+    final updatedBatches = List<BroilerBatch>.from(farm.broilerBatches);
+    final batchIndex = updatedBatches.indexWhere((b) => b.id == sale.batchId);
+    if (batchIndex != -1) {
+      updatedBatches[batchIndex] = updatedBatches[batchIndex].copyWith(
+        estado: BatchStatus.cerrado,
+        updatedAt: DateTime.now(),
+      );
+    }
+    
+    final updatedFarm = farm.copyWith(
+      batchSales: updatedSales,
+      broilerBatches: updatedBatches,
+    );
+    await updateFarm(updatedFarm);
+  }
+
+  Future<void> updateBatchSale(BatchSale sale, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final updatedSales = List<BatchSale>.from(farm.batchSales);
+    final index = updatedSales.indexWhere((s) => s.id == sale.id);
+    
+    if (index != -1) {
+      updatedSales[index] = sale;
+      final updatedFarm = farm.copyWith(batchSales: updatedSales);
+      await updateFarm(updatedFarm);
+    }
+  }
+
+  Future<void> deleteBatchSale(String saleId, {String? farmId}) async {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return;
+    
+    final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+    final sale = farm.batchSales.firstWhere((s) => s.id == saleId);
+    
+    // Si se elimina la venta, reactivar el lote si no hay otras ventas
+    final updatedSales = farm.batchSales.where((s) => s.id != saleId).toList();
+    final otherSalesForBatch = updatedSales.where((s) => s.batchId == sale.batchId).isEmpty;
+    
+    final updatedBatches = List<BroilerBatch>.from(farm.broilerBatches);
+    if (otherSalesForBatch) {
+      final batchIndex = updatedBatches.indexWhere((b) => b.id == sale.batchId);
+      if (batchIndex != -1) {
+        updatedBatches[batchIndex] = updatedBatches[batchIndex].copyWith(
+          estado: BatchStatus.activo,
+          updatedAt: DateTime.now(),
+        );
+      }
+    }
+    
+    final updatedFarm = farm.copyWith(
+      batchSales: updatedSales,
+      broilerBatches: updatedBatches,
+    );
+    await updateFarm(updatedFarm);
+  }
+
+  BatchSale? getBatchSaleByBatchId(String batchId, {String? farmId}) {
+    final targetFarmId = farmId ?? _currentFarm?.id;
+    if (targetFarmId == null) return null;
+    
+    try {
+      final farm = _farms.firstWhere((f) => f.id == targetFarmId);
+      return farm.batchSales.firstWhere((s) => s.batchId == batchId);
+    } catch (e) {
+      return null;
     }
   }
 }

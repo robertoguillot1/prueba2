@@ -92,6 +92,3 @@ class PhotoDisplayWidget extends StatelessWidget {
   }
 }
 
-
-
-

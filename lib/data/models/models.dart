@@ -5,5 +5,3 @@ export 'bovinos/bovinos_models.dart';
 export 'porcinos/porcinos_models.dart';
 export 'trabajadores/trabajadores_models.dart';
 
-
-

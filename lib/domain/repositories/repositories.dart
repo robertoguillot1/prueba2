@@ -18,5 +18,3 @@ export 'trabajadores/tareas_repository.dart';
 export 'trabajadores/asistencia_repository.dart';
 export 'trabajadores/pagos_repository.dart';
 
-
-

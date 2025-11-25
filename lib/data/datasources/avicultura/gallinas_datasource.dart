@@ -142,5 +142,3 @@ class GallinasDataSourceImpl implements GallinasDataSource {
   }
 }
 
-
-

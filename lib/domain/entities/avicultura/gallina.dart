@@ -69,5 +69,3 @@ enum EstadoGallina {
   descartada,
 }
 
-
-

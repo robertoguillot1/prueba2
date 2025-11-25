@@ -25,5 +25,3 @@ abstract class PagosRepository {
   Future<Result<List<Pago>>> getPagosByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
-
-

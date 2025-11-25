@@ -93,5 +93,3 @@ class CerdosRepositoryImpl implements CerdosRepository {
   }
 }
 
-
-

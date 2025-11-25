@@ -25,5 +25,3 @@ abstract class PartosOvejaRepository {
   Future<Result<List<PartoOveja>>> getPartosByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
-
-

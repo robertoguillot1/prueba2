@@ -5,6 +5,3 @@ export 'crecimiento_chart.dart';
 export 'asistencia_mensual_chart.dart';
 export 'pie_chart_widget.dart';
 
-
-
-

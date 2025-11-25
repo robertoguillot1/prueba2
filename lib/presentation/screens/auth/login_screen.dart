@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/di/dependency_injection.dart';
 import '../../../core/utils/result.dart';
 import '../../../domain/entities/auth/usuario.dart';
-import '../../modules/dashboard/screens/dashboard_screen.dart';
-import '../../modules/dashboard/cubits/dashboard_cubit.dart';
+import '../home/home_screen.dart';
 
 /// Pantalla de inicio de sesión
 class LoginScreen extends StatefulWidget {
@@ -49,14 +47,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result.isSuccess) {
       final usuario = (result as Success<Usuario>).data;
-      final farmId = usuario.farmId ?? 'default';
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (_) => DependencyInjection.createDashboardCubit(farmId),
-              child: DashboardScreen(farmId: farmId),
-            ),
+            builder: (_) => HomeScreen(farmId: usuario.farmId ?? 'default'),
           ),
         );
       }

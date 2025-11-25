@@ -171,6 +171,3 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
-
-
-

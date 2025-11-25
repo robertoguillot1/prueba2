@@ -138,6 +138,3 @@ class ProduccionDiariaChart extends StatelessWidget {
   }
 }
 
-
-
-

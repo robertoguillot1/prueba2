@@ -28,5 +28,3 @@ abstract class ProduccionHuevosRepository {
   Future<Result<List<ProduccionHuevos>>> getProduccionesByFecha(String farmId, DateTime fechaInicio, DateTime fechaFin);
 }
 
-
-

@@ -58,5 +58,3 @@ enum TareaEstado {
   cancelada,
 }
 
-
-

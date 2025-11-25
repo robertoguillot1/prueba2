@@ -60,5 +60,3 @@ class UsuarioModel extends Usuario {
   }
 }
 
-
-

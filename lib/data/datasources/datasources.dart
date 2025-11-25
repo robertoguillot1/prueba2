@@ -9,5 +9,3 @@ export 'bovinos/produccion_leche_datasource.dart';
 export 'porcinos/cerdos_datasource.dart';
 export 'trabajadores/trabajadores_datasource.dart';
 
-
-

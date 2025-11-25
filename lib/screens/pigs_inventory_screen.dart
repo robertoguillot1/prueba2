@@ -4,6 +4,7 @@ import '../providers/farm_provider.dart';
 import '../models/farm.dart';
 import '../models/pig.dart';
 import 'pig_form_screen.dart';
+import 'pig_profile_screen.dart';
 
 class PigsInventoryScreen extends StatefulWidget {
   final Farm farm;
@@ -174,9 +175,9 @@ class _PigsInventoryScreenState extends State<PigsInventoryScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PigFormScreen(
+              builder: (context) => PigProfileScreen(
                 farm: farm,
-                pigToEdit: pig,
+                pig: pig,
               ),
             ),
           );
@@ -295,9 +296,9 @@ class _PigsInventoryScreenState extends State<PigsInventoryScreen> {
     switch (stage) {
       case FeedingStage.inicio:
         return Colors.green;
-      case FeedingStage.desarrollo:
+      case FeedingStage.levante:
         return Colors.orange;
-      case FeedingStage.finalizacion:
+      case FeedingStage.engorde:
         return Colors.red;
     }
   }

@@ -136,5 +136,3 @@ class RegistrosPesoOvejaDataSourceImpl implements RegistrosPesoOvejaDataSource {
   }
 }
 
-
-
