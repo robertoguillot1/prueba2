@@ -79,6 +79,15 @@ import '../../presentation/cubits/auth/auth_cubit.dart';
 import '../../presentation/modules/dashboard/cubits/dashboard_cubit.dart';
 import '../../presentation/modules/farms/cubits/farms_cubit.dart';
 import '../../presentation/modules/farms/cubits/farm_form_cubit.dart';
+// Cattle Module (Clean Architecture)
+import '../../features/cattle/data/datasources/cattle_remote_datasource.dart';
+import '../../features/cattle/data/repositories/cattle_repository_impl.dart';
+import '../../features/cattle/domain/repositories/cattle_repository.dart';
+import '../../features/cattle/domain/usecases/get_cattle_list.dart';
+import '../../features/cattle/domain/usecases/get_bovine.dart';
+import '../../features/cattle/domain/usecases/add_bovine.dart';
+import '../../features/cattle/domain/usecases/update_bovine.dart';
+import '../../features/cattle/domain/usecases/delete_bovine.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -225,6 +234,25 @@ class DependencyInjection {
 
     // FARMS - Use Cases (no se registran como singleton porque necesitan userId)
     // Se crearán directamente en los factory methods
+
+    // CATTLE - Data Source
+    sl.registerLazySingleton<CattleRemoteDataSource>(
+      () => CattleRemoteDataSourceImpl(),
+    );
+
+    // CATTLE - Repository
+    sl.registerLazySingleton<CattleRepository>(
+      () => CattleRepositoryImpl(
+        remoteDataSource: sl<CattleRemoteDataSource>(),
+      ),
+    );
+
+    // CATTLE - Use Cases
+    sl.registerLazySingleton(() => GetCattleList(sl<CattleRepository>()));
+    sl.registerLazySingleton(() => GetBovine(sl<CattleRepository>()));
+    sl.registerLazySingleton(() => AddBovine(sl<CattleRepository>()));
+    sl.registerLazySingleton(() => UpdateBovine(sl<CattleRepository>()));
+    sl.registerLazySingleton(() => DeleteBovine(sl<CattleRepository>()));
   }
   
   // Getters para Data Sources
