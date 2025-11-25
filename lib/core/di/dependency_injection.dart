@@ -67,8 +67,18 @@ import '../../domain/usecases/porcinos/get_cerdos_stream.dart';
 import '../../domain/usecases/ovinos/get_ovejas_stream.dart';
 import '../../domain/usecases/avicultura/get_gallinas_stream.dart';
 import '../../domain/usecases/trabajadores/get_trabajadores_stream.dart';
+import '../../domain/repositories/farm_repository.dart';
+import '../../domain/usecases/farm/get_farms_stream.dart';
+import '../../domain/usecases/farm/create_farm.dart';
+import '../../domain/usecases/farm/update_farm.dart';
+import '../../domain/usecases/farm/delete_farm.dart';
+import '../../domain/usecases/farm/set_current_farm.dart';
+import '../../data/datasources/remote/farm/farm_remote_datasource.dart';
+import '../../data/repositories/farm_repository_impl.dart';
 import '../../presentation/cubits/auth/auth_cubit.dart';
 import '../../presentation/modules/dashboard/cubits/dashboard_cubit.dart';
+import '../../presentation/modules/farms/cubits/farms_cubit.dart';
+import '../../presentation/modules/farms/cubits/farm_form_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -200,6 +210,21 @@ class DependencyInjection {
         signOutUseCase: sl<SignOut>(),
       ),
     );
+
+    // FARMS - Data Source
+    sl.registerLazySingleton<FarmRemoteDataSource>(
+      () => FarmFirebaseDataSource(),
+    );
+
+    // FARMS - Repository
+    sl.registerLazySingleton<FarmRepository>(
+      () => FarmRepositoryImpl(
+        remoteDataSource: sl<FarmRemoteDataSource>(),
+      ),
+    );
+
+    // FARMS - Use Cases (no se registran como singleton porque necesitan userId)
+    // Se crearán directamente en los factory methods
   }
   
   // Getters para Data Sources
@@ -263,6 +288,28 @@ class DependencyInjection {
     );
   }
   
+  /// Crea una instancia de FarmsCubit para un usuario
+  static FarmsCubit createFarmsCubit(String userId) {
+    return FarmsCubit(
+      getFarmsStream: GetFarmsStream(
+        repository: sl<FarmRepository>(),
+        userId: userId,
+      ),
+      deleteFarmUseCase: DeleteFarm(sl<FarmRepository>()),
+      setCurrentFarmUseCase: SetCurrentFarm(sl<FarmRepository>()),
+      userId: userId,
+    );
+  }
+
+  /// Crea una instancia de FarmFormCubit para un usuario
+  static FarmFormCubit createFarmFormCubit(String userId) {
+    return FarmFormCubit(
+      createFarmUseCase: CreateFarm(sl<FarmRepository>()),
+      updateFarmUseCase: UpdateFarm(sl<FarmRepository>()),
+      userId: userId,
+    );
+  }
+
   /// Crea una instancia de DashboardCubit con todos los streams necesarios
   static DashboardCubit createDashboardCubit(String farmId) {
     return DashboardCubit(
