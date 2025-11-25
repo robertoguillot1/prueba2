@@ -193,8 +193,8 @@ class DependencyInjection {
     sl.registerFactory(
       () => AuthCubit(
         getCurrentUser: sl<GetCurrentUser>(),
-        signIn: sl<SignIn>(),
-        signOut: sl<SignOut>(),
+        signInUseCase: sl<SignIn>(),
+        signOutUseCase: sl<SignOut>(),
       ),
     );
   }

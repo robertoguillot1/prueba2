@@ -8,13 +8,13 @@ import 'auth_state.dart';
 /// Cubit para manejar el estado de autenticación
 class AuthCubit extends Cubit<AuthState> {
   final GetCurrentUser getCurrentUser;
-  final SignIn signIn;
-  final SignOut signOut;
+  final SignIn signInUseCase;
+  final SignOut signOutUseCase;
 
   AuthCubit({
     required this.getCurrentUser,
-    required this.signIn,
-    required this.signOut,
+    required this.signInUseCase,
+    required this.signOutUseCase,
   }) : super(const AuthInitial());
 
   /// Verifica el estado de autenticación actual
@@ -41,7 +41,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(const AuthLoading());
     try {
-      await signIn.call(email: email, password: password);
+      await signInUseCase.call(email: email, password: password);
       // Después de iniciar sesión, obtener el usuario actual
       final user = await getCurrentUser.call();
       if (user != null) {
@@ -58,7 +58,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// Emite Unauthenticated después de cerrar sesión
   Future<void> signOut() async {
     try {
-      await signOut.call();
+      await signOutUseCase.call();
       emit(const Unauthenticated());
     } catch (e) {
       emit(AuthError('Error al cerrar sesión: $e'));
