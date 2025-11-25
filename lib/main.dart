@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -11,11 +12,15 @@ import 'providers/farm_provider.dart';
 // Nuevos providers y tema
 import 'core/providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
-import 'core/di/dependency_injection.dart';
+import 'core/di/dependency_injection.dart' as di;
 
-// Screens existentes
-import 'screens/login_screen.dart';
-import 'screens/main_navigation_screen.dart';
+// Auth - Cubit y Estados
+import 'presentation/cubits/auth/auth_cubit.dart';
+import 'presentation/cubits/auth/auth_state.dart';
+
+// Screens
+import 'presentation/screens/auth/login_screen.dart';
+import 'presentation/modules/dashboard/screens/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +37,7 @@ void main() async {
   
   // Inicializar Dependency Injection
   try {
-    await DependencyInjection.init();
+    await di.DependencyInjection.init();
   } catch (e) {
     debugPrint('Error inicializando Dependency Injection: $e');
   }
@@ -62,9 +67,17 @@ class MyApp extends StatelessWidget {
         // Nuevo ThemeProvider
         ChangeNotifierProvider.value(value: themeProvider),
         // AuthService como Provider (si se necesita acceso desde widgets)
-        Provider.value(value: DependencyInjection.authService),
+        Provider.value(value: di.DependencyInjection.authService),
       ],
-      child: const AppWithAuthSync(),
+      child: MultiBlocProvider(
+        providers: [
+          // AuthCubit - verifica el estado de autenticación al iniciar
+          BlocProvider<AuthCubit>(
+            create: (_) => di.sl<AuthCubit>()..checkAuthStatus(),
+          ),
+        ],
+        child: const AppWithAuthSync(),
+      ),
     );
   }
 }
@@ -153,9 +166,28 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
           themeMode: themeProvider.isSystemMode 
               ? ThemeMode.system 
               : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
-          home: authProvider.isAuthenticated
-              ? const MainNavigationScreen()
-              : const LoginScreen(),
+          home: BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              // Si está autenticado, mostrar Dashboard
+              if (authState is Authenticated) {
+                return DashboardScreen(farmId: 'default');
+              }
+              
+              // Si no está autenticado o hay error, mostrar Login
+              if (authState is Unauthenticated || authState is AuthError) {
+                return const LoginScreen();
+              }
+              
+              // Para cualquier otro estado (AuthLoading, AuthInitial), mostrar loading
+              return Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(
+                    color: primaryColor,
+                  ),
+                ),
+              );
+            },
+          ),
           debugShowCheckedModeBanner: false,
         );
       },

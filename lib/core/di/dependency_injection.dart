@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/datasources/ovinos/ovejas_datasource.dart';
 import '../../data/datasources/bovinos/bovinos_datasource.dart';
 import '../../data/datasources/porcinos/cerdos_datasource.dart';
@@ -54,6 +56,15 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/photo_service.dart';
 import '../../core/services/report_service.dart';
 import '../../data/database/app_database.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/auth/get_current_user.dart';
+import '../../domain/usecases/auth/sign_in.dart';
+import '../../domain/usecases/auth/sign_out.dart';
+import '../../presentation/cubits/auth/auth_cubit.dart';
+
+/// Instancia global de GetIt para inyección de dependencias
+final GetIt sl = GetIt.instance;
 
 /// Clase para inyección de dependencias (Dependency Injection)
 class DependencyInjection {
@@ -157,6 +168,29 @@ class DependencyInjection {
     _cerdosRepository = CerdosRepositoryImpl(_cerdosDataSource!);
     _trabajadoresRepository = TrabajadoresRepositoryImpl(_trabajadoresDataSource!);
     _gallinasRepository = GallinasRepositoryImpl(_gallinasDataSource!);
+    
+    // ========== REGISTRO CON GET_IT ==========
+    // CORE - Firebase Auth
+    sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+    
+    // AUTH - Repositorio
+    sl.registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(firebaseAuth: sl<FirebaseAuth>()),
+    );
+    
+    // AUTH - Casos de Uso
+    sl.registerLazySingleton(() => GetCurrentUser(sl<AuthRepository>()));
+    sl.registerLazySingleton(() => SignIn(sl<AuthRepository>()));
+    sl.registerLazySingleton(() => SignOut(sl<AuthRepository>()));
+    
+    // AUTH - Cubit (Factory para crear nueva instancia cada vez)
+    sl.registerFactory(
+      () => AuthCubit(
+        getCurrentUser: sl<GetCurrentUser>(),
+        signIn: sl<SignIn>(),
+        signOut: sl<SignOut>(),
+      ),
+    );
   }
   
   // Getters para Data Sources
