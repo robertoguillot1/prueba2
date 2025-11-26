@@ -261,6 +261,7 @@ class DependencyInjection {
       () => BovinoFormCubit(
         addBovineUseCase: sl<AddBovine>(),
         updateBovineUseCase: sl<UpdateBovine>(),
+        deleteBovineUseCase: sl<DeleteBovine>(),
       ),
     );
   }

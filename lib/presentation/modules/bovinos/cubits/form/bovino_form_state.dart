@@ -19,7 +19,7 @@ class BovinoFormLoading extends BovinoFormState {
   const BovinoFormLoading();
 }
 
-/// Estado de éxito
+/// Estado de éxito (crear/editar)
 class BovinoFormSuccess extends BovinoFormState {
   final BovineEntity bovine;
   final bool isEdit; // true si fue edición, false si fue creación
@@ -31,6 +31,16 @@ class BovinoFormSuccess extends BovinoFormState {
 
   @override
   List<Object?> get props => [bovine, isEdit];
+}
+
+/// Estado de éxito al eliminar
+class BovinoFormDeleted extends BovinoFormState {
+  final String message;
+
+  const BovinoFormDeleted({this.message = 'Bovino eliminado exitosamente'});
+
+  @override
+  List<Object?> get props => [message];
 }
 
 /// Estado de error

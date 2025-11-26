@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../core/di/dependency_injection.dart' as di;
+import '../cubits/form/bovino_form_cubit.dart';
+import '../cubits/form/bovino_form_state.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de detalle/perfil de un Bovino
@@ -16,6 +20,36 @@ class BovinoDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => di.sl<BovinoFormCubit>(),
+      child: BlocListener<BovinoFormCubit, BovinoFormState>(
+        listener: (context, state) {
+          if (state is BovinoFormDeleted) {
+            // Mostrar mensaje de éxito
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Cerrar pantalla y regresar a la lista con resultado true
+            Navigator.pop(context, true);
+          } else if (state is BovinoFormError) {
+            // Mostrar mensaje de error
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: _buildDetailContent(context),
+      ),
+    );
+  }
+
+  Widget _buildDetailContent(BuildContext context) {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -66,6 +100,13 @@ class BovinoDetailScreen extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 280,
       pinned: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.delete, color: Colors.red),
+          onPressed: () => _showDeleteConfirmation(context),
+          tooltip: 'Eliminar bovino',
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -471,6 +512,50 @@ class BovinoDetailScreen extends StatelessWidget {
       // para que la lista se actualice
       Navigator.pop(context, true);
     }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Eliminar Bovino?'),
+        content: Text(
+          'Esta acción no se puede deshacer. ¿Estás seguro de eliminar a ${bovine.identifier}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
+          ),
+          BlocBuilder<BovinoFormCubit, BovinoFormState>(
+            builder: (context, state) {
+              final isLoading = state is BovinoFormLoading;
+              
+              return TextButton(
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        // Cerrar el diálogo
+                        Navigator.pop(dialogContext);
+                        // Llamar al método delete del cubit
+                        context.read<BovinoFormCubit>().delete(bovine.id);
+                      },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Eliminar'),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   // Helpers para obtener labels, colores e iconos

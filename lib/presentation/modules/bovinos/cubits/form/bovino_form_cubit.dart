@@ -2,12 +2,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../../../../../features/cattle/domain/usecases/add_bovine.dart';
 import '../../../../../features/cattle/domain/usecases/update_bovine.dart';
+import '../../../../../features/cattle/domain/usecases/delete_bovine.dart';
 import 'bovino_form_state.dart';
 
-/// Cubit para manejar el formulario de Bovino (Crear/Editar)
+/// Cubit para manejar el formulario de Bovino (Crear/Editar/Eliminar)
 class BovinoFormCubit extends Cubit<BovinoFormState> {
   final AddBovine addBovineUseCase;
   final UpdateBovine updateBovineUseCase;
+  final DeleteBovine deleteBovineUseCase;
 
   BovineEntity? _currentBovine; // Almacena el bovino en modo edición
   bool get isEditMode => _currentBovine != null;
@@ -15,6 +17,7 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
   BovinoFormCubit({
     required this.addBovineUseCase,
     required this.updateBovineUseCase,
+    required this.deleteBovineUseCase,
   }) : super(const BovinoFormInitial());
 
   /// Inicializa el formulario
@@ -174,6 +177,37 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
         isEdit: true,
       )),
     );
+  }
+
+  /// Elimina un bovino
+  Future<void> delete(String bovineId) async {
+    // Guardar el estado actual
+    final currentState = state;
+    
+    emit(const BovinoFormLoading());
+
+    try {
+      final result = await deleteBovineUseCase.call(DeleteBovineParams(id: bovineId));
+
+      result.fold(
+        (failure) {
+          emit(BovinoFormError(failure.message));
+          // Restaurar el estado anterior después de un error
+          if (currentState is BovinoFormLoaded) {
+            emit(currentState);
+          }
+        },
+        (_) {
+          emit(const BovinoFormDeleted());
+        },
+      );
+    } catch (e) {
+      emit(BovinoFormError('Error inesperado al eliminar bovino: $e'));
+      // Restaurar el estado anterior
+      if (currentState is BovinoFormLoaded) {
+        emit(currentState);
+      }
+    }
   }
 
   /// Resetea el formulario
