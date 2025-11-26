@@ -7,6 +7,7 @@ import '../cubits/form/bovino_form_cubit.dart';
 import '../cubits/form/bovino_form_state.dart';
 import '../details/tabs/reproduction_tab.dart';
 import '../details/tabs/production_tab.dart';
+import '../details/tabs/health_tab.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de detalle/perfil de un Bovino
@@ -343,36 +344,9 @@ class BovinoDetailScreen extends StatelessWidget {
 
   // TAB 4: SANIDAD
   Widget _buildHealthTab(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.medical_services_outlined,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Próximamente',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Aquí podrás ver el historial de vacunas, tratamientos y chequeos veterinarios',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+    return HealthTab(
+      bovine: bovine,
+      farmId: farmId,
     );
   }
 

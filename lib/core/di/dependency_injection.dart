@@ -111,6 +111,13 @@ import '../../domain/usecases/bovinos/add_milk_production.dart';
 import '../../domain/usecases/bovinos/add_weight_record.dart';
 import '../../presentation/modules/bovinos/details/cubits/production_cubit.dart';
 import '../../presentation/modules/bovinos/details/cubits/production_form_cubit.dart';
+// Sanidad (Vacunas)
+import '../../features/cattle/domain/repositories/vacuna_bovino_repository.dart';
+import '../../features/cattle/domain/usecases/get_vacunas_by_bovino.dart';
+import '../../features/cattle/domain/usecases/add_vacuna_bovino.dart';
+import '../../features/cattle/data/repositories/vacuna_bovino_repository_impl.dart';
+import '../../features/cattle/data/datasources/vacuna_bovino_remote_datasource.dart';
+import '../../presentation/modules/bovinos/details/cubits/health_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -158,6 +165,7 @@ class DependencyInjection {
   static EventosReproductivosRepository? _eventosReproductivosRepository;
   static ProduccionLecheRepository? _produccionLecheRepository;
   static PesoBovinoRepository? _pesoBovinoRepository;
+  static VacunaBovinoRepository? _vacunaBovinoRepository;
   
   /// Inicializa todas las dependencias
   static Future<void> init() async {
@@ -229,6 +237,9 @@ class DependencyInjection {
     _eventosReproductivosRepository = EventosReproductivosRepositoryImpl(_eventosReproductivosDataSource!);
     _produccionLecheRepository = ProduccionLecheRepositoryImpl(_produccionLecheDataSource!);
     _pesoBovinoRepository = PesoBovinoRepositoryImpl(_pesoBovinoDataSource!);
+    // Vacunas Bovino (Firestore)
+    final vacunaBovinoDataSource = VacunaBovinoRemoteDataSourceImpl();
+    _vacunaBovinoRepository = VacunaBovinoRepositoryImpl(vacunaBovinoDataSource);
     
     // ========== REGISTRO CON GET_IT ==========
     // CORE - Firebase Auth
@@ -454,6 +465,14 @@ class DependencyInjection {
     return ProductionFormCubit(
       addMilkProduction: AddMilkProduction(_produccionLecheRepository!),
       addWeightRecord: AddWeightRecord(_pesoBovinoRepository!),
+    );
+  }
+
+  /// Crea una instancia de HealthCubit
+  static HealthCubit createHealthCubit() {
+    return HealthCubit(
+      getVacunas: GetVacunasByBovino(_vacunaBovinoRepository!),
+      addVacuna: AddVacunaBovino(_vacunaBovinoRepository!),
     );
   }
   
