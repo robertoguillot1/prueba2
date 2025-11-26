@@ -163,7 +163,7 @@ class DashboardCubit extends Cubit<DashboardState> {
     for (final bovine in _cattle) {
       // ALERTA CRÍTICA: Bajo Peso en Bovinos Activos
       // Si el bovino está activo y tiene peso menor a 180kg -> Alerta crítica
-      if (bovine.status.toLowerCase() == 'activo' && bovine.weight != null && bovine.weight! < 180.0) {
+      if (bovine.status == BovineStatus.active && bovine.weight != null && bovine.weight! < 180.0) {
         alerts.add(DashboardAlert(
           title: 'Bajo Peso Crítico',
           message: '${bovine.identifier} (${bovine.name ?? 'Sin nombre'}) tiene solo ${bovine.weight?.toStringAsFixed(1)}kg',
@@ -174,7 +174,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       }
 
       // ALERTA DE ADVERTENCIA: Peso bajo pero no crítico (entre 180kg y 250kg)
-      if (bovine.status.toLowerCase() == 'activo' && 
+      if (bovine.status == BovineStatus.active && 
           bovine.weight != null && 
           bovine.weight! >= 180.0 && 
           bovine.weight! < 250.0) {
@@ -188,7 +188,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       }
 
       // ALERTA INFORMATIVA: Bovinos próximos a edad de venta (> 2 años y > 400kg)
-      if (bovine.status.toLowerCase() == 'activo' && 
+      if (bovine.status == BovineStatus.active && 
           bovine.age >= 2 && 
           bovine.weight != null && 
           bovine.weight! >= 400.0) {
