@@ -369,3 +369,4 @@ El formulario de bovinos está **100% funcional** y listo para usar. Puedes:
 
 **Próximo paso:** Actualiza `CattleListScreen` para navegar al formulario cuando se presione el FAB o se toque una tarjeta.
 
+

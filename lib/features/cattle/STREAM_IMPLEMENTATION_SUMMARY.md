@@ -197,3 +197,4 @@ Ahora la lista de bovinos se actualiza automáticamente cuando:
 
 **¡Disfruta de tu app con sincronización en tiempo real!** 🎊
 
+

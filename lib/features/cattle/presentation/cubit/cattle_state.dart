@@ -53,3 +53,4 @@ class CattleError extends CattleState {
   List<Object?> get props => [message];
 }
 
+

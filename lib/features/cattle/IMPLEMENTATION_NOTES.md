@@ -219,3 +219,4 @@ BlocConsumer<CattleCubit, CattleState>(
 - [ ] Implementar paginación para listas grandes
 - [ ] Agregar caché local para modo offline
 
+

@@ -64,3 +64,4 @@ class DashboardAlert extends Equatable {
   List<Object?> get props => [title, message, type, route, routeArguments];
 }
 
+

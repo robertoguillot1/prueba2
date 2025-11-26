@@ -370,3 +370,4 @@ El módulo de bovinos está **100% funcional** con:
 
 **¡Listo para producción!** 🚀
 
+

@@ -97,3 +97,4 @@ class VacunaBovinoEntity extends Equatable {
       ];
 }
 
+
