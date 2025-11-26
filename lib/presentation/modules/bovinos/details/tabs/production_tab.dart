@@ -8,6 +8,8 @@ import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../cubits/production_cubit.dart';
 import '../forms/milk_production_form_screen.dart';
 import '../forms/weight_record_form_screen.dart';
+import '../../widgets/leche_diaria_chart.dart';
+import '../../widgets/peso_chart.dart';
 
 /// Pestaña de Producción en el detalle del bovino
 class ProductionTab extends StatelessWidget {
@@ -177,8 +179,8 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Gráfico placeholder
-        _buildChartPlaceholder(context, 'Producción de Leche'),
+        // Gráfico de producción de leche
+        LecheDiariaChart(registros: records),
         const SizedBox(height: 24),
 
         // Estadísticas
@@ -208,8 +210,8 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Gráfico placeholder
-        _buildChartPlaceholder(context, 'Evolución del Peso'),
+        // Gráfico de evolución de peso
+        PesoChart(registros: records),
         const SizedBox(height: 24),
 
         // Estadísticas
@@ -226,40 +228,6 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
 
         const SizedBox(height: 80), // Espacio para el FAB
       ],
-    );
-  }
-
-  /// Placeholder del gráfico
-  Widget _buildChartPlaceholder(BuildContext context, String title) {
-    return Card(
-      child: Container(
-        height: 200,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.show_chart,
-              size: 64,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Gráfico disponible próximamente',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

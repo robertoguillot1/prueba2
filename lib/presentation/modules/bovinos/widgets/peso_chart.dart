@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../../../../domain/entities/bovinos/produccion_leche.dart';
+import '../../../../domain/entities/bovinos/peso_bovino.dart';
 
-/// Widget de gráfico para producción diaria de leche
-class LecheDiariaChart extends StatelessWidget {
-  final List<ProduccionLeche> registros;
+/// Widget de gráfico para evolución de peso
+class PesoChart extends StatelessWidget {
+  final List<PesoBovino> registros;
 
-  const LecheDiariaChart({
+  const PesoChart({
     super.key,
     required this.registros,
   });
@@ -20,7 +20,7 @@ class LecheDiariaChart extends StatelessWidget {
     }
 
     // Preparar datos para el gráfico
-    final sortedData = List<ProduccionLeche>.from(registros);
+    final sortedData = List<PesoBovino>.from(registros);
     sortedData.sort((a, b) => a.recordDate.compareTo(b.recordDate));
 
     // Tomar los últimos 10 registros
@@ -38,16 +38,19 @@ class LecheDiariaChart extends StatelessWidget {
             // Título
             Row(
               children: [
-                Icon(Icons.local_drink, color: Colors.blue.shade600, size: 20),
+                Icon(Icons.show_chart, color: Colors.green.shade600, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Producción de Leche (Últimos ${displayData.length} registros)',
+                  'Evolución del Peso (Últimos ${displayData.length} registros)',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            // Indicador de ganancia
+            _buildGainIndicator(context, displayData),
             const SizedBox(height: 20),
 
             // Gráfico
@@ -61,19 +64,54 @@ class LecheDiariaChart extends StatelessWidget {
     );
   }
 
+  /// Indicador de ganancia total en el periodo
+  Widget _buildGainIndicator(BuildContext context, List<PesoBovino> data) {
+    final firstWeight = data.first.weight;
+    final lastWeight = data.last.weight;
+    final gain = lastWeight - firstWeight;
+    final isPositive = gain >= 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPositive ? Icons.trending_up : Icons.trending_down,
+            size: 16,
+            color: isPositive ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '${isPositive ? '+' : ''}${gain.toStringAsFixed(1)} kg en este periodo',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isPositive ? Colors.green.shade700 : Colors.red.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Construye los datos del gráfico
   LineChartData _buildLineChartData(
-    List<ProduccionLeche> data,
+    List<PesoBovino> data,
     BuildContext context,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Calcular valores min y max para el eje Y
-    final litersValues = data.map((r) => r.litersProduced).toList();
-    final minY = litersValues.reduce((a, b) => a < b ? a : b);
-    final maxY = litersValues.reduce((a, b) => a > b ? a : b);
+    final weightValues = data.map((r) => r.weight).toList();
+    final minY = weightValues.reduce((a, b) => a < b ? a : b);
+    final maxY = weightValues.reduce((a, b) => a > b ? a : b);
 
-    // Agregar margen al eje Y
+    // Agregar margen al eje Y (20%)
     final yMargin = (maxY - minY) * 0.2;
     final chartMinY = (minY - yMargin).clamp(0.0, double.infinity).toDouble();
     final chartMaxY = (maxY + yMargin).toDouble();
@@ -82,7 +120,7 @@ class LecheDiariaChart extends StatelessWidget {
     final spots = data.asMap().entries.map((entry) {
       return FlSpot(
         entry.key.toDouble(),
-        entry.value.litersProduced,
+        entry.value.weight,
       );
     }).toList();
 
@@ -128,11 +166,11 @@ class LecheDiariaChart extends StatelessWidget {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 40,
+            reservedSize: 45,
             interval: (chartMaxY - chartMinY) / 5,
             getTitlesWidget: (value, meta) {
               return Text(
-                '${value.toStringAsFixed(1)}L',
+                '${value.toStringAsFixed(0)} kg',
                 style: TextStyle(
                   fontSize: 10,
                   color: Colors.grey.shade600,
@@ -157,17 +195,19 @@ class LecheDiariaChart extends StatelessWidget {
         LineChartBarData(
           spots: spots,
           isCurved: true,
-          color: Colors.blue,
+          color: Colors.green,
           barWidth: 3,
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
             getDotPainter: (spot, percent, barData, index) {
+              // Resaltar el último punto (más reciente)
+              final isLast = index == data.length - 1;
               return FlDotCirclePainter(
-                radius: 4,
+                radius: isLast ? 6 : 4,
                 color: Colors.white,
                 strokeWidth: 2,
-                strokeColor: Colors.blue,
+                strokeColor: isLast ? Colors.green.shade700 : Colors.green,
               );
             },
           ),
@@ -175,8 +215,8 @@ class LecheDiariaChart extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                Colors.blue.withOpacity(0.3),
-                Colors.blue.withOpacity(0.05),
+                Colors.green.withOpacity(0.3),
+                Colors.green.withOpacity(0.05),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -190,8 +230,18 @@ class LecheDiariaChart extends StatelessWidget {
           getTooltipItems: (touchedSpots) {
             return touchedSpots.map((spot) {
               final date = data[spot.x.toInt()].recordDate;
+              final weight = spot.y;
+              
+              // Calcular ganancia si no es el primer punto
+              String gainText = '';
+              if (spot.x.toInt() > 0) {
+                final previousWeight = data[spot.x.toInt() - 1].weight;
+                final gain = weight - previousWeight;
+                gainText = '\n${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(1)} kg';
+              }
+              
               return LineTooltipItem(
-                '${DateFormat('dd/MM').format(date)}\n${spot.y.toStringAsFixed(1)}L',
+                '${DateFormat('dd/MM').format(date)}\n${weight.toStringAsFixed(1)} kg$gainText',
                 const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -228,7 +278,7 @@ class LecheDiariaChart extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Registra al menos 2 producciones de leche para ver la tendencia',
+              'Registra al menos 2 pesajes para ver la evolución del peso',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey.shade500,
                   ),
@@ -240,3 +290,4 @@ class LecheDiariaChart extends StatelessWidget {
     );
   }
 }
+
