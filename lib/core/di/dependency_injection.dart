@@ -98,6 +98,16 @@ import '../../domain/usecases/bovinos/get_eventos_reproductivos_by_bovino.dart';
 import '../../domain/usecases/bovinos/create_evento_reproductivo.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproduction_cubit.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproductive_event_form_cubit.dart';
+// Producción (Leche y Peso)
+import '../../domain/repositories/bovinos/produccion_leche_repository.dart';
+import '../../domain/repositories/bovinos/peso_bovino_repository.dart';
+import '../../data/repositories_impl/bovinos/produccion_leche_repository_impl.dart';
+import '../../data/repositories_impl/bovinos/peso_bovino_repository_impl.dart';
+import '../../data/datasources/bovinos/produccion_leche_datasource.dart';
+import '../../data/datasources/bovinos/peso_bovino_datasource.dart';
+import '../../domain/usecases/bovinos/get_producciones_leche_by_bovino.dart';
+import '../../domain/usecases/bovinos/get_pesos_by_bovino.dart';
+import '../../presentation/modules/bovinos/details/cubits/production_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -133,6 +143,8 @@ class DependencyInjection {
   static TrabajadoresDataSource? _trabajadoresDataSource;
   static GallinasDataSource? _gallinasDataSource;
   static EventosReproductivosDataSource? _eventosReproductivosDataSource;
+  static ProduccionLecheDataSource? _produccionLecheDataSource;
+  static PesoBovinoDataSource? _pesoBovinoDataSource;
   
   // Repositories
   static OvejasRepository? _ovejasRepository;
@@ -141,6 +153,8 @@ class DependencyInjection {
   static TrabajadoresRepository? _trabajadoresRepository;
   static GallinasRepository? _gallinasRepository;
   static EventosReproductivosRepository? _eventosReproductivosRepository;
+  static ProduccionLecheRepository? _produccionLecheRepository;
+  static PesoBovinoRepository? _pesoBovinoRepository;
   
   /// Inicializa todas las dependencias
   static Future<void> init() async {
@@ -200,6 +214,8 @@ class DependencyInjection {
     _trabajadoresDataSource = TrabajadoresDataSourceImpl(_sharedPreferences!);
     _gallinasDataSource = GallinasDataSourceImpl(_sharedPreferences!);
     _eventosReproductivosDataSource = EventosReproductivosDataSourceImpl(_sharedPreferences!);
+    _produccionLecheDataSource = ProduccionLecheDataSourceImpl(_sharedPreferences!);
+    _pesoBovinoDataSource = PesoBovinoDataSourceImpl(_sharedPreferences!);
     
     // Inicializar Repositories
     _ovejasRepository = OvejasRepositoryImpl(_ovejasDataSource!);
@@ -208,6 +224,8 @@ class DependencyInjection {
     _trabajadoresRepository = TrabajadoresRepositoryImpl(_trabajadoresDataSource!);
     _gallinasRepository = GallinasRepositoryImpl(_gallinasDataSource!);
     _eventosReproductivosRepository = EventosReproductivosRepositoryImpl(_eventosReproductivosDataSource!);
+    _produccionLecheRepository = ProduccionLecheRepositoryImpl(_produccionLecheDataSource!);
+    _pesoBovinoRepository = PesoBovinoRepositoryImpl(_pesoBovinoDataSource!);
     
     // ========== REGISTRO CON GET_IT ==========
     // CORE - Firebase Auth
@@ -417,6 +435,14 @@ class DependencyInjection {
   static ReproductiveEventFormCubit createReproductiveEventFormCubit() {
     return ReproductiveEventFormCubit(
       createEvento: CreateEventoReproductivo(_eventosReproductivosRepository!),
+    );
+  }
+
+  /// Crea una instancia de ProductionCubit
+  static ProductionCubit createProductionCubit() {
+    return ProductionCubit(
+      getProduccionesLeche: GetProduccionesLecheByBovino(_produccionLecheRepository!),
+      getPesos: GetPesosByBovino(_pesoBovinoRepository!),
     );
   }
   
