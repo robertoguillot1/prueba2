@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: Usuario autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Usuario es dueño del recurso
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Usuarios: Solo pueden leer/escribir sus propios datos
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+
+      // Fincas del usuario
+      match /farms/{farmId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update, delete: if isOwner(userId);
+
+        // Bovinos de la finca
+        match /bovinos/{bovinoId} {
+          allow read, write: if isOwner(userId);
+
+          // Subcolecciones de bovinos
+          match /{subcollection=**} {
+            allow read, write: if isOwner(userId);
+          }
+        }
+      }
+    }
+  }
+}
