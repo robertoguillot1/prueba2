@@ -169,14 +169,37 @@ class FarmsListScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           // Establecer como finca actual y navegar al dashboard
-          context.read<FarmsCubit>().setCurrentFarm(farm.id).then((_) {
+          try {
+            await context.read<FarmsCubit>().setCurrentFarm(farm.id);
+            
+            if (!context.mounted) return;
+            
+            // Navegar al dashboard con el farmId
             Navigator.of(context).pushReplacementNamed(
               '/dashboard',
               arguments: {'farmId': farm.id},
             );
-          });
+          } catch (e) {
+            if (!context.mounted) return;
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.white),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text('Error al seleccionar la finca'),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

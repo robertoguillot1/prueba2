@@ -78,8 +78,10 @@ class FarmsCubit extends Cubit<FarmsState> {
   Future<void> setCurrentFarm(String farmId) async {
     try {
       await setCurrentFarmUseCase.call(userId, farmId);
+      // No emitir estado aquí, la navegación se maneja en la UI
     } catch (e) {
       emit(FarmsError('Error al establecer la finca actual: $e'));
+      rethrow; // Re-lanzar el error para que la UI pueda manejarlo
     }
   }
 

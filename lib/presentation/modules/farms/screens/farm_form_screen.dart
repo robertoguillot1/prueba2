@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/farm/farm.dart';
@@ -19,29 +20,6 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
   final _nameController = TextEditingController();
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
-  int _selectedColor = 0xFF4CAF50; // Verde por defecto
-
-  // Lista de colores disponibles
-  final List<int> _availableColors = [
-    0xFF4CAF50, // Verde
-    0xFF2196F3, // Azul
-    0xFF9C27B0, // Morado
-    0xFFF44336, // Rojo
-    0xFFFF9800, // Naranja
-    0xFF00BCD4, // Cyan
-    0xFF795548, // Marrón
-    0xFF607D8B, // Azul Gris
-    0xFFE91E63, // Rosa
-    0xFF3F51B5, // Índigo
-    0xFF009688, // Teal
-    0xFFFFC107, // Ámbar
-    0xFFFF5722, // Naranja Oscuro
-    0xFF03A9F4, // Azul Claro
-    0xFF8BC34A, // Verde Claro
-    0xFF673AB7, // Morado Oscuro
-    0xFF9E9E9E, // Gris
-    0xFF795548, // Marrón
-  ];
 
   @override
   void initState() {
@@ -50,7 +28,6 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
       _nameController.text = widget.farm!.name;
       _locationController.text = widget.farm!.location ?? '';
       _descriptionController.text = widget.farm!.description ?? '';
-      _selectedColor = widget.farm!.primaryColor;
     }
   }
 
@@ -68,7 +45,10 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
     final cubit = context.read<FarmFormCubit>();
 
     if (widget.farm == null) {
-      // Crear nueva finca
+      // Crear nueva finca - Generar color aleatorio
+      final random = Random();
+      final randomColor = Colors.primaries[random.nextInt(Colors.primaries.length)].value;
+      
       cubit.createFarm(
         name: _nameController.text.trim(),
         location: _locationController.text.trim().isEmpty
@@ -77,10 +57,10 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
         description: _descriptionController.text.trim().isEmpty
             ? null
             : _descriptionController.text.trim(),
-        primaryColor: _selectedColor,
+        primaryColor: randomColor,
       );
     } else {
-      // Actualizar finca existente
+      // Actualizar finca existente - Mantener color original
       cubit.updateFarm(
         farm: widget.farm!,
         name: _nameController.text.trim(),
@@ -90,7 +70,7 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
         description: _descriptionController.text.trim().isEmpty
             ? null
             : _descriptionController.text.trim(),
-        primaryColor: _selectedColor,
+        primaryColor: widget.farm!.primaryColor, // Mantener color original
       );
     }
   }
@@ -110,33 +90,35 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
       body: BlocListener<FarmFormCubit, FarmFormState>(
         listener: (context, state) {
           if (state is FarmFormSuccess) {
-            // Mostrar mensaje de éxito
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        widget.farm == null
-                            ? 'Finca creada exitosamente'
-                            : 'Finca actualizada exitosamente',
-                      ),
+            // Cerrar la pantalla inmediatamente y retornar true
+            Navigator.pop(context, true);
+            
+            // Mostrar mensaje de éxito después de cerrar
+            Future.microtask(() {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            widget.farm == null
+                                ? '¡Finca creada exitosamente!'
+                                : '¡Finca actualizada exitosamente!',
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            );
-            // Cerrar la pantalla después de mostrar el mensaje
-            Future.delayed(const Duration(milliseconds: 100), () {
-              if (mounted) {
-                Navigator.pop(context, true);
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                );
               }
             });
           } else if (state is FarmFormError) {
@@ -270,116 +252,39 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
                               fillColor: isDark
                                   ? Colors.grey.shade800
                                   : Colors.grey.shade50,
-                            ),
-                            maxLines: 3,
                           ),
-                          const SizedBox(height: 32),
-
-                          // Selector de color - Grid de círculos
-                          Text(
-                            'Color Principal',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          maxLines: 3,
                           ),
                           const SizedBox(height: 16),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 6,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1,
-                            ),
-                            itemCount: _availableColors.length,
-                            itemBuilder: (context, index) {
-                              final colorValue = _availableColors[index];
-                              final isSelected = _selectedColor == colorValue;
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedColor = colorValue;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(colorValue),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Colors.black
-                                          : Colors.grey.shade400,
-                                      width: isSelected ? 3 : 1.5,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: Color(colorValue).withOpacity(0.5),
-                                              blurRadius: 8,
-                                              spreadRadius: 2,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: isSelected
-                                      ? const Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 20,
-                                        )
-                                      : null,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 32),
 
-                          // Vista previa del color seleccionado
+                          // Información sobre el color
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Color(_selectedColor).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: Color(_selectedColor).withOpacity(0.3),
-                                width: 2,
+                                color: primaryColor.withOpacity(0.3),
+                                width: 1,
                               ),
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Color(_selectedColor),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2,
-                                    ),
-                                  ),
+                                Icon(
+                                  Icons.palette,
+                                  size: 20,
+                                  color: primaryColor,
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Color seleccionado',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '#${_selectedColor.toRadixString(16).toUpperCase()}',
-                                        style: theme.textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(_selectedColor),
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    widget.farm == null
+                                        ? 'Se asignará un color automáticamente'
+                                        : 'El color de la finca se mantendrá',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey.shade700,
+                                      fontStyle: FontStyle.italic,
+                                    ),
                                   ),
                                 ),
                               ],
