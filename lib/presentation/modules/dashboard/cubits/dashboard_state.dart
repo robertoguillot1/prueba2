@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../models/dashboard_alert.dart';
 
 /// Estados del Dashboard
 abstract class DashboardState extends Equatable {
@@ -27,7 +28,7 @@ class DashboardLoaded extends DashboardState {
   final int totalOvejas;
   final int totalGallinas;
   final int totalTrabajadores;
-  final List<String> alertas;
+  final List<DashboardAlert> alerts; // Cambiado de alertas (String) a alerts (DashboardAlert)
 
   const DashboardLoaded({
     required this.totalBovinos,
@@ -35,7 +36,7 @@ class DashboardLoaded extends DashboardState {
     required this.totalOvejas,
     required this.totalGallinas,
     required this.totalTrabajadores,
-    required this.alertas,
+    required this.alerts,
   });
 
   @override
@@ -45,7 +46,7 @@ class DashboardLoaded extends DashboardState {
         totalOvejas,
         totalGallinas,
         totalTrabajadores,
-        alertas,
+        alerts,
       ];
 }
 

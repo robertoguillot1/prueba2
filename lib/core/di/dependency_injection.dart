@@ -354,6 +354,7 @@ class DependencyInjection {
   /// Crea una instancia de DashboardCubit con todos los streams necesarios
   static DashboardCubit createDashboardCubit(String farmId) {
     return DashboardCubit(
+      farmId: farmId,
       getBovinosStream: GetBovinosStream(
         repository: _bovinosRepository!,
         farmId: farmId,
@@ -374,6 +375,7 @@ class DependencyInjection {
         repository: _trabajadoresRepository!,
         farmId: farmId,
       ),
+      cattleRepository: sl(), // Inyectamos el CattleRepository del nuevo sistema
     );
   }
 

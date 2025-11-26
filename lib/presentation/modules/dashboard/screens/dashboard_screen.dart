@@ -6,6 +6,7 @@ import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/widgets/theme_switcher.dart';
 import '../cubits/dashboard_cubit.dart';
 import '../cubits/dashboard_state.dart';
+import '../models/dashboard_alert.dart';
 import '../widgets/summary_card_widget.dart';
 import '../../bovinos/screens/bovino_menu_screen.dart';
 import '../../porcinos/screens/porcicultura_menu_screen.dart';
@@ -135,7 +136,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 24),
 
           // Sección de Alertas
-          _buildAlertasSection(context, state.alertas),
+          _buildAlertasSection(context, state.alerts),
           const SizedBox(height: 24),
 
           // Resumen de Inventario
@@ -242,27 +243,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAlertasSection(BuildContext context, List<String> alertas) {
-    if (alertas.isEmpty) {
+  Widget _buildAlertasSection(BuildContext context, List<DashboardAlert> alerts) {
+    // Si no hay alertas, mostrar mensaje positivo
+    if (alerts.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.green.shade200),
+          gradient: LinearGradient(
+            colors: [Colors.green.shade50, Colors.green.shade100],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.green.shade300, width: 2),
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green.shade700, size: 32),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.shade700,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle, color: Colors.white, size: 32),
+            ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                'Todo opera con normalidad',
-                style: TextStyle(
-                  color: Colors.green.shade900,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Todo en orden en la finca',
+                    style: TextStyle(
+                      color: Colors.green.shade900,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'No hay alertas prioritarias',
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -270,55 +294,176 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.warning, color: Colors.orange.shade700, size: 28),
-              const SizedBox(width: 8),
-              Text(
-                'Alertas',
+    // Separar alertas por tipo
+    final criticalAlerts = alerts.where((a) => a.type == AlertType.critical).toList();
+    final warningAlerts = alerts.where((a) => a.type == AlertType.warning).toList();
+    final infoAlerts = alerts.where((a) => a.type == AlertType.info).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Título de la sección
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.priority_high, color: Colors.red.shade700, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Alertas Prioritarias',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${alerts.length}',
                 style: TextStyle(
-                  color: Colors.orange.shade900,
+                  color: Colors.red.shade900,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...alertas.map((alerta) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Lista de alertas críticas
+        if (criticalAlerts.isNotEmpty) ...[
+          ...criticalAlerts.map((alert) => _buildAlertCard(context, alert)),
+          const SizedBox(height: 8),
+        ],
+
+        // Lista de alertas de advertencia
+        if (warningAlerts.isNotEmpty) ...[
+          ...warningAlerts.map((alert) => _buildAlertCard(context, alert)),
+          const SizedBox(height: 8),
+        ],
+
+        // Lista de alertas informativas
+        if (infoAlerts.isNotEmpty) ...[
+          ...infoAlerts.map((alert) => _buildAlertCard(context, alert)),
+        ],
+      ],
+    );
+  }
+
+  /// Construye una tarjeta individual de alerta
+  Widget _buildAlertCard(BuildContext context, DashboardAlert alert) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: alert.type == AlertType.critical ? 4 : 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: alert.color.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: InkWell(
+        onTap: alert.route != null
+            ? () {
+                // Navegar a la ruta especificada si existe
+                Navigator.pushNamed(
+                  context,
+                  alert.route!,
+                  arguments: alert.routeArguments,
+                );
+              }
+            : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icono de la alerta
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: alert.color.withOpacity(isDark ? 0.3 : 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  alert.icon,
+                  color: alert.color,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Contenido de la alerta
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.orange.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        alerta,
-                        style: TextStyle(
-                          color: Colors.orange.shade900,
-                          fontSize: 14,
+                    // Etiqueta del tipo + Título
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: alert.color.withOpacity(isDark ? 0.3 : 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            alert.typeLabel.toUpperCase(),
+                            style: TextStyle(
+                              color: alert.color,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      alert.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      alert.message,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey.shade700,
+                          ),
                     ),
                   ],
                 ),
-              )),
-        ],
+              ),
+
+              // Flecha de navegación (solo si tiene ruta)
+              if (alert.route != null) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey.shade400,
+                  size: 24,
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
