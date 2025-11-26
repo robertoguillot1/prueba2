@@ -89,39 +89,48 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
       ),
       body: BlocListener<FarmFormCubit, FarmFormState>(
         listener: (context, state) {
+          print('🟣 [FarmFormScreen] BlocListener - Estado recibido: ${state.runtimeType}');
+          
           if (state is FarmFormSuccess) {
-            // Cerrar la pantalla inmediatamente y retornar true
-            Navigator.pop(context, true);
+            print('✅ [FarmFormScreen] FarmFormSuccess detectado - Cerrando INMEDIATAMENTE');
             
-            // Mostrar mensaje de éxito después de cerrar
+            // CRÍTICO: Cerrar la pantalla PRIMERO (sin delay)
+            // El `true` indica que se creó/actualizó exitosamente
+            Navigator.of(context).pop(true);
+            print('✅ [FarmFormScreen] Navigator.pop(true) ejecutado');
+            
+            // Mostrar SnackBar en la pantalla anterior (usando Future.microtask)
             Future.microtask(() {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: Colors.white),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            widget.farm == null
-                                ? '¡Finca creada exitosamente!'
-                                : '¡Finca actualizada exitosamente!',
-                          ),
+              // Verificar que el contexto todavía esté montado
+              if (!context.mounted) return;
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.farm == null
+                              ? '¡Finca creada exitosamente!'
+                              : '¡Finca actualizada exitosamente!',
                         ),
-                      ],
-                    ),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+              print('✅ [FarmFormScreen] SnackBar mostrado en pantalla anterior');
             });
           } else if (state is FarmFormError) {
+            print('❌ [FarmFormScreen] FarmFormError detectado: ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(

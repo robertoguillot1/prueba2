@@ -170,20 +170,32 @@ class FarmsListScreen extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () async {
-          // Establecer como finca actual y navegar al dashboard
+          // DEBUG: Verificar que el tap se detecta
+          print('🔵 [DEBUG] TAP DETECTADO en finca: ${farm.name} (ID: ${farm.id})');
+          
           try {
+            // Establecer como finca actual
+            print('🔵 [DEBUG] Intentando setCurrentFarm...');
             await context.read<FarmsCubit>().setCurrentFarm(farm.id);
+            print('✅ [DEBUG] setCurrentFarm completado');
             
-            if (!context.mounted) return;
+            if (!context.mounted) {
+              print('⚠️ [DEBUG] Context no montado, abortando navegación');
+              return;
+            }
             
-            // Navegar al dashboard eliminando el historial previo
-            // Esto evita que el usuario regrese a la lista con el botón atrás
+            // Navegar al dashboard
+            print('🔵 [DEBUG] Intentando navegar a /dashboard con farmId: ${farm.id}');
             Navigator.of(context).pushNamedAndRemoveUntil(
               '/dashboard',
               (route) => false,
               arguments: {'farmId': farm.id},
             );
-          } catch (e) {
+            print('✅ [DEBUG] Navegación iniciada');
+          } catch (e, stackTrace) {
+            print('❌ [DEBUG] Error en navegación: $e');
+            print('❌ [DEBUG] StackTrace: $stackTrace');
+            
             if (!context.mounted) return;
             
             ScaffoldMessenger.of(context).showSnackBar(

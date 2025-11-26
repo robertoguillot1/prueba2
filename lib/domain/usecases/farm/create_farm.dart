@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../entities/farm/farm.dart';
 import '../../repositories/farm_repository.dart';
 
@@ -7,9 +8,26 @@ class CreateFarm {
 
   CreateFarm(this.repository);
 
-  /// Crea una nueva finca
+  /// Crea una nueva finca con timeout de 30 segundos
   Future<Farm> call(Farm farm) async {
-    return await repository.createFarm(farm);
+    debugPrint('🔵 [CreateFarm UseCase] Iniciando creación de finca: ${farm.name}');
+    
+    try {
+      final result = await repository.createFarm(farm).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          debugPrint('⏱️ [CreateFarm UseCase] TIMEOUT - Firebase no respondió en 30s');
+          throw Exception('Timeout: La operación tardó demasiado. Verifica tu conexión a internet.');
+        },
+      );
+      
+      debugPrint('✅ [CreateFarm UseCase] Finca creada exitosamente - ID: ${result.id}');
+      return result;
+    } catch (e, stackTrace) {
+      debugPrint('❌ [CreateFarm UseCase] Error: $e');
+      debugPrint('❌ [CreateFarm UseCase] StackTrace: $stackTrace');
+      rethrow;
+    }
   }
 }
 

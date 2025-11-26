@@ -76,10 +76,14 @@ class FarmsCubit extends Cubit<FarmsState> {
 
   /// Establece la finca actual
   Future<void> setCurrentFarm(String farmId) async {
+    print('🟢 [FarmsCubit] setCurrentFarm iniciado - farmId: $farmId, userId: $userId');
     try {
       await setCurrentFarmUseCase.call(userId, farmId);
+      print('✅ [FarmsCubit] setCurrentFarm completado exitosamente');
       // No emitir estado aquí, la navegación se maneja en la UI
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [FarmsCubit] Error en setCurrentFarm: $e');
+      print('❌ [FarmsCubit] StackTrace: $stackTrace');
       emit(FarmsError('Error al establecer la finca actual: $e'));
       rethrow; // Re-lanzar el error para que la UI pueda manejarlo
     }

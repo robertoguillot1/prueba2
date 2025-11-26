@@ -24,7 +24,10 @@ class FarmFormCubit extends Cubit<FarmFormState> {
     String? imageUrl,
     int primaryColor = 0xFF4CAF50, // Verde por defecto
   }) async {
+    print('🟢 [FarmFormCubit] createFarm iniciado - name: $name');
     emit(const FarmFormLoading());
+    print('🟡 [FarmFormCubit] Estado emitido: FarmFormLoading');
+    
     try {
       final farm = Farm(
         id: '', // Se generará en el datasource
@@ -37,10 +40,17 @@ class FarmFormCubit extends Cubit<FarmFormState> {
         createdAt: DateTime.now(),
       );
 
+      print('🔵 [FarmFormCubit] Llamando a createFarmUseCase...');
       final createdFarm = await createFarmUseCase.call(farm);
+      print('✅ [FarmFormCubit] Finca creada exitosamente - ID: ${createdFarm.id}');
+      
       emit(FarmFormSuccess(createdFarm));
-    } catch (e) {
+      print('✅ [FarmFormCubit] Estado emitido: FarmFormSuccess');
+    } catch (e, stackTrace) {
+      print('❌ [FarmFormCubit] Error al crear finca: $e');
+      print('❌ [FarmFormCubit] StackTrace: $stackTrace');
       emit(FarmFormError('Error al crear la finca: $e'));
+      print('🔴 [FarmFormCubit] Estado emitido: FarmFormError');
     }
   }
 
@@ -53,7 +63,10 @@ class FarmFormCubit extends Cubit<FarmFormState> {
     String? imageUrl,
     int? primaryColor,
   }) async {
+    print('🟢 [FarmFormCubit] updateFarm iniciado - farmId: ${farm.id}');
     emit(const FarmFormLoading());
+    print('🟡 [FarmFormCubit] Estado emitido: FarmFormLoading');
+    
     try {
       final updatedFarm = farm.copyWith(
         name: name ?? farm.name,
@@ -64,10 +77,17 @@ class FarmFormCubit extends Cubit<FarmFormState> {
         updatedAt: DateTime.now(),
       );
 
+      print('🔵 [FarmFormCubit] Llamando a updateFarmUseCase...');
       final savedFarm = await updateFarmUseCase.call(updatedFarm);
+      print('✅ [FarmFormCubit] Finca actualizada exitosamente - ID: ${savedFarm.id}');
+      
       emit(FarmFormSuccess(savedFarm));
-    } catch (e) {
+      print('✅ [FarmFormCubit] Estado emitido: FarmFormSuccess');
+    } catch (e, stackTrace) {
+      print('❌ [FarmFormCubit] Error al actualizar finca: $e');
+      print('❌ [FarmFormCubit] StackTrace: $stackTrace');
       emit(FarmFormError('Error al actualizar la finca: $e'));
+      print('🔴 [FarmFormCubit] Estado emitido: FarmFormError');
     }
   }
 

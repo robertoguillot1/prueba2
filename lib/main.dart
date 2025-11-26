@@ -171,7 +171,35 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
                   ? ThemeMode.system 
                   : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
               initialRoute: initialRoute,
-              onGenerateRoute: AppRouter.onGenerateRoute,
+              routes: AppRouter.getRoutes(), // ✅ Mapa de rutas básicas
+              onGenerateRoute: AppRouter.onGenerateRoute, // ✅ Fallback para rutas con argumentos
+              onUnknownRoute: (settings) {
+                // Manejo de rutas no encontradas
+                debugPrint('❌ [main.dart] Ruta no encontrada: ${settings.name}');
+                return MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(
+                      title: const Text('Error'),
+                      backgroundColor: Colors.red,
+                    ),
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                          const SizedBox(height: 16),
+                          Text('Ruta no encontrada: ${settings.name}'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(_).pushReplacementNamed('/'),
+                            child: const Text('Volver al inicio'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
               debugShowCheckedModeBanner: false,
             );
           },
