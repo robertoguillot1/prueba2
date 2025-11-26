@@ -6,7 +6,8 @@ import '../../../../core/di/dependency_injection.dart';
 import '../viewmodels/bovinos_viewmodel.dart';
 import '../widgets/bovino_tile.dart';
 import '../create/bovino_create_screen.dart';
-import '../details/bovino_details_screen.dart';
+import '../screens/bovino_detail_screen.dart';
+import '../mappers/bovino_mapper.dart';
 
 /// Pantalla de lista de Bovinos
 class BovinosListScreen extends StatefulWidget {
@@ -69,15 +70,19 @@ class _BovinosListScreenState extends State<BovinosListScreen> {
   }
 
   void _navigateToDetails(bovino) {
+    // Convertir el Bovino viejo a BovineEntity nuevo usando el mapper
+    final bovineEntity = BovinoMapper.toEntity(bovino);
+    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider.value(
-          value: _viewModel,
-          child: BovinoDetailsScreen(bovino: bovino, farmId: widget.farmId),
+        builder: (_) => BovinoDetailScreen(
+          bovine: bovineEntity,
+          farmId: widget.farmId,
         ),
       ),
     ).then((result) {
+      // Recargar la lista al volver por si se editó algo en el detalle
       if (result == true) {
         _refreshData();
       }

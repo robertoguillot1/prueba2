@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
 import '../../../../presentation/modules/bovinos/screens/bovino_form_screen.dart';
+import '../../../../presentation/modules/bovinos/screens/bovino_detail_screen.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../cubit/cattle_cubit.dart';
 import '../cubit/cattle_state.dart';
@@ -195,15 +196,15 @@ class CattleListScreen extends StatelessWidget {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BovinoFormScreen(
+        builder: (_) => BovinoDetailScreen(
+          bovine: bovine,
           farmId: farmId,
-          bovine: bovine, // Pasar el bovino para editar
         ),
       ),
     );
 
     if (result == true && context.mounted) {
-      // Recargar la lista después de editar
+      // Recargar la lista si hubo cambios desde la pantalla de detalle
       context.read<CattleCubit>().loadCattle(farmId);
     }
   }

@@ -21,7 +21,7 @@ class BovinoFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => di.DependencyInjection.createBovinoFormCubit()
+      create: (_) => di.sl<BovinoFormCubit>()
         ..initialize(bovine),
       child: _BovinoFormContent(
         bovine: bovine,

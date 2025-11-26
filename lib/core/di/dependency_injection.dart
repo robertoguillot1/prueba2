@@ -255,6 +255,14 @@ class DependencyInjection {
     sl.registerLazySingleton(() => AddBovine(sl<CattleRepository>()));
     sl.registerLazySingleton(() => UpdateBovine(sl<CattleRepository>()));
     sl.registerLazySingleton(() => DeleteBovine(sl<CattleRepository>()));
+
+    // CATTLE - Cubit de Formulario (Factory para crear nueva instancia cada vez)
+    sl.registerFactory(
+      () => BovinoFormCubit(
+        addBovineUseCase: sl<AddBovine>(),
+        updateBovineUseCase: sl<UpdateBovine>(),
+      ),
+    );
   }
   
   // Getters para Data Sources
@@ -377,14 +385,6 @@ class DependencyInjection {
       updateBovineUseCase: sl<UpdateBovine>(),
       deleteBovineUseCase: sl<DeleteBovine>(),
       repository: sl<CattleRepository>(),
-    );
-  }
-
-  /// Crea una instancia de BovinoFormCubit para el formulario
-  static BovinoFormCubit createBovinoFormCubit() {
-    return BovinoFormCubit(
-      addBovineUseCase: sl<AddBovine>(),
-      updateBovineUseCase: sl<UpdateBovine>(),
     );
   }
   
