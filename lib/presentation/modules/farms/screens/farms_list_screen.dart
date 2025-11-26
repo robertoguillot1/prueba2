@@ -176,9 +176,11 @@ class FarmsListScreen extends StatelessWidget {
             
             if (!context.mounted) return;
             
-            // Navegar al dashboard con el farmId
-            Navigator.of(context).pushReplacementNamed(
+            // Navegar al dashboard eliminando el historial previo
+            // Esto evita que el usuario regrese a la lista con el botón atrás
+            Navigator.of(context).pushNamedAndRemoveUntil(
               '/dashboard',
+              (route) => false,
               arguments: {'farmId': farm.id},
             );
           } catch (e) {
@@ -190,13 +192,14 @@ class FarmsListScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.error_outline, color: Colors.white),
                     const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text('Error al seleccionar la finca'),
+                    Expanded(
+                      child: Text('Error al seleccionar la finca: $e'),
                     ),
                   ],
                 ),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 3),
               ),
             );
           }
