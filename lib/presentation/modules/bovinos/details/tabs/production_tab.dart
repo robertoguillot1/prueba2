@@ -6,6 +6,8 @@ import '../../../../../domain/entities/bovinos/produccion_leche.dart';
 import '../../../../../domain/entities/bovinos/peso_bovino.dart';
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../cubits/production_cubit.dart';
+import '../forms/milk_production_form_screen.dart';
+import '../forms/weight_record_form_screen.dart';
 
 /// Pestaña de Producción en el detalle del bovino
 class ProductionTab extends StatelessWidget {
@@ -585,24 +587,44 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
     );
   }
 
-  /// Mostrar diálogo para agregar producción de leche
-  void _showAddMilkDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Formulario de registro de leche en desarrollo'),
-        duration: Duration(seconds: 2),
+  /// Mostrar formulario para agregar producción de leche
+  void _showAddMilkDialog() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MilkProductionFormScreen(
+          bovine: widget.bovine,
+          farmId: widget.farmId,
+        ),
       ),
     );
+
+    if (result == true && context.mounted) {
+      context.read<ProductionCubit>().refresh(
+            bovineId: widget.bovine.id,
+            farmId: widget.farmId,
+          );
+    }
   }
 
-  /// Mostrar diálogo para agregar peso
-  void _showAddWeightDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Formulario de registro de peso en desarrollo'),
-        duration: Duration(seconds: 2),
+  /// Mostrar formulario para agregar peso
+  void _showAddWeightDialog() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WeightRecordFormScreen(
+          bovine: widget.bovine,
+          farmId: widget.farmId,
+        ),
       ),
     );
+
+    if (result == true && context.mounted) {
+      context.read<ProductionCubit>().refresh(
+            bovineId: widget.bovine.id,
+            farmId: widget.farmId,
+          );
+    }
   }
 }
 

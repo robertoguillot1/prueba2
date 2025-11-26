@@ -107,7 +107,10 @@ import '../../data/datasources/bovinos/produccion_leche_datasource.dart';
 import '../../data/datasources/bovinos/peso_bovino_datasource.dart';
 import '../../domain/usecases/bovinos/get_producciones_leche_by_bovino.dart';
 import '../../domain/usecases/bovinos/get_pesos_by_bovino.dart';
+import '../../domain/usecases/bovinos/add_milk_production.dart';
+import '../../domain/usecases/bovinos/add_weight_record.dart';
 import '../../presentation/modules/bovinos/details/cubits/production_cubit.dart';
+import '../../presentation/modules/bovinos/details/cubits/production_form_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -443,6 +446,14 @@ class DependencyInjection {
     return ProductionCubit(
       getProduccionesLeche: GetProduccionesLecheByBovino(_produccionLecheRepository!),
       getPesos: GetPesosByBovino(_pesoBovinoRepository!),
+    );
+  }
+
+  /// Crea una instancia de ProductionFormCubit
+  static ProductionFormCubit createProductionFormCubit() {
+    return ProductionFormCubit(
+      addMilkProduction: AddMilkProduction(_produccionLecheRepository!),
+      addWeightRecord: AddWeightRecord(_pesoBovinoRepository!),
     );
   }
   
