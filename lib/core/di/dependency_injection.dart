@@ -90,6 +90,14 @@ import '../../features/cattle/domain/usecases/add_bovine.dart';
 import '../../features/cattle/domain/usecases/update_bovine.dart';
 import '../../features/cattle/domain/usecases/delete_bovine.dart';
 import '../../features/cattle/presentation/cubit/cattle_cubit.dart';
+// Eventos Reproductivos (Sistema Viejo)
+import '../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
+import '../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
+import '../../data/datasources/bovinos/eventos_reproductivos_datasource.dart';
+import '../../domain/usecases/bovinos/get_eventos_reproductivos_by_bovino.dart';
+import '../../domain/usecases/bovinos/create_evento_reproductivo.dart';
+import '../../presentation/modules/bovinos/details/cubits/reproduction_cubit.dart';
+import '../../presentation/modules/bovinos/details/cubits/reproductive_event_form_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -124,6 +132,7 @@ class DependencyInjection {
   static CerdosDataSource? _cerdosDataSource;
   static TrabajadoresDataSource? _trabajadoresDataSource;
   static GallinasDataSource? _gallinasDataSource;
+  static EventosReproductivosDataSource? _eventosReproductivosDataSource;
   
   // Repositories
   static OvejasRepository? _ovejasRepository;
@@ -131,6 +140,7 @@ class DependencyInjection {
   static CerdosRepository? _cerdosRepository;
   static TrabajadoresRepository? _trabajadoresRepository;
   static GallinasRepository? _gallinasRepository;
+  static EventosReproductivosRepository? _eventosReproductivosRepository;
   
   /// Inicializa todas las dependencias
   static Future<void> init() async {
@@ -189,6 +199,7 @@ class DependencyInjection {
     _cerdosDataSource = CerdosDataSourceImpl(_sharedPreferences!);
     _trabajadoresDataSource = TrabajadoresDataSourceImpl(_sharedPreferences!);
     _gallinasDataSource = GallinasDataSourceImpl(_sharedPreferences!);
+    _eventosReproductivosDataSource = EventosReproductivosDataSourceImpl(_sharedPreferences!);
     
     // Inicializar Repositories
     _ovejasRepository = OvejasRepositoryImpl(_ovejasDataSource!);
@@ -196,6 +207,7 @@ class DependencyInjection {
     _cerdosRepository = CerdosRepositoryImpl(_cerdosDataSource!);
     _trabajadoresRepository = TrabajadoresRepositoryImpl(_trabajadoresDataSource!);
     _gallinasRepository = GallinasRepositoryImpl(_gallinasDataSource!);
+    _eventosReproductivosRepository = EventosReproductivosRepositoryImpl(_eventosReproductivosDataSource!);
     
     // ========== REGISTRO CON GET_IT ==========
     // CORE - Firebase Auth
@@ -388,6 +400,23 @@ class DependencyInjection {
       updateBovineUseCase: sl<UpdateBovine>(),
       deleteBovineUseCase: sl<DeleteBovine>(),
       repository: sl<CattleRepository>(),
+    );
+  }
+
+  /// Crea una instancia de ReproductionCubit para un bovino específico
+  static ReproductionCubit createReproductionCubit(String farmId) {
+    return ReproductionCubit(
+      getEventos: GetEventosReproductivosByBovino(
+        repository: _eventosReproductivosRepository!,
+        farmId: farmId,
+      ),
+    );
+  }
+
+  /// Crea una instancia de ReproductiveEventFormCubit
+  static ReproductiveEventFormCubit createReproductiveEventFormCubit() {
+    return ReproductiveEventFormCubit(
+      createEvento: CreateEventoReproductivo(_eventosReproductivosRepository!),
     );
   }
   

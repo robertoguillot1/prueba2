@@ -5,6 +5,7 @@ import '../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
 import '../cubits/form/bovino_form_cubit.dart';
 import '../cubits/form/bovino_form_state.dart';
+import '../details/tabs/reproduction_tab.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de detalle/perfil de un Bovino
@@ -324,36 +325,9 @@ class BovinoDetailScreen extends StatelessWidget {
 
   // TAB 2: REPRODUCCIÓN
   Widget _buildReproductionTab(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.favorite_outline,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Próximamente',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Aquí podrás ver el historial de partos, gestaciones y reproducción del animal',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+    return ReproductionTab(
+      bovine: bovine,
+      farmId: farmId,
     );
   }
 
