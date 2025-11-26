@@ -87,7 +87,13 @@ class _ReproductiveEventFormContentState
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context, true); // Retorna true para indicar éxito
+          
+          // Si fue un parto, ofrecer registrar la cría
+          if (_selectedType == TipoEventoReproductivo.parto) {
+            _showRegisterOffspringDialog(context);
+          } else {
+            Navigator.pop(context, true); // Retorna true para indicar éxito
+          }
         } else if (state is ReproductiveEventFormError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -549,6 +555,67 @@ class _ReproductiveEventFormContentState
         return Icons.cancel;
       case TipoEventoReproductivo.secado:
         return Icons.water_drop;
+    }
+  }
+
+  /// Muestra diálogo para registrar la cría nacida
+  Future<void> _showRegisterOffspringDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.child_care, color: Colors.green),
+            SizedBox(width: 12),
+            Text('Registro de Cría'),
+          ],
+        ),
+        content: const Text(
+          '¿Desea registrar la cría nacida ahora mismo?\n\n'
+          'Se prellenará automáticamente la fecha de nacimiento y la madre.',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Después'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.add),
+            label: const Text('Registrar Ahora'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!context.mounted) return;
+
+    if (result == true) {
+      // Usuario aceptó registrar la cría
+      // Navegar al formulario de bovino con datos prellenados
+      final registered = await Navigator.pushNamed(
+        context,
+        '/bovinos/form',
+        arguments: {
+          'farmId': widget.bovine.farmId,
+          'initialMotherId': widget.bovine.id,
+          'initialBirthDate': _selectedDate,
+        },
+      );
+
+      if (!context.mounted) return;
+
+      // Volver a la pantalla anterior después de registrar (o cancelar)
+      Navigator.pop(context, registered ?? true);
+    } else {
+      // Usuario eligió "Después"
+      Navigator.pop(context, true);
     }
   }
 }

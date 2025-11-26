@@ -14,6 +14,8 @@ class BovineEntity extends Equatable {
   final BovineStatus status; // activo/vendido/muerto
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String? motherId; // ID de la madre (genealogía)
+  final String? fatherId; // ID del padre (genealogía)
 
   const BovineEntity({
     required this.id,
@@ -28,6 +30,8 @@ class BovineEntity extends Equatable {
     required this.status,
     required this.createdAt,
     this.updatedAt,
+    this.motherId,
+    this.fatherId,
   });
 
   /// Calcula la edad del bovino en años basada en birthDate
@@ -55,6 +59,8 @@ class BovineEntity extends Equatable {
     BovineStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? motherId,
+    String? fatherId,
   }) {
     return BovineEntity(
       id: id ?? this.id,
@@ -69,6 +75,8 @@ class BovineEntity extends Equatable {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      motherId: motherId ?? this.motherId,
+      fatherId: fatherId ?? this.fatherId,
     );
   }
 
@@ -96,6 +104,8 @@ class BovineEntity extends Equatable {
         status,
         createdAt,
         updatedAt,
+        motherId,
+        fatherId,
       ];
 }
 

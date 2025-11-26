@@ -11,11 +11,15 @@ import '../cubits/form/bovino_form_state.dart';
 class BovinoFormScreen extends StatelessWidget {
   final BovineEntity? bovine; // null = crear, no null = editar
   final String farmId;
+  final String? initialMotherId; // Pre-llenar madre (para crías desde parto)
+  final DateTime? initialBirthDate; // Pre-llenar fecha de nacimiento
 
   const BovinoFormScreen({
     super.key,
     this.bovine,
     required this.farmId,
+    this.initialMotherId,
+    this.initialBirthDate,
   });
 
   @override
@@ -26,6 +30,8 @@ class BovinoFormScreen extends StatelessWidget {
       child: _BovinoFormContent(
         bovine: bovine,
         farmId: farmId,
+        initialMotherId: initialMotherId,
+        initialBirthDate: initialBirthDate,
       ),
     );
   }
@@ -34,10 +40,14 @@ class BovinoFormScreen extends StatelessWidget {
 class _BovinoFormContent extends StatefulWidget {
   final BovineEntity? bovine;
   final String farmId;
+  final String? initialMotherId;
+  final DateTime? initialBirthDate;
 
   const _BovinoFormContent({
     this.bovine,
     required this.farmId,
+    this.initialMotherId,
+    this.initialBirthDate,
   });
 
   @override
@@ -55,12 +65,25 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
   BovinePurpose _selectedPurpose = BovinePurpose.meat;
   BovineStatus _selectedStatus = BovineStatus.active;
   DateTime _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
+  
+  // Genealogía
+  String? _motherId;
+  String? _fatherId;
 
   bool get isEditMode => widget.bovine != null;
 
   @override
   void initState() {
     super.initState();
+    
+    // Pre-llenar con datos iniciales (cría desde parto)
+    if (widget.initialMotherId != null) {
+      _motherId = widget.initialMotherId;
+    }
+    if (widget.initialBirthDate != null) {
+      _selectedBirthDate = widget.initialBirthDate!;
+    }
+    
     if (isEditMode) {
       _loadBovineData();
     }
@@ -76,6 +99,8 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     _selectedPurpose = bovine.purpose;
     _selectedStatus = bovine.status;
     _selectedBirthDate = bovine.birthDate;
+    _motherId = bovine.motherId;
+    _fatherId = bovine.fatherId;
   }
 
   @override
@@ -99,6 +124,8 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
             weight: double.parse(_weightController.text.trim()),
             purpose: _selectedPurpose,
             status: _selectedStatus,
+            motherId: _motherId,
+            fatherId: _fatherId,
           );
     }
   }
@@ -173,6 +200,14 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
 
                 const SizedBox(height: 24),
 
+                // Sección: Genealogía (si aplica)
+                if (_motherId != null) ...[
+                  _buildSectionTitle('Genealogía', Icons.family_restroom),
+                  const SizedBox(height: 12),
+                  _buildGenealogyInfo(),
+                  const SizedBox(height: 24),
+                ],
+
                 // Sección: Características
                 _buildSectionTitle('Características', Icons.pets),
                 const SizedBox(height: 12),
@@ -246,6 +281,62 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
               ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGenealogyInfo() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_motherId != null) ...[
+            Row(
+              children: [
+                Icon(Icons.favorite, size: 16, color: Colors.pink.shade400),
+                const SizedBox(width: 8),
+                Text(
+                  'Madre: $_motherId',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (_fatherId != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.male, size: 16, color: Colors.blue.shade700),
+                const SizedBox(width: 8),
+                Text(
+                  'Padre: $_fatherId',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            'Esta información se registrará automáticamente',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

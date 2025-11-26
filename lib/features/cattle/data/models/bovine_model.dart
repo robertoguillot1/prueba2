@@ -17,6 +17,8 @@ class BovineModel extends BovineEntity {
     required BovineStatus status,
     required DateTime createdAt,
     DateTime? updatedAt,
+    String? motherId,
+    String? fatherId,
   }) : super(
           id: id,
           farmId: farmId,
@@ -30,6 +32,8 @@ class BovineModel extends BovineEntity {
           status: status,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          motherId: motherId,
+          fatherId: fatherId,
         );
 
   /// Crea un modelo desde JSON de Firestore
@@ -53,6 +57,8 @@ class BovineModel extends BovineEntity {
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
           : null,
+      motherId: json['motherId'] as String?,
+      fatherId: json['fatherId'] as String?,
     );
   }
 
@@ -70,6 +76,8 @@ class BovineModel extends BovineEntity {
       'status': _statusToString(status),
       'createdAt': Timestamp.fromDate(createdAt),
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (motherId != null) 'motherId': motherId,
+      if (fatherId != null) 'fatherId': fatherId,
     };
   }
 
@@ -87,6 +95,8 @@ class BovineModel extends BovineEntity {
     BovineStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? motherId,
+    String? fatherId,
   }) {
     return BovineModel(
       id: id ?? this.id,
@@ -101,6 +111,8 @@ class BovineModel extends BovineEntity {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      motherId: motherId ?? this.motherId,
+      fatherId: fatherId ?? this.fatherId,
     );
   }
 
@@ -119,6 +131,8 @@ class BovineModel extends BovineEntity {
       status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      motherId: entity.motherId,
+      fatherId: entity.fatherId,
     );
   }
 

@@ -43,6 +43,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required double weight,
     required BovinePurpose purpose,
     required BovineStatus status,
+    String? motherId,
+    String? fatherId,
   }) async {
     // Validaciones básicas
     if (identifier.trim().isEmpty) {
@@ -80,6 +82,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
           weight: weight,
           purpose: purpose,
           status: status,
+          motherId: motherId,
+          fatherId: fatherId,
         );
       } else {
         // MODO CREACIÓN
@@ -93,6 +97,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
           weight: weight,
           purpose: purpose,
           status: status,
+          motherId: motherId,
+          fatherId: fatherId,
         );
       }
     } catch (e) {
@@ -111,6 +117,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required double weight,
     required BovinePurpose purpose,
     required BovineStatus status,
+    String? motherId,
+    String? fatherId,
   }) async {
     final newBovine = BovineEntity(
       id: '', // Se generará en el datasource
@@ -124,6 +132,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
       purpose: purpose,
       status: status,
       createdAt: DateTime.now(),
+      motherId: motherId,
+      fatherId: fatherId,
     );
 
     final result = await addBovineUseCase.call(AddBovineParams(bovine: newBovine));
@@ -148,6 +158,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required double weight,
     required BovinePurpose purpose,
     required BovineStatus status,
+    String? motherId,
+    String? fatherId,
   }) async {
     if (_currentBovine == null) {
       emit(const BovinoFormError('No hay un bovino para actualizar'));
@@ -164,6 +176,8 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
       purpose: purpose,
       status: status,
       updatedAt: DateTime.now(),
+      motherId: motherId,
+      fatherId: fatherId,
     );
 
     final result = await updateBovineUseCase.call(

@@ -18,6 +18,9 @@ import '../../presentation/modules/avicultura/list/gallinas_list_screen.dart';
 // Importar pantallas del módulo Cattle (Clean Architecture)
 import '../../features/cattle/presentation/screens/cattle_list_screen.dart';
 
+// Importar pantallas de formularios de Bovinos
+import '../../presentation/modules/bovinos/screens/bovino_form_screen.dart';
+
 // Importar pantallas de Fincas
 import '../../presentation/modules/farms/screens/farms_list_screen.dart';
 import '../../presentation/modules/farms/screens/farm_form_screen.dart';
@@ -186,6 +189,36 @@ class AppRouter {
               appBar: AppBar(title: const Text('Error')),
               body: const Center(
                 child: Text('No se proporcionó la finca para editar'),
+              ),
+            );
+          },
+          settings: settings,
+        );
+
+      // ========== RUTAS DE BOVINOS FORMULARIO ==========
+      
+      case '/bovinos/form':
+        return MaterialPageRoute(
+          builder: (_) {
+            // Extraer parámetros de los argumentos
+            if (arguments is Map<String, dynamic>) {
+              final farmId = arguments['farmId'] as String;
+              final bovine = arguments['bovine']; // Puede ser null (crear)
+              final initialMotherId = arguments['initialMotherId'] as String?;
+              final initialBirthDate = arguments['initialBirthDate'] as DateTime?;
+              
+              return BovinoFormScreen(
+                farmId: farmId,
+                bovine: bovine,
+                initialMotherId: initialMotherId,
+                initialBirthDate: initialBirthDate,
+              );
+            }
+            // Si no se proporcionan los parámetros correctos, mostrar error
+            return Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: const Center(
+                child: Text('Parámetros incorrectos para el formulario de bovino'),
               ),
             );
           },
