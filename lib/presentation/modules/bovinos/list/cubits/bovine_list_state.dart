@@ -67,3 +67,4 @@ class BovineListError extends BovineListState {
   List<Object?> get props => [message];
 }
 
+

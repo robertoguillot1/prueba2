@@ -25,3 +25,4 @@ class GetCattleList implements UseCase<Either<Failure, List<BovineEntity>>, GetC
 
 
 
+

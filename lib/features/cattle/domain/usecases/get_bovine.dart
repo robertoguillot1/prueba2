@@ -25,3 +25,4 @@ class GetBovine implements UseCase<Either<Failure, BovineEntity>, GetBovineParam
 
 
 
+

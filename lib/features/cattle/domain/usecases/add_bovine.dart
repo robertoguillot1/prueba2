@@ -29,3 +29,4 @@ class AddBovine implements UseCase<Either<Failure, BovineEntity>, AddBovineParam
 
 
 
+
