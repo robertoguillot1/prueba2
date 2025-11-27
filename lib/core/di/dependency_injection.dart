@@ -98,6 +98,7 @@ import '../../domain/usecases/bovinos/get_eventos_reproductivos_by_bovino.dart';
 import '../../domain/usecases/bovinos/create_evento_reproductivo.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproduction_cubit.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproductive_event_form_cubit.dart';
+import '../../presentation/modules/bovinos/list/cubits/bovine_list_cubit.dart';
 // Producción (Leche y Peso)
 import '../../domain/repositories/bovinos/produccion_leche_repository.dart';
 import '../../domain/repositories/bovinos/peso_bovino_repository.dart';
@@ -473,6 +474,13 @@ class DependencyInjection {
     return HealthCubit(
       getVacunas: GetVacunasByBovino(_vacunaBovinoRepository!),
       addVacuna: AddVacunaBovino(_vacunaBovinoRepository!),
+    );
+  }
+
+  /// Crea una instancia de BovineListCubit (sistema nuevo - Firestore)
+  static BovineListCubit createBovineListCubit() {
+    return BovineListCubit(
+      getCattleList: sl<GetCattleList>(),
     );
   }
   
