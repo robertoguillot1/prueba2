@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -170,6 +171,19 @@ class _AppWithAuthSyncState extends State<AppWithAuthSync>
               themeMode: themeProvider.isSystemMode 
                   ? ThemeMode.system 
                   : (themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light),
+              
+              // Configuración de localizaciones (idioma)
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('es', 'ES'), // Español
+                Locale('en', 'US'), // Inglés
+              ],
+              locale: const Locale('es', 'ES'),
+              
               initialRoute: initialRoute,
               routes: AppRouter.getRoutes(), // ✅ Mapa de rutas básicas
               onGenerateRoute: AppRouter.onGenerateRoute, // ✅ Fallback para rutas con argumentos

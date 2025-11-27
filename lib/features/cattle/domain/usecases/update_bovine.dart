@@ -28,3 +28,4 @@ class UpdateBovine implements UseCase<Either<Failure, BovineEntity>, UpdateBovin
 }
 
 
+

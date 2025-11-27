@@ -220,3 +220,4 @@ BlocConsumer<CattleCubit, CattleState>(
 - [ ] Agregar caché local para modo offline
 
 
+

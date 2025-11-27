@@ -6,31 +6,41 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper: Usuario es dueño del recurso
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    // ===============================================
+    // SISTEMA PRINCIPAL: Clean Architecture
+    // ===============================================
+    
+    // Fincas principales (sistema nuevo Clean Architecture)
+    match /farms/{farmId} {
+      // Permitir lectura/escritura si el usuario está autenticado
+      allow read, write: if isAuthenticated();
+
+      // Bovinos/Cattle de la finca
+      match /cattle/{cattleId} {
+        allow read, write: if isAuthenticated();
+
+        // Subcolecciones de bovinos:
+        // - vacunas (vaccines)
+        // - pesos (weights)
+        // - eventos reproductivos (reproductive_events)
+        // - producción de leche (milk_production)
+        match /{subcollection=**} {
+          allow read, write: if isAuthenticated();
+        }
+      }
     }
 
-    // Usuarios: Solo pueden leer/escribir sus propios datos
+    // ===============================================
+    // DATOS DE USUARIO (perfil, configuración)
+    // ===============================================
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId);
+      // Permitir al usuario leer/escribir solo sus propios datos
+      allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Fincas del usuario
+      // Fincas del usuario (SOLO para compatibilidad con módulo de fincas)
+      // Esta ruta almacena: users/{userId}/farms/{farmId}
       match /farms/{farmId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
-        allow update, delete: if isOwner(userId);
-
-        // Bovinos de la finca
-        match /bovinos/{bovinoId} {
-          allow read, write: if isOwner(userId);
-
-          // Subcolecciones de bovinos
-          match /{subcollection=**} {
-            allow read, write: if isOwner(userId);
-          }
-        }
+        allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
   }
