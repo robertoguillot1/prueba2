@@ -81,13 +81,14 @@ class BovineEntity extends Equatable {
   }
 
   /// Valida que la entidad sea válida
+  /// Nota: No validamos el ID porque se genera automáticamente en Firestore
   bool get isValid {
-    return id.isNotEmpty &&
-        farmId.isNotEmpty &&
+    return farmId.isNotEmpty &&
         identifier.isNotEmpty &&
         breed.isNotEmpty &&
         weight > 0 &&
-        birthDate.isBefore(DateTime.now());
+        // Permitir fecha de hoy, pero no fechas futuras
+        birthDate.isBefore(DateTime.now().add(const Duration(days: 1)));
   }
 
   @override

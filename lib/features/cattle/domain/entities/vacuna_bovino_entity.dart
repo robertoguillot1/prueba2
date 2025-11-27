@@ -74,9 +74,9 @@ class VacunaBovinoEntity extends Equatable {
   }
 
   /// Valida que la entidad sea válida
+  /// Nota: No validamos el ID porque se genera automáticamente en Firestore
   bool get isValid {
-    return id.isNotEmpty &&
-        bovinoId.isNotEmpty &&
+    return bovinoId.isNotEmpty &&
         farmId.isNotEmpty &&
         nombreVacuna.trim().isNotEmpty &&
         fechaAplicacion.isBefore(DateTime.now().add(const Duration(days: 1)));
