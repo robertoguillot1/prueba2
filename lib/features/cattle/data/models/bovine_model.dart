@@ -19,6 +19,14 @@ class BovineModel extends BovineEntity {
     DateTime? updatedAt,
     String? motherId,
     String? fatherId,
+    int previousCalvings = 0,
+    HealthStatus healthStatus = HealthStatus.healthy,
+    ProductionStage productionStage = ProductionStage.raising,
+    BreedingStatus? breedingStatus,
+    DateTime? lastHeatDate,
+    DateTime? inseminationDate,
+    DateTime? expectedCalvingDate,
+    String? notes,
   }) : super(
           id: id,
           farmId: farmId,
@@ -34,6 +42,14 @@ class BovineModel extends BovineEntity {
           updatedAt: updatedAt,
           motherId: motherId,
           fatherId: fatherId,
+          previousCalvings: previousCalvings,
+          healthStatus: healthStatus,
+          productionStage: productionStage,
+          breedingStatus: breedingStatus,
+          lastHeatDate: lastHeatDate,
+          inseminationDate: inseminationDate,
+          expectedCalvingDate: expectedCalvingDate,
+          notes: notes,
         );
 
   /// Crea un modelo desde JSON de Firestore
@@ -59,6 +75,26 @@ class BovineModel extends BovineEntity {
           : null,
       motherId: json['motherId'] as String?,
       fatherId: json['fatherId'] as String?,
+      previousCalvings: (json['previousCalvings'] as num?)?.toInt() ?? 0,
+      healthStatus: json['healthStatus'] != null
+          ? _parseHealthStatus(json['healthStatus'] as String)
+          : HealthStatus.healthy,
+      productionStage: json['productionStage'] != null
+          ? _parseProductionStage(json['productionStage'] as String)
+          : ProductionStage.raising,
+      breedingStatus: json['breedingStatus'] != null
+          ? _parseBreedingStatus(json['breedingStatus'] as String)
+          : null,
+      lastHeatDate: json['lastHeatDate'] != null
+          ? (json['lastHeatDate'] as Timestamp).toDate()
+          : null,
+      inseminationDate: json['inseminationDate'] != null
+          ? (json['inseminationDate'] as Timestamp).toDate()
+          : null,
+      expectedCalvingDate: json['expectedCalvingDate'] != null
+          ? (json['expectedCalvingDate'] as Timestamp).toDate()
+          : null,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -78,6 +114,14 @@ class BovineModel extends BovineEntity {
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
       if (motherId != null) 'motherId': motherId,
       if (fatherId != null) 'fatherId': fatherId,
+      'previousCalvings': previousCalvings,
+      'healthStatus': _healthStatusToString(healthStatus),
+      'productionStage': _productionStageToString(productionStage),
+      if (breedingStatus != null) 'breedingStatus': _breedingStatusToString(breedingStatus!),
+      if (lastHeatDate != null) 'lastHeatDate': Timestamp.fromDate(lastHeatDate!),
+      if (inseminationDate != null) 'inseminationDate': Timestamp.fromDate(inseminationDate!),
+      if (expectedCalvingDate != null) 'expectedCalvingDate': Timestamp.fromDate(expectedCalvingDate!),
+      if (notes != null) 'notes': notes,
     };
   }
 
@@ -97,6 +141,14 @@ class BovineModel extends BovineEntity {
     DateTime? updatedAt,
     String? motherId,
     String? fatherId,
+    int? previousCalvings,
+    HealthStatus? healthStatus,
+    ProductionStage? productionStage,
+    BreedingStatus? breedingStatus,
+    DateTime? lastHeatDate,
+    DateTime? inseminationDate,
+    DateTime? expectedCalvingDate,
+    String? notes,
   }) {
     return BovineModel(
       id: id ?? this.id,
@@ -113,6 +165,14 @@ class BovineModel extends BovineEntity {
       updatedAt: updatedAt ?? this.updatedAt,
       motherId: motherId ?? this.motherId,
       fatherId: fatherId ?? this.fatherId,
+      previousCalvings: previousCalvings ?? this.previousCalvings,
+      healthStatus: healthStatus ?? this.healthStatus,
+      productionStage: productionStage ?? this.productionStage,
+      breedingStatus: breedingStatus ?? this.breedingStatus,
+      lastHeatDate: lastHeatDate ?? this.lastHeatDate,
+      inseminationDate: inseminationDate ?? this.inseminationDate,
+      expectedCalvingDate: expectedCalvingDate ?? this.expectedCalvingDate,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -133,6 +193,14 @@ class BovineModel extends BovineEntity {
       updatedAt: entity.updatedAt,
       motherId: entity.motherId,
       fatherId: entity.fatherId,
+      previousCalvings: entity.previousCalvings,
+      healthStatus: entity.healthStatus,
+      productionStage: entity.productionStage,
+      breedingStatus: entity.breedingStatus,
+      lastHeatDate: entity.lastHeatDate,
+      inseminationDate: entity.inseminationDate,
+      expectedCalvingDate: entity.expectedCalvingDate,
+      notes: entity.notes,
     );
   }
 
@@ -211,6 +279,102 @@ class BovineModel extends BovineEntity {
         return 'sold';
       case BovineStatus.dead:
         return 'dead';
+    }
+  }
+
+  static HealthStatus _parseHealthStatus(String value) {
+    switch (value.toLowerCase()) {
+      case 'healthy':
+      case 'sano':
+        return HealthStatus.healthy;
+      case 'sick':
+      case 'enfermo':
+        return HealthStatus.sick;
+      case 'undertreatment':
+      case 'tratamiento':
+        return HealthStatus.underTreatment;
+      case 'recovering':
+      case 'recuperandose':
+        return HealthStatus.recovering;
+      default:
+        return HealthStatus.healthy;
+    }
+  }
+
+  static String _healthStatusToString(HealthStatus status) {
+    switch (status) {
+      case HealthStatus.healthy:
+        return 'healthy';
+      case HealthStatus.sick:
+        return 'sick';
+      case HealthStatus.underTreatment:
+        return 'underTreatment';
+      case HealthStatus.recovering:
+        return 'recovering';
+    }
+  }
+
+  static ProductionStage _parseProductionStage(String value) {
+    switch (value.toLowerCase()) {
+      case 'raising':
+      case 'levante':
+        return ProductionStage.raising;
+      case 'productive':
+      case 'productiva':
+        return ProductionStage.productive;
+      case 'dry':
+      case 'seca':
+        return ProductionStage.dry;
+      default:
+        return ProductionStage.raising;
+    }
+  }
+
+  static String _productionStageToString(ProductionStage stage) {
+    switch (stage) {
+      case ProductionStage.raising:
+        return 'raising';
+      case ProductionStage.productive:
+        return 'productive';
+      case ProductionStage.dry:
+        return 'dry';
+    }
+  }
+
+  static BreedingStatus _parseBreedingStatus(String value) {
+    switch (value.toLowerCase()) {
+      case 'notspecified':
+      case 'noespecificado':
+        return BreedingStatus.notSpecified;
+      case 'pregnant':
+      case 'gestante':
+        return BreedingStatus.pregnant;
+      case 'inseminated':
+      case 'inseminada':
+        return BreedingStatus.inseminated;
+      case 'empty':
+      case 'vacia':
+        return BreedingStatus.empty;
+      case 'served':
+      case 'servida':
+        return BreedingStatus.served;
+      default:
+        return BreedingStatus.notSpecified;
+    }
+  }
+
+  static String _breedingStatusToString(BreedingStatus status) {
+    switch (status) {
+      case BreedingStatus.notSpecified:
+        return 'notSpecified';
+      case BreedingStatus.pregnant:
+        return 'pregnant';
+      case BreedingStatus.inseminated:
+        return 'inseminated';
+      case BreedingStatus.empty:
+        return 'empty';
+      case BreedingStatus.served:
+        return 'served';
     }
   }
 }

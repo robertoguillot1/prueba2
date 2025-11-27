@@ -45,6 +45,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required BovineStatus status,
     String? motherId,
     String? fatherId,
+    int previousCalvings = 0,
+    HealthStatus healthStatus = HealthStatus.healthy,
+    ProductionStage productionStage = ProductionStage.raising,
+    BreedingStatus? breedingStatus,
+    DateTime? lastHeatDate,
+    DateTime? inseminationDate,
+    DateTime? expectedCalvingDate,
+    String? notes,
   }) async {
     // Validaciones básicas
     if (identifier.trim().isEmpty) {
@@ -84,6 +92,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
           status: status,
           motherId: motherId,
           fatherId: fatherId,
+          previousCalvings: previousCalvings,
+          healthStatus: healthStatus,
+          productionStage: productionStage,
+          breedingStatus: breedingStatus,
+          lastHeatDate: lastHeatDate,
+          inseminationDate: inseminationDate,
+          expectedCalvingDate: expectedCalvingDate,
+          notes: notes,
         );
       } else {
         // MODO CREACIÓN
@@ -99,6 +115,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
           status: status,
           motherId: motherId,
           fatherId: fatherId,
+          previousCalvings: previousCalvings,
+          healthStatus: healthStatus,
+          productionStage: productionStage,
+          breedingStatus: breedingStatus,
+          lastHeatDate: lastHeatDate,
+          inseminationDate: inseminationDate,
+          expectedCalvingDate: expectedCalvingDate,
+          notes: notes,
         );
       }
     } catch (e) {
@@ -119,6 +143,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required BovineStatus status,
     String? motherId,
     String? fatherId,
+    int previousCalvings = 0,
+    HealthStatus healthStatus = HealthStatus.healthy,
+    ProductionStage productionStage = ProductionStage.raising,
+    BreedingStatus? breedingStatus,
+    DateTime? lastHeatDate,
+    DateTime? inseminationDate,
+    DateTime? expectedCalvingDate,
+    String? notes,
   }) async {
     final newBovine = BovineEntity(
       id: '', // Se generará en el datasource
@@ -134,6 +166,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
       createdAt: DateTime.now(),
       motherId: motherId,
       fatherId: fatherId,
+      previousCalvings: previousCalvings,
+      healthStatus: healthStatus,
+      productionStage: productionStage,
+      breedingStatus: breedingStatus,
+      lastHeatDate: lastHeatDate,
+      inseminationDate: inseminationDate,
+      expectedCalvingDate: expectedCalvingDate,
+      notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
     );
 
     final result = await addBovineUseCase.call(AddBovineParams(bovine: newBovine));
@@ -160,6 +200,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     required BovineStatus status,
     String? motherId,
     String? fatherId,
+    int previousCalvings = 0,
+    HealthStatus healthStatus = HealthStatus.healthy,
+    ProductionStage productionStage = ProductionStage.raising,
+    BreedingStatus? breedingStatus,
+    DateTime? lastHeatDate,
+    DateTime? inseminationDate,
+    DateTime? expectedCalvingDate,
+    String? notes,
   }) async {
     if (_currentBovine == null) {
       emit(const BovinoFormError('No hay un bovino para actualizar'));
@@ -178,6 +226,14 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
       updatedAt: DateTime.now(),
       motherId: motherId,
       fatherId: fatherId,
+      previousCalvings: previousCalvings,
+      healthStatus: healthStatus,
+      productionStage: productionStage,
+      breedingStatus: breedingStatus,
+      lastHeatDate: lastHeatDate,
+      inseminationDate: inseminationDate,
+      expectedCalvingDate: expectedCalvingDate,
+      notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
     );
 
     final result = await updateBovineUseCase.call(

@@ -1,10 +1,10 @@
-import '../../../../domain/entities/bovinos/bovino.dart';
+import '../../../../domain/entities/bovinos/bovino.dart' as old;
 import '../../../../features/cattle/domain/entities/bovine_entity.dart';
 
 /// Mapper para convertir entre el modelo viejo (Bovino) y el nuevo (BovineEntity)
 class BovinoMapper {
   /// Convierte un Bovino (viejo) a BovineEntity (nuevo)
-  static BovineEntity toEntity(Bovino bovino) {
+  static BovineEntity toEntity(old.Bovino bovino) {
     return BovineEntity(
       id: bovino.id,
       farmId: bovino.farmId,
@@ -22,42 +22,42 @@ class BovinoMapper {
   }
 
   /// Mapea el género (los enums tienen los mismos valores)
-  static BovineGender _mapGender(BovinoGender oldGender) {
+  static BovineGender _mapGender(old.BovinoGender oldGender) {
     switch (oldGender) {
-      case BovinoGender.male:
+      case old.BovinoGender.male:
         return BovineGender.male;
-      case BovinoGender.female:
+      case old.BovinoGender.female:
         return BovineGender.female;
     }
   }
 
   /// Infiere el propósito basándose en la categoría y etapa de producción
-  static BovinePurpose _inferPurpose(Bovino bovino) {
+  static BovinePurpose _inferPurpose(old.Bovino bovino) {
     // Si es vaca o tiene estado de lactancia/prenada, probablemente es leche o dual
-    if (bovino.category == BovinoCategory.vaca) {
-      if (bovino.breedingStatus == BreedingStatus.lactante ||
-          bovino.breedingStatus == BreedingStatus.prenada) {
+    if (bovino.category == old.BovinoCategory.vaca) {
+      if (bovino.breedingStatus == old.BreedingStatus.lactante ||
+          bovino.breedingStatus == old.BreedingStatus.prenada) {
         return BovinePurpose.dual; // Probablemente dual propósito
       }
       return BovinePurpose.milk; // Vacas generalmente para leche
     }
 
     // Si es toro, probablemente reproducción o carne
-    if (bovino.category == BovinoCategory.toro) {
+    if (bovino.category == old.BovinoCategory.toro) {
       return BovinePurpose.meat; // Toros usualmente para carne
     }
 
     // Terneros y novillos en desarrollo
-    if (bovino.category == BovinoCategory.ternero ||
-        bovino.category == BovinoCategory.novilla) {
-      if (bovino.productionStage == ProductionStage.levante ||
-          bovino.productionStage == ProductionStage.desarrollo) {
+    if (bovino.category == old.BovinoCategory.ternero ||
+        bovino.category == old.BovinoCategory.novilla) {
+      if (bovino.productionStage == old.ProductionStage.levante ||
+          bovino.productionStage == old.ProductionStage.desarrollo) {
         return BovinePurpose.dual; // En desarrollo, podría ser dual
       }
     }
 
     // Si está en descarte, probablemente carne
-    if (bovino.productionStage == ProductionStage.descarte) {
+    if (bovino.productionStage == old.ProductionStage.descarte) {
       return BovinePurpose.meat;
     }
 
@@ -66,19 +66,21 @@ class BovinoMapper {
   }
 
   /// Mapea el estado de salud a estado general
-  static BovineStatus _mapStatus(HealthStatus healthStatus) {
+  static BovineStatus _mapStatus(old.HealthStatus healthStatus) {
     switch (healthStatus) {
-      case HealthStatus.sano:
+      case old.HealthStatus.sano:
         return BovineStatus.active; // Sano = Activo
-      case HealthStatus.enfermo:
+      case old.HealthStatus.enfermo:
         return BovineStatus.active; // Enfermo pero aún en la finca = Activo
-      case HealthStatus.tratamiento:
+      case old.HealthStatus.tratamiento:
         return BovineStatus.active; // En tratamiento = Activo
+      default:
+        return BovineStatus.active; // Por defecto, activo
     }
   }
 
   /// Convierte una lista de Bovino a lista de BovineEntity
-  static List<BovineEntity> toEntityList(List<Bovino> bovinos) {
+  static List<BovineEntity> toEntityList(List<old.Bovino> bovinos) {
     return bovinos.map((bovino) => toEntity(bovino)).toList();
   }
 }

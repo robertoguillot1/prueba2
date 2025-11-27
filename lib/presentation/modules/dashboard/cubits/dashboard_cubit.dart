@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../domain/entities/bovinos/bovino.dart';
+import '../../../../domain/entities/bovinos/bovino.dart' as old;
 import '../../../../domain/entities/porcinos/cerdo.dart';
 import '../../../../domain/entities/ovinos/oveja.dart';
 import '../../../../domain/entities/avicultura/gallina.dart';
@@ -26,7 +26,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   final CattleRepository cattleRepository; // Para obtener bovinos del nuevo sistema
 
   // Stream subscriptions
-  StreamSubscription<List<Bovino>>? _bovinosSubscription;
+  StreamSubscription<List<old.Bovino>>? _bovinosSubscription;
   StreamSubscription<List<Cerdo>>? _cerdosSubscription;
   StreamSubscription<List<Oveja>>? _ovejasSubscription;
   StreamSubscription<List<Gallina>>? _gallinasSubscription;
@@ -34,7 +34,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   StreamSubscription<List<BovineEntity>>? _cattleSubscription; // Para el nuevo sistema
 
   // Datos actuales
-  List<Bovino> _bovinos = [];
+  List<old.Bovino> _bovinos = [];
   List<Cerdo> _cerdos = [];
   List<Oveja> _ovejas = [];
   List<Gallina> _gallinas = [];
@@ -135,8 +135,8 @@ class DashboardCubit extends Cubit<DashboardState> {
     // ============================================
     // Alertas de Bovinos: Secado de vacas gestantes
     for (final bovino in _bovinos) {
-      if (bovino.gender == BovinoGender.female &&
-          bovino.breedingStatus == BreedingStatus.prenada &&
+      if (bovino.gender == old.BovinoGender.female &&
+          bovino.breedingStatus == old.BreedingStatus.prenada &&
           bovino.expectedCalvingDate != null) {
         final now = DateTime.now();
         final fechaSecado = bovino.expectedCalvingDate!

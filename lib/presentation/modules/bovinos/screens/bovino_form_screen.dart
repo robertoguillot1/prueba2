@@ -60,6 +60,7 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
   final _nameController = TextEditingController();
   final _breedController = TextEditingController();
   final _weightController = TextEditingController();
+  final _notesController = TextEditingController();
 
   BovineGender _selectedGender = BovineGender.female;
   BovinePurpose _selectedPurpose = BovinePurpose.meat;
@@ -69,6 +70,15 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
   // Genealogía
   String? _motherId;
   String? _fatherId;
+
+  // Nuevos campos
+  int _previousCalvings = 0;
+  HealthStatus _healthStatus = HealthStatus.healthy;
+  ProductionStage _productionStage = ProductionStage.raising;
+  BreedingStatus? _breedingStatus;
+  DateTime? _lastHeatDate;
+  DateTime? _inseminationDate;
+  DateTime? _expectedCalvingDate;
 
   bool get isEditMode => widget.bovine != null;
 
@@ -86,6 +96,11 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     
     if (isEditMode) {
       _loadBovineData();
+    } else {
+      // Si es MACHO, forzar propósito a CARNE
+      if (_selectedGender == BovineGender.male) {
+        _selectedPurpose = BovinePurpose.meat;
+      }
     }
   }
 
@@ -95,12 +110,20 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     _nameController.text = bovine.name ?? '';
     _breedController.text = bovine.breed;
     _weightController.text = bovine.weight.toString();
+    _notesController.text = bovine.notes ?? '';
     _selectedGender = bovine.gender;
     _selectedPurpose = bovine.purpose;
     _selectedStatus = bovine.status;
     _selectedBirthDate = bovine.birthDate;
     _motherId = bovine.motherId;
     _fatherId = bovine.fatherId;
+    _previousCalvings = bovine.previousCalvings;
+    _healthStatus = bovine.healthStatus;
+    _productionStage = bovine.productionStage;
+    _breedingStatus = bovine.breedingStatus;
+    _lastHeatDate = bovine.lastHeatDate;
+    _inseminationDate = bovine.inseminationDate;
+    _expectedCalvingDate = bovine.expectedCalvingDate;
   }
 
   @override
@@ -109,6 +132,7 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     _nameController.dispose();
     _breedController.dispose();
     _weightController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -126,6 +150,14 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
             status: _selectedStatus,
             motherId: _motherId,
             fatherId: _fatherId,
+            previousCalvings: _previousCalvings,
+            healthStatus: _healthStatus,
+            productionStage: _productionStage,
+            breedingStatus: _breedingStatus,
+            lastHeatDate: _lastHeatDate,
+            inseminationDate: _inseminationDate,
+            expectedCalvingDate: _expectedCalvingDate,
+            notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
           );
     }
   }
@@ -211,11 +243,11 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
                 // Sección: Características
                 _buildSectionTitle('Características', Icons.pets),
                 const SizedBox(height: 12),
+                _buildCategoryBadge(),
+                const SizedBox(height: 16),
                 _buildGenderSelector(),
                 const SizedBox(height: 16),
                 _buildPurposeSelector(),
-                const SizedBox(height: 16),
-                _buildStatusSelector(),
 
                 const SizedBox(height: 24),
 
@@ -225,6 +257,45 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
                 _buildBirthDateField(context),
                 const SizedBox(height: 16),
                 _buildWeightField(),
+
+                const SizedBox(height: 24),
+
+                // Sección: Salud y Producción
+                _buildSectionTitle('Salud y Producción', Icons.local_hospital),
+                const SizedBox(height: 12),
+                _buildHealthStatusSelector(),
+                const SizedBox(height: 16),
+                _buildProductionStageSelector(),
+                const SizedBox(height: 16),
+                _buildStatusSelector(),
+
+                const SizedBox(height: 24),
+
+                // Sección: Estado Reproductivo (solo hembras)
+                if (_selectedGender == BovineGender.female) ...[
+                  _buildSectionTitle('Estado Reproductivo', Icons.pregnant_woman),
+                  const SizedBox(height: 12),
+                  _buildBreedingStatusSelector(),
+                  const SizedBox(height: 16),
+                  _buildLastHeatDateField(context),
+                  const SizedBox(height: 16),
+                  if (_breedingStatus == BreedingStatus.inseminated ||
+                      _breedingStatus == BreedingStatus.pregnant) ...[
+                    _buildInseminationDateField(context),
+                    const SizedBox(height: 16),
+                  ],
+                  if (_breedingStatus == BreedingStatus.pregnant) ...[
+                    _buildExpectedCalvingDateField(context),
+                    const SizedBox(height: 16),
+                  ],
+                  _buildPreviousCalvingsField(),
+                  const SizedBox(height: 24),
+                ],
+
+                // Sección: Notas
+                _buildSectionTitle('Notas', Icons.notes),
+                const SizedBox(height: 12),
+                _buildNotesField(),
 
                 const SizedBox(height: 32),
 
@@ -417,7 +488,25 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
                 selected: _selectedGender == BovineGender.male,
                 onSelected: (selected) {
                   if (selected) {
-                    setState(() => _selectedGender = BovineGender.male);
+                    setState(() {
+                      _selectedGender = BovineGender.male;
+                      // LÓGICA: Si cambia a macho, forzar propósito a CARNE
+                      if (_selectedPurpose != BovinePurpose.meat) {
+                        _selectedPurpose = BovinePurpose.meat;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Propósito cambiado a "Carne" (los machos no producen leche)'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
+                      }
+                      // LÓGICA: Limpiar datos reproductivos
+                      _breedingStatus = null;
+                      _lastHeatDate = null;
+                      _inseminationDate = null;
+                      _expectedCalvingDate = null;
+                    });
                   }
                 },
                 color: Colors.blue,
@@ -444,34 +533,82 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
   }
 
   Widget _buildPurposeSelector() {
-    return DropdownButtonFormField<BovinePurpose>(
-      value: _selectedPurpose,
-      decoration: InputDecoration(
-        labelText: 'Propósito *',
-        prefixIcon: const Icon(Icons.work_outline),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+    final isMale = _selectedGender == BovineGender.male;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Propósito *',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            if (isMale) ...[
+              const SizedBox(width: 8),
+              Tooltip(
+                message: 'Los machos solo pueden ser de Carne',
+                child: Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.grey[400],
+                ),
+              ),
+            ],
+          ],
         ),
-      ),
-      items: const [
-        DropdownMenuItem(
-          value: BovinePurpose.meat,
-          child: Text('Carne'),
-        ),
-        DropdownMenuItem(
-          value: BovinePurpose.milk,
-          child: Text('Leche'),
-        ),
-        DropdownMenuItem(
-          value: BovinePurpose.dual,
-          child: Text('Doble Propósito'),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<BovinePurpose>(
+          value: _selectedPurpose,
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.work_outline),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          items: [
+            const DropdownMenuItem(
+              value: BovinePurpose.meat,
+              child: Row(
+                children: [
+                  Icon(Icons.restaurant, size: 18, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('Carne'),
+                ],
+              ),
+            ),
+            if (!isMale) ...[
+              const DropdownMenuItem(
+                value: BovinePurpose.milk,
+                child: Row(
+                  children: [
+                    Icon(Icons.water_drop, size: 18, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Leche'),
+                  ],
+                ),
+              ),
+              const DropdownMenuItem(
+                value: BovinePurpose.dual,
+                child: Row(
+                  children: [
+                    Icon(Icons.star, size: 18, color: Colors.purple),
+                    SizedBox(width: 8),
+                    Text('Doble Propósito'),
+                  ],
+                ),
+              ),
+            ],
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              setState(() => _selectedPurpose = value);
+            }
+          },
         ),
       ],
-      onChanged: (value) {
-        if (value != null) {
-          setState(() => _selectedPurpose = value);
-        }
-      },
     );
   }
 
@@ -599,6 +736,348 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  // ========== NUEVOS MÉTODOS ==========
+
+  Widget _buildCategoryBadge() {
+    // Crear una entidad temporal para calcular la categoría
+    final tempEntity = BovineEntity(
+      id: '',
+      farmId: widget.farmId,
+      identifier: _identifierController.text,
+      breed: _breedController.text,
+      gender: _selectedGender,
+      birthDate: _selectedBirthDate,
+      weight: double.tryParse(_weightController.text) ?? 0,
+      purpose: _selectedPurpose,
+      status: _selectedStatus,
+      createdAt: DateTime.now(),
+      previousCalvings: _previousCalvings,
+    );
+
+    final category = tempEntity.category;
+    final ageDisplay = tempEntity.ageDisplay;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: category.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: category.color, width: 2),
+      ),
+      child: Row(
+        children: [
+          Icon(category.icon, color: category.color, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Categoría: ${category.displayName}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: category.color,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Se calcula automáticamente según edad, género y partos',
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Edad: $ageDisplay',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.auto_awesome,
+            color: category.color.withOpacity(0.6),
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHealthStatusSelector() {
+    return DropdownButtonFormField<HealthStatus>(
+      value: _healthStatus,
+      decoration: InputDecoration(
+        labelText: 'Estado de Salud *',
+        prefixIcon: const Icon(Icons.favorite_outline),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      items: HealthStatus.values.map((status) {
+        return DropdownMenuItem(
+          value: status,
+          child: Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: status.color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(status.displayName),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() => _healthStatus = value);
+        }
+      },
+    );
+  }
+
+  Widget _buildProductionStageSelector() {
+    return DropdownButtonFormField<ProductionStage>(
+      value: _productionStage,
+      decoration: InputDecoration(
+        labelText: 'Etapa de Producción *',
+        prefixIcon: const Icon(Icons.timeline),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      items: ProductionStage.values.map((stage) {
+        return DropdownMenuItem(
+          value: stage,
+          child: Text(stage.displayName),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() => _productionStage = value);
+        }
+      },
+    );
+  }
+
+  Widget _buildBreedingStatusSelector() {
+    return DropdownButtonFormField<BreedingStatus?>(
+      value: _breedingStatus,
+      decoration: InputDecoration(
+        labelText: 'Estado Reproductivo',
+        prefixIcon: const Icon(Icons.pregnant_woman),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      items: [
+        const DropdownMenuItem<BreedingStatus?>(
+          value: null,
+          child: Text('No especificado'),
+        ),
+        ...BreedingStatus.values.map((status) {
+          return DropdownMenuItem(
+            value: status,
+            child: Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: status.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(status.displayName),
+              ],
+            ),
+          );
+        }),
+      ],
+      onChanged: (value) {
+        setState(() => _breedingStatus = value);
+      },
+    );
+  }
+
+  Widget _buildLastHeatDateField(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: _lastHeatDate ?? DateTime.now(),
+          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+          lastDate: DateTime.now(),
+          locale: const Locale('es', 'ES'),
+        );
+        if (picked != null) {
+          setState(() => _lastHeatDate = picked);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Última Fecha de Celo',
+          prefixIcon: const Icon(Icons.calendar_today),
+          suffixIcon: _lastHeatDate != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () => setState(() => _lastHeatDate = null),
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          _lastHeatDate != null
+              ? DateFormat('dd/MM/yyyy').format(_lastHeatDate!)
+              : 'Seleccionar fecha',
+          style: TextStyle(
+            color: _lastHeatDate != null ? null : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInseminationDateField(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: _inseminationDate ?? DateTime.now(),
+          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+          lastDate: DateTime.now(),
+          locale: const Locale('es', 'ES'),
+        );
+        if (picked != null) {
+          setState(() {
+            _inseminationDate = picked;
+            // Calcular fecha esperada de parto (283 días después)
+            _expectedCalvingDate = picked.add(const Duration(days: 283));
+          });
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Fecha de Inseminación',
+          prefixIcon: const Icon(Icons.science),
+          suffixIcon: _inseminationDate != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () => setState(() {
+                    _inseminationDate = null;
+                    _expectedCalvingDate = null;
+                  }),
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          _inseminationDate != null
+              ? DateFormat('dd/MM/yyyy').format(_inseminationDate!)
+              : 'Seleccionar fecha',
+          style: TextStyle(
+            color: _inseminationDate != null ? null : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpectedCalvingDateField(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: _expectedCalvingDate ?? DateTime.now().add(const Duration(days: 283)),
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+          locale: const Locale('es', 'ES'),
+        );
+        if (picked != null) {
+          setState(() => _expectedCalvingDate = picked);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Fecha Esperada de Parto',
+          prefixIcon: const Icon(Icons.event_available),
+          helperText: 'Calculada automáticamente (283 días)',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          _expectedCalvingDate != null
+              ? DateFormat('dd/MM/yyyy').format(_expectedCalvingDate!)
+              : 'Seleccionar fecha',
+          style: TextStyle(
+            color: _expectedCalvingDate != null ? null : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviousCalvingsField() {
+    return TextFormField(
+      initialValue: _previousCalvings.toString(),
+      decoration: InputDecoration(
+        labelText: 'Partos Previos',
+        hintText: '0',
+        prefixIcon: const Icon(Icons.child_care),
+        helperText: 'Número de partos anteriores',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      onChanged: (value) {
+        setState(() {
+          _previousCalvings = int.tryParse(value) ?? 0;
+        });
+      },
+    );
+  }
+
+  Widget _buildNotesField() {
+    return TextFormField(
+      controller: _notesController,
+      decoration: InputDecoration(
+        labelText: 'Notas Adicionales',
+        hintText: 'Observaciones, comentarios, etc.',
+        prefixIcon: const Icon(Icons.note),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      maxLines: 4,
+      textCapitalization: TextCapitalization.sentences,
     );
   }
 }
