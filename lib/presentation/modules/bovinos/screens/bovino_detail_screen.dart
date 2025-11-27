@@ -129,7 +129,7 @@ class BovinoDetailScreen extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 260, // Reducido de 280 a 260
       pinned: true,
       actions: [
         IconButton(
@@ -150,69 +150,87 @@ class BovinoDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 60), // Espacio para el AppBar
-              // Avatar/Foto del animal
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _getGenderColor(bovine.gender).withOpacity(0.2),
-                  border: Border.all(
-                    color: _getGenderColor(bovine.gender),
-                    width: 3,
+          child: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16), // Reducido de 60 a 16
+                // Avatar/Foto del animal (más pequeño)
+                Container(
+                  width: 100, // Reducido de 120 a 100
+                  height: 100, // Reducido de 120 a 100
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _getGenderColor(bovine.gender).withOpacity(0.2),
+                    border: Border.all(
+                      color: _getGenderColor(bovine.gender),
+                      width: 3,
+                    ),
                   ),
-                ),
-                child: Icon(
-                  _getGenderIcon(bovine.gender),
-                  size: 60,
-                  color: _getGenderColor(bovine.gender),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Identificador
-              Text(
-                bovine.identifier,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              // Nombre (si existe)
-              if (bovine.name != null)
-                Text(
-                  bovine.name!,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-                ),
-              const SizedBox(height: 16),
-              // Chips de información
-              Wrap(
-                spacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  _buildInfoChip(
-                    label: bovine.breed,
-                    icon: Icons.pets,
-                    color: Colors.blue,
-                  ),
-                  _buildInfoChip(
-                    label: _getGenderLabel(bovine.gender),
-                    icon: _getGenderIcon(bovine.gender),
+                  child: Icon(
+                    _getGenderIcon(bovine.gender),
+                    size: 50, // Reducido de 60 a 50
                     color: _getGenderColor(bovine.gender),
                   ),
-                  _buildInfoChip(
-                    label: _getStatusLabel(bovine.status),
-                    icon: _getStatusIcon(bovine.status),
-                    color: _getStatusColor(bovine.status),
+                ),
+                const SizedBox(height: 12), // Reducido de 16 a 12
+                // Identificador
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    bovine.identifier,
+                    style: theme.textTheme.headlineSmall?.copyWith( // Reducido de headlineMedium
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 4),
+                // Nombre (si existe)
+                if (bovine.name != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      bovine.name!,
+                      style: theme.textTheme.bodyLarge?.copyWith( // Reducido de titleMedium
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                const SizedBox(height: 12), // Reducido de 16 a 12
+                // Chips de información (más compactos)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 6, // Reducido de 8 a 6
+                    runSpacing: 6,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _buildInfoChip(
+                        label: bovine.breed,
+                        icon: Icons.pets,
+                        color: Colors.blue,
+                      ),
+                      _buildInfoChip(
+                        label: _getGenderLabel(bovine.gender),
+                        icon: _getGenderIcon(bovine.gender),
+                        color: _getGenderColor(bovine.gender),
+                      ),
+                      _buildInfoChip(
+                        label: _getStatusLabel(bovine.status),
+                        icon: _getStatusIcon(bovine.status),
+                        color: _getStatusColor(bovine.status),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
       ),

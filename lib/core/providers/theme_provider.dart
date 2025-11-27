@@ -6,8 +6,8 @@ import 'dart:ui' show Brightness;
 class ThemeProvider with ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   
-  bool _isDarkMode = false;
-  bool _isSystemMode = true; // Por defecto sigue el sistema
+  bool _isDarkMode = false; // Por defecto modo claro
+  bool _isSystemMode = false; // Por defecto NO seguir el sistema (usar modo claro)
 
   ThemeProvider() {
     loadTheme();
@@ -31,9 +31,9 @@ class ThemeProvider with ChangeNotifier {
           _isDarkMode = themeModeString == 'dark';
         }
       } else {
-        // Por defecto seguir el sistema
-        _isSystemMode = true;
-        _isDarkMode = _getSystemBrightness() == Brightness.dark;
+        // Por defecto usar modo claro (no seguir el sistema)
+        _isSystemMode = false;
+        _isDarkMode = false;
       }
       
       notifyListeners();
