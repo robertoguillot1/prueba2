@@ -55,44 +55,72 @@ class BovinoDetailScreen extends StatelessWidget {
   Widget _buildDetailContent(BuildContext context) {
     return DefaultTabController(
       length: 4,
-      child: Scaffold(
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              _buildSliverAppBar(context),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyTabBarDelegate(
-                  TabBar(
-                    tabs: const [
-                      Tab(icon: Icon(Icons.info_outline), text: 'General'),
-                      Tab(icon: Icon(Icons.favorite_outline), text: 'Reproducción'),
-                      Tab(icon: Icon(Icons.show_chart), text: 'Producción'),
-                      Tab(icon: Icon(Icons.medical_services_outlined), text: 'Sanidad'),
-                    ],
-                    labelColor: Theme.of(context).primaryColor,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: Theme.of(context).primaryColor,
+      child: Builder(
+        builder: (BuildContext tabContext) {
+          return Scaffold(
+            body: NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  _buildSliverAppBar(context),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _StickyTabBarDelegate(
+                      TabBar(
+                        tabs: const [
+                          Tab(icon: Icon(Icons.info_outline), text: 'General'),
+                          Tab(icon: Icon(Icons.favorite_outline), text: 'Reproducción'),
+                          Tab(icon: Icon(Icons.show_chart), text: 'Producción'),
+                          Tab(icon: Icon(Icons.medical_services_outlined), text: 'Sanidad'),
+                        ],
+                        labelColor: Theme.of(context).primaryColor,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: Theme.of(context).primaryColor,
+                      ),
+                    ),
                   ),
-                ),
+                ];
+              },
+              body: TabBarView(
+                children: [
+                  _buildGeneralTab(tabContext),
+                  _buildReproductionTab(tabContext),
+                  _buildProductionTab(tabContext),
+                  _buildHealthTab(tabContext),
+                ],
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              _buildGeneralTab(context),
-              _buildReproductionTab(context),
-              _buildProductionTab(context),
-              _buildHealthTab(context),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _navigateToEdit(context),
-          icon: const Icon(Icons.edit),
-          label: const Text('Editar'),
-        ),
+            ),
+            // FAB solo visible en tabs General (0) y Reproducción (1)
+            // Producción y Sanidad tienen sus propios FABs
+            floatingActionButton: _buildConditionalFAB(tabContext),
+          );
+        },
       ),
+    );
+  }
+
+  /// FAB condicional que solo aparece en tabs General y Reproducción
+  Widget? _buildConditionalFAB(BuildContext context) {
+    // Obtener el índice actual del TabController
+    final tabController = DefaultTabController.of(context);
+    
+    return AnimatedBuilder(
+      animation: tabController,
+      builder: (context, child) {
+        final currentIndex = tabController.index;
+        
+        // Solo mostrar en tab General (0) y Reproducción (1)
+        if (currentIndex == 0 || currentIndex == 1) {
+          return FloatingActionButton.extended(
+            onPressed: () => _navigateToEdit(context),
+            icon: const Icon(Icons.edit),
+            label: const Text('Editar'),
+            heroTag: 'edit_bovine_fab', // Evitar conflictos con otros FABs
+          );
+        }
+        
+        // En tabs Producción (2) y Sanidad (3), no mostrar (tienen sus propios FABs)
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -215,6 +243,7 @@ class BovinoDetailScreen extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(), // Asegurar scroll
       children: [
         _buildSectionTitle('Información General', Icons.info),
         const SizedBox(height: 16),

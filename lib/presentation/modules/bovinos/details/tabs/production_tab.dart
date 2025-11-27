@@ -73,43 +73,108 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProductionCubit, ProductionState>(
-      builder: (context, state) {
-        if (state is ProductionLoading) {
+    return Scaffold(
+      // Scaffold dentro del TabBarView para tener FAB local
+      body: BlocBuilder<ProductionCubit, ProductionState>(
+        builder: (context, state) {
+          if (state is ProductionLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ProductionError) {
+            return _buildErrorState(context, state.message);
+          }
+
+          if (state is ProductionLoaded) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<ProductionCubit>().refresh(
+                      bovineId: widget.bovine.id,
+                      farmId: widget.farmId,
+                    );
+                await Future.delayed(const Duration(milliseconds: 500));
+              },
+              child: Column(
+                children: [
+                  // Toggle de vista
+                  _buildViewToggle(),
+
+                  // Contenido según la vista seleccionada
+                  Expanded(
+                    child: _selectedView == ProductionView.milk
+                        ? _buildMilkView(context, state.leche)
+                        : _buildWeightView(context, state.pesos),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return const Center(child: CircularProgressIndicator());
-        }
+        },
+      ),
+      // FAB persistente que cambia según la vista
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
 
-        if (state is ProductionError) {
-          return _buildErrorState(context, state.message);
-        }
+  /// Botón flotante que se adapta a la vista actual
+  Widget _buildFloatingActionButton(BuildContext context) {
+    // Si no puede producir leche y está en vista de leche, no mostrar FAB
+    if (_selectedView == ProductionView.milk && !_canProduceMilk) {
+      return const SizedBox.shrink();
+    }
 
-        if (state is ProductionLoaded) {
-          return RefreshIndicator(
-            onRefresh: () async {
+    final isMilkView = _selectedView == ProductionView.milk;
+
+    return FloatingActionButton(
+      onPressed: () {
+        // Lógica INTELIGENTE basada en la vista seleccionada
+        if (isMilkView) {
+          // Vista Leche -> Ir a Formulario de Leche
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MilkProductionFormScreen(
+                bovine: widget.bovine,
+                farmId: widget.farmId,
+              ),
+            ),
+          ).then((result) {
+            // Recargar datos si se agregó un registro exitosamente
+            if (result == true && context.mounted) {
               context.read<ProductionCubit>().refresh(
                     bovineId: widget.bovine.id,
                     farmId: widget.farmId,
                   );
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
-            child: Column(
-              children: [
-                // Toggle de vista
-                _buildViewToggle(),
-
-                // Contenido según la vista seleccionada
-                Expanded(
-                  child: _selectedView == ProductionView.milk
-                      ? _buildMilkView(context, state.leche)
-                      : _buildWeightView(context, state.pesos),
-                ),
-              ],
+            }
+          });
+        } else {
+          // Vista Peso -> Ir a Formulario de Peso
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WeightRecordFormScreen(
+                bovine: widget.bovine,
+                farmId: widget.farmId,
+              ),
             ),
-          );
+          ).then((result) {
+            // Recargar datos si se agregó un registro exitosamente
+            if (result == true && context.mounted) {
+              context.read<ProductionCubit>().refresh(
+                    bovineId: widget.bovine.id,
+                    farmId: widget.farmId,
+                  );
+            }
+          });
         }
-
-        return const Center(child: CircularProgressIndicator());
       },
+      // Icono específico según la vista: gota para leche, báscula para peso
+      child: Icon(isMilkView ? Icons.water_drop : Icons.monitor_weight),
+      // Color según la acción: azul para leche, verde para peso
+      backgroundColor: isMilkView ? Colors.blue : Colors.green,
+      heroTag: 'production_fab_${widget.bovine.id}', // Evitar conflictos de Hero
     );
   }
 
@@ -417,13 +482,13 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
     );
   }
 
-  /// Estado vacío
+  /// Estado vacío (sin botón, el FAB maneja la acción)
   Widget _buildEmptyState(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String message,
-    required VoidCallback onAdd,
+    required VoidCallback onAdd, // Mantenido para compatibilidad
   }) {
     return Center(
       child: Padding(
@@ -448,13 +513,32 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
                   ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
-              label: const Text('Registrar Ahora'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            const SizedBox(height: 16),
+            // Mensaje visual que indica el FAB
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.blue.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.touch_app, color: Colors.blue.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Usa el botón flotante para agregar',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
