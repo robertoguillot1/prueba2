@@ -53,7 +53,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Dashboard Operativo'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              // Volver a la lista de fincas
+              Navigator.pop(context);
+            },
+            tooltip: 'Volver a Fincas',
+          ),
           actions: [
+            // Botón para cambiar de finca directamente
+            IconButton(
+              icon: const Icon(Icons.swap_horiz),
+              onPressed: () {
+                // Volver a la lista de fincas para seleccionar otra
+                Navigator.pushReplacementNamed(context, '/farms');
+              },
+              tooltip: 'Cambiar de Finca',
+            ),
             const ThemeSwitcher(),
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -556,4 +573,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+
 
