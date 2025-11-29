@@ -524,11 +524,19 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
     // Usar el contexto del builder que tiene acceso al BlocProvider
     final cubit = context.read<TransferCubit>();
     
-    // Obtener el nombre de la finca destino
-    final destinationName = _availableFarms.firstWhere(
-      (f) => f.id == _selectedToFarmId,
-      orElse: () => _availableFarms.first,
-    ).name;
+    // Obtener el nombre de la finca destino de forma segura
+    String destinationName;
+    try {
+      final selectedFarm = _availableFarms.firstWhere(
+        (f) => f.id == _selectedToFarmId,
+      );
+      destinationName = selectedFarm.name;
+    } catch (e) {
+      // Si no se encuentra, usar el nombre de la finca actual como fallback
+      destinationName = _currentFarm?.name ?? 'Finca Desconocida';
+      print('⚠️ [BatchTransferFormScreen] Finca destino no encontrada, usando fallback: $destinationName');
+    }
+    
     int completed = 0;
     int errors = 0;
 

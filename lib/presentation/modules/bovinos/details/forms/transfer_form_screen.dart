@@ -107,17 +107,23 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
           final toFarmId = widget.transfer!.toFarmId!;
           if (!availableFarms.any((f) => f.id == toFarmId)) {
             // Buscar la finca destino en todas las fincas
-            final destFarm = allFarms.firstWhere(
-              (f) => f.id == toFarmId,
-              orElse: () => Farm(
+            try {
+              final destFarm = allFarms.firstWhere(
+                (f) => f.id == toFarmId,
+              );
+              _availableFarms.add(destFarm);
+            } catch (e) {
+              // Si no se encuentra, crear una finca temporal con datos mínimos
+              // Usar el tipo correcto (Farm es la entidad base)
+              final tempFarm = Farm(
                 id: toFarmId,
                 ownerId: userId,
                 name: 'Finca Desconocida',
                 primaryColor: Colors.grey.value,
                 createdAt: DateTime.now(),
-              ),
-            );
-            _availableFarms.add(destFarm);
+              );
+              _availableFarms.add(tempFarm);
+            }
           }
         }
       });
@@ -533,16 +539,44 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       return;
     }
 
-    // Obtener el nombre de la finca destino
-    final destinationName = _availableFarms.firstWhere(
-      (f) => f.id == _selectedToFarmId,
-      orElse: () => _availableFarms.first,
-    ).name;
+    // Obtener el nombre de la finca destino de forma segura
+    String destinationName;
+    try {
+      final selectedFarm = _availableFarms.firstWhere(
+        (f) => f.id == _selectedToFarmId,
+      );
+      destinationName = selectedFarm.name;
+    } catch (e) {
+      // Si no se encuentra, usar el nombre de la finca actual como fallback
+      destinationName = _currentFarm?.name ?? 'Finca Desconocida';
+      print('⚠️ [TransferFormScreen] Finca destino no encontrada, usando fallback: $destinationName');
+    }
 
     print('✅ [TransferFormScreen] Datos válidos. Bovino ID: ${widget.bovine.id}');
     print('📝 [TransferFormScreen] Origen: ${_fromLocationController.text}');
     print('📝 [TransferFormScreen] Destino: $destinationName');
     print('📝 [TransferFormScreen] Motivo: ${_selectedReason.displayName}');
+
+    // Mostrar feedback de guardado
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 16),
+            Text('Guardando transferencia...'),
+          ],
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
 
     try {
       if (isEditMode && widget.transfer != null) {
