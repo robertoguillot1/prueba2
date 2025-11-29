@@ -486,9 +486,12 @@ class _FarmTransfersScreenContent extends StatelessWidget {
 
   void _showTransferOptions(BuildContext context) {
     print('📋 [FarmTransfersScreen] Mostrando opciones de transferencia');
+    // CRÍTICO: Guardar el contexto de la pantalla principal ANTES del bottom sheet
+    final parentContext = context;
+    
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
+      builder: (bsContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -498,11 +501,14 @@ class _FarmTransfersScreenContent extends StatelessWidget {
               subtitle: const Text('Registrar transferencia de un bovino'),
               onTap: () {
                 print('✅ [FarmTransfersScreen] Opción Individual seleccionada');
-                Navigator.pop(context);
-                // Usar un pequeño delay para asegurar que el bottom sheet se cierre
+                Navigator.pop(bsContext); // Cerrar con el context del bottom sheet
+                // Usar el contexto de la pantalla principal
                 Future.microtask(() {
-                  if (context.mounted) {
-                    _showBovineSelector(context);
+                  if (parentContext.mounted) {
+                    print('🚀 [FarmTransfersScreen] Navegando a selector individual...');
+                    _showBovineSelector(parentContext);
+                  } else {
+                    print('❌ [FarmTransfersScreen] Contexto no montado después de cerrar bottom sheet');
                   }
                 });
               },
@@ -513,11 +519,14 @@ class _FarmTransfersScreenContent extends StatelessWidget {
               subtitle: const Text('Registrar transferencia de múltiples bovinos'),
               onTap: () {
                 print('✅ [FarmTransfersScreen] Opción Lote seleccionada');
-                Navigator.pop(context);
-                // Usar un pequeño delay para asegurar que el bottom sheet se cierre
+                Navigator.pop(bsContext); // Cerrar con el context del bottom sheet
+                // Usar el contexto de la pantalla principal
                 Future.microtask(() {
-                  if (context.mounted) {
-                    _showBatchTransferSelector(context);
+                  if (parentContext.mounted) {
+                    print('🚀 [FarmTransfersScreen] Navegando a selector de lote...');
+                    _showBatchTransferSelector(parentContext);
+                  } else {
+                    print('❌ [FarmTransfersScreen] Contexto no montado después de cerrar bottom sheet');
                   }
                 });
               },

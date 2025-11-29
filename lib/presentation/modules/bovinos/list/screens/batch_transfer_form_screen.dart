@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/di/dependency_injection.dart' as di;
+import '../../../../../core/di/dependency_injection.dart' show sl;
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../../../../../features/cattle/domain/entities/transfer_entity.dart';
+import '../../../../../domain/entities/farm/farm.dart';
+import '../../../../../domain/repositories/farm_repository.dart';
+import '../../../../../presentation/cubits/auth/auth_cubit.dart';
+import '../../../../../presentation/cubits/auth/auth_state.dart';
 import '../../details/cubits/transfer_cubit.dart';
 import '../../details/cubits/transfer_state.dart';
 
@@ -25,7 +30,6 @@ class BatchTransferFormScreen extends StatefulWidget {
 class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fromLocationController = TextEditingController();
-  final _toLocationController = TextEditingController();
   final _transporterNameController = TextEditingController();
   final _vehicleInfoController = TextEditingController();
   final _notesController = TextEditingController();
@@ -35,18 +39,70 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
   String? _selectedToFarmId;
   int _transfersCreated = 0;
   int _transfersTotal = 0;
+  
+  // Datos de fincas
+  List<Farm> _availableFarms = [];
+  Farm? _currentFarm;
+  bool _loadingFarms = true;
 
   @override
   void initState() {
     super.initState();
-    _fromLocationController.text = 'Finca Actual';
     _transfersTotal = widget.bovines.length;
+    _loadFarms();
+  }
+
+  Future<void> _loadFarms() async {
+    setState(() {
+      _loadingFarms = true;
+    });
+
+    try {
+      // Obtener userId del AuthCubit
+      final authState = context.read<AuthCubit>().state;
+      if (authState is! Authenticated) {
+        setState(() {
+          _loadingFarms = false;
+        });
+        return;
+      }
+
+      final userId = authState.user.id;
+      final farmRepository = sl<FarmRepository>();
+
+      // Obtener todas las fincas del usuario
+      final allFarms = await farmRepository.getFarms(userId);
+      
+      // Obtener la finca actual
+      final currentFarm = await farmRepository.getFarmById(userId, widget.farmId);
+
+      // Filtrar fincas disponibles (excluir la actual)
+      final availableFarms = allFarms.where((farm) => farm.id != widget.farmId).toList();
+
+      setState(() {
+        _currentFarm = currentFarm;
+        _availableFarms = availableFarms;
+        _loadingFarms = false;
+        
+        // Pre-llenar origen con el nombre de la finca actual
+        if (currentFarm != null) {
+          _fromLocationController.text = currentFarm.name;
+        } else {
+          _fromLocationController.text = 'Finca Actual';
+        }
+      });
+    } catch (e) {
+      print('❌ [BatchTransferFormScreen] Error al cargar fincas: $e');
+      setState(() {
+        _loadingFarms = false;
+        _fromLocationController.text = 'Finca Actual';
+      });
+    }
   }
 
   @override
   void dispose() {
     _fromLocationController.dispose();
-    _toLocationController.dispose();
     _transporterNameController.dispose();
     _vehicleInfoController.dispose();
     _notesController.dispose();
@@ -104,12 +160,12 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
                       ],
                     ),
                   )
-                else
-                  IconButton(
-                    icon: const Icon(Icons.save),
-                    onPressed: isLoading ? null : _handleSave,
-                    tooltip: 'Guardar',
-                  ),
+                 else
+                   IconButton(
+                     icon: const Icon(Icons.save),
+                     onPressed: isLoading ? null : () => _handleSave(context),
+                     tooltip: 'Guardar',
+                   ),
               ],
             ),
             body: SingleChildScrollView(
@@ -153,37 +209,75 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
                           ),
                     ),
                     const SizedBox(height: 12),
+                    // Origen: Solo lectura (finca actual)
                     TextFormField(
                       controller: _fromLocationController,
-                      decoration: const InputDecoration(
+                      enabled: false,
+                      decoration: InputDecoration(
                         labelText: 'Origen',
-                        hintText: 'Ej: Finca Principal, Pasto 1, etc.',
-                        prefixIcon: Icon(Icons.location_on),
-                        border: OutlineInputBorder(),
+                        hintText: 'Cargando...',
+                        prefixIcon: const Icon(Icons.location_on),
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.grey.shade200,
+                        helperText: 'Finca desde la cual se realiza la transferencia',
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Por favor ingresa el origen';
-                        }
-                        return null;
-                      },
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _toLocationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Destino',
-                        hintText: 'Ej: Finca Secundaria, Pasto 2, etc.',
-                        prefixIcon: Icon(Icons.location_on),
-                        border: OutlineInputBorder(),
+                    // Destino: Selector de fincas disponibles
+                    if (_loadingFarms)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    else if (_availableFarms.isEmpty)
+                      Card(
+                        color: Colors.orange.shade50,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.orange.shade700),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'No hay otras fincas disponibles para transferir',
+                                  style: TextStyle(color: Colors.orange.shade700),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      DropdownButtonFormField<String>(
+                        value: _selectedToFarmId,
+                        decoration: const InputDecoration(
+                          labelText: 'Destino',
+                          hintText: 'Selecciona la finca destino',
+                          prefixIcon: Icon(Icons.location_on),
+                          border: OutlineInputBorder(),
+                        ),
+                        items: _availableFarms.map((farm) {
+                          return DropdownMenuItem<String>(
+                            value: farm.id,
+                            child: Text(farm.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedToFarmId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor selecciona una finca destino';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Por favor ingresa el destino';
-                        }
-                        return null;
-                      },
-                    ),
                     const SizedBox(height: 24),
 
                     // Información de transporte (opcional)
@@ -228,11 +322,11 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Botón de guardar
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: isLoading ? null : _handleSave,
+                     // Botón de guardar
+                     SizedBox(
+                       width: double.infinity,
+                       child: ElevatedButton.icon(
+                         onPressed: isLoading ? null : () => _handleSave(context),
                         icon: isLoading
                             ? const SizedBox(
                                 width: 20,
@@ -406,8 +500,19 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
     );
   }
 
-  Future<void> _handleSave() async {
+  Future<void> _handleSave(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Validar que se haya seleccionado un destino
+    if (_selectedToFarmId == null || _selectedToFarmId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una finca destino'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -416,7 +521,14 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
       _transfersCreated = 0;
     });
 
+    // Usar el contexto del builder que tiene acceso al BlocProvider
     final cubit = context.read<TransferCubit>();
+    
+    // Obtener el nombre de la finca destino
+    final destinationName = _availableFarms.firstWhere(
+      (f) => f.id == _selectedToFarmId,
+      orElse: () => _availableFarms.first,
+    ).name;
     int completed = 0;
     int errors = 0;
 
@@ -428,7 +540,7 @@ class _BatchTransferFormScreenState extends State<BatchTransferFormScreen> {
           farmId: widget.farmId,
           bovineId: bovine.id,
           fromLocation: _fromLocationController.text.trim(),
-          toLocation: _toLocationController.text.trim(),
+          toLocation: destinationName,
           reason: _selectedReason,
           transferDate: _transferDate,
           toFarmId: _selectedToFarmId,

@@ -157,10 +157,27 @@ class _BatchTransferSelectorScreenState extends State<BatchTransferSelectorScree
                   onPressed: _selectedBovineIds.isEmpty
                       ? null
                       : () {
+                          print('✅ [BatchTransferSelectorScreen] Continuar con ${_selectedBovineIds.length} bovinos');
+                          
+                          // Verificar que hay seleccionados
+                          if (_selectedBovineIds.isEmpty) {
+                            print('❌ [BatchTransferSelectorScreen] No hay bovinos seleccionados');
+                            return;
+                          }
+                          
+                          // Obtener los bovinos seleccionados
                           final selectedBovines = widget.bovines
                               .where((b) => _selectedBovineIds.contains(b.id))
                               .toList();
-                          Navigator.pop(context, selectedBovines);
+                          
+                          print('📋 [BatchTransferSelectorScreen] Bovinos seleccionados: ${selectedBovines.map((b) => b.identifier).join(", ")}');
+                          
+                          // Retornar los bovinos seleccionados al llamador
+                          if (context.mounted) {
+                            Navigator.pop(context, selectedBovines);
+                          } else {
+                            print('❌ [BatchTransferSelectorScreen] Contexto no montado');
+                          }
                         },
                   icon: const Icon(Icons.arrow_forward),
                   label: Text(
