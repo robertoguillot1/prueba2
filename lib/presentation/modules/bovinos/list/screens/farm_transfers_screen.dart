@@ -10,7 +10,8 @@ import '../cubits/farm_transfers_cubit.dart';
 import '../../details/cubits/transfer_state.dart';
 import '../../details/forms/transfer_form_screen.dart';
 import '../../screens/bovino_detail_screen.dart';
-import '../cubits/farm_transfers_cubit.dart';
+import 'batch_transfer_selector_screen.dart';
+import 'batch_transfer_form_screen.dart';
 
 /// Pantalla para ver todas las transferencias de una finca
 class FarmTransfersScreen extends StatelessWidget {
@@ -484,6 +485,7 @@ class _FarmTransfersScreenContent extends StatelessWidget {
   }
 
   void _showTransferOptions(BuildContext context) {
+    print('📋 [FarmTransfersScreen] Mostrando opciones de transferencia');
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -495,8 +497,14 @@ class _FarmTransfersScreenContent extends StatelessWidget {
               title: const Text('Transferencia Individual'),
               subtitle: const Text('Registrar transferencia de un bovino'),
               onTap: () {
+                print('✅ [FarmTransfersScreen] Opción Individual seleccionada');
                 Navigator.pop(context);
-                _showBovineSelector(context);
+                // Usar un pequeño delay para asegurar que el bottom sheet se cierre
+                Future.microtask(() {
+                  if (context.mounted) {
+                    _showBovineSelector(context);
+                  }
+                });
               },
             ),
             ListTile(
@@ -504,13 +512,14 @@ class _FarmTransfersScreenContent extends StatelessWidget {
               title: const Text('Transferencia de Lote'),
               subtitle: const Text('Registrar transferencia de múltiples bovinos'),
               onTap: () {
+                print('✅ [FarmTransfersScreen] Opción Lote seleccionada');
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidad de lote próximamente'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
+                // Usar un pequeño delay para asegurar que el bottom sheet se cierre
+                Future.microtask(() {
+                  if (context.mounted) {
+                    _showBatchTransferSelector(context);
+                  }
+                });
               },
             ),
           ],
@@ -520,72 +529,148 @@ class _FarmTransfersScreenContent extends StatelessWidget {
   }
 
   Future<void> _showBovineSelector(BuildContext context) async {
-    // Obtener lista de bovinos
-    final getCattleList = sl<GetCattleList>();
-    final result = await getCattleList(GetCattleListParams(farmId: farmId));
+    try {
+      // Verificar que el contexto esté montado
+      if (!context.mounted) {
+        print('❌ [FarmTransfersScreen] Contexto no montado al iniciar selección');
+        return;
+      }
 
-    result.fold(
-      (failure) {
+      // Obtener lista de bovinos
+      final getCattleList = sl<GetCattleList>();
+      final result = await getCattleList(GetCattleListParams(farmId: farmId));
+
+      await result.fold(
+        (failure) async {
+          print('❌ [FarmTransfersScreen] Error al obtener bovinos: ${failure.message}');
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${failure.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        (bovines) async {
+          print('✅ [FarmTransfersScreen] Bovinos obtenidos: ${bovines.length}');
+
+          if (!context.mounted) {
+            print('❌ [FarmTransfersScreen] Contexto no montado después de obtener bovinos');
+            return;
+          }
+
+          if (bovines.isEmpty) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No hay bovinos registrados'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+            return;
+          }
+
+          // Mostrar diálogo de selección
+          print('📋 [FarmTransfersScreen] Mostrando diálogo de selección...');
+          final selectedBovine = await showDialog<BovineEntity>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Seleccionar Bovino'),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: bovines.length,
+                    itemBuilder: (context, index) {
+                      final bovine = bovines[index];
+                      return ListTile(
+                        leading: Icon(
+                          bovine.gender == BovineGender.female 
+                              ? Icons.female 
+                              : Icons.male,
+                          color: bovine.gender == BovineGender.female 
+                              ? Colors.pink 
+                              : Colors.blue,
+                        ),
+                        title: Text(
+                          bovine.identifier,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          bovine.name?.isNotEmpty == true 
+                              ? '${bovine.name} • ${bovine.breed}' 
+                              : bovine.breed,
+                        ),
+                        onTap: () {
+                          print('✅ [FarmTransfersScreen] Bovino seleccionado: ${bovine.identifier}');
+                          Navigator.pop(dialogContext, bovine);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    print('❌ [FarmTransfersScreen] Selección cancelada');
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Cancelar'),
+                ),
+              ],
+            ),
+          );
+
+          print('🔍 [FarmTransfersScreen] Resultado del diálogo: ${selectedBovine?.identifier ?? "null"}');
+
+          // Si se seleccionó un bovino, navegar al formulario
+          if (selectedBovine != null) {
+            if (!context.mounted) {
+              print('❌ [FarmTransfersScreen] Contexto no montado antes de navegar');
+              return;
+            }
+
+            print('🚀 [FarmTransfersScreen] Navegando al formulario para: ${selectedBovine.identifier}');
+            
+            final editResult = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TransferFormScreen(
+                  bovine: selectedBovine,
+                  farmId: farmId,
+                ),
+              ),
+            );
+
+            print('📝 [FarmTransfersScreen] Resultado del formulario: $editResult');
+
+            // Recargar la lista si se guardó exitosamente
+            if (editResult == true && context.mounted) {
+              print('🔄 [FarmTransfersScreen] Recargando lista de transferencias...');
+              context.read<FarmTransfersCubit>().refresh(farmId: farmId);
+            }
+          } else {
+            print('⚠️ [FarmTransfersScreen] No se seleccionó ningún bovino');
+          }
+        },
+      );
+    } catch (e, stackTrace) {
+      print('❌ [FarmTransfersScreen] Error inesperado: $e');
+      print('Stack trace: $stackTrace');
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${failure.message}'),
+            content: Text('Error inesperado: $e'),
             backgroundColor: Colors.red,
           ),
         );
-      },
-      (bovines) async {
-        if (bovines.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No hay bovinos registrados'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-          return;
-        }
-
-        final selectedBovine = await showDialog<BovineEntity>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Seleccionar Bovino'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: bovines.length,
-                itemBuilder: (context, index) {
-                  final bovine = bovines[index];
-                  return ListTile(
-                    leading: Icon(
-                      bovine.gender == BovineGender.female ? Icons.female : Icons.male,
-                    ),
-                    title: Text(bovine.identifier),
-                    subtitle: Text(bovine.name ?? bovine.breed),
-                    onTap: () => Navigator.pop(context, bovine),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-
-        if (selectedBovine != null && context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TransferFormScreen(
-                bovine: selectedBovine,
-                farmId: farmId,
-              ),
-            ),
-          ).then((result) {
-            if (result == true && context.mounted) {
-              context.read<FarmTransfersCubit>().refresh(farmId: farmId);
-            }
-          });
-        }
-      },
-    );
+      }
+    }
   }
 
   Future<void> _navigateToEditTransfer(BuildContext context, TransferEntity transfer) async {
@@ -662,6 +747,109 @@ class _FarmTransfersScreenContent extends StatelessWidget {
             bovineId: transfer.bovineId,
             farmId: farmId,
           );
+    }
+  }
+
+  Future<void> _showBatchTransferSelector(BuildContext context) async {
+    try {
+      // Verificar que el contexto esté montado
+      if (!context.mounted) {
+        print('❌ [FarmTransfersScreen] Contexto no montado al iniciar selección de lote');
+        return;
+      }
+
+      // Obtener lista de bovinos
+      final getCattleList = sl<GetCattleList>();
+      final result = await getCattleList(GetCattleListParams(farmId: farmId));
+
+      await result.fold(
+        (failure) async {
+          print('❌ [FarmTransfersScreen] Error al obtener bovinos para lote: ${failure.message}');
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${failure.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        (bovines) async {
+          print('✅ [FarmTransfersScreen] Bovinos obtenidos para lote: ${bovines.length}');
+
+          if (!context.mounted) {
+            print('❌ [FarmTransfersScreen] Contexto no montado después de obtener bovinos');
+            return;
+          }
+
+          if (bovines.isEmpty) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No hay bovinos registrados'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+            return;
+          }
+
+          // Navegar a la pantalla de selección múltiple
+          print('📋 [FarmTransfersScreen] Navegando a selector de lote...');
+          final selectedBovines = await Navigator.push<List<BovineEntity>>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BatchTransferSelectorScreen(
+                bovines: bovines,
+                farmId: farmId,
+              ),
+            ),
+          );
+
+          print('🔍 [FarmTransfersScreen] Resultado del selector: ${selectedBovines?.length ?? 0} bovinos');
+
+          // Si se seleccionaron bovinos, navegar al formulario de lote
+          if (selectedBovines != null && selectedBovines.isNotEmpty) {
+            if (!context.mounted) {
+              print('❌ [FarmTransfersScreen] Contexto no montado antes de navegar al formulario de lote');
+              return;
+            }
+
+            print('🚀 [FarmTransfersScreen] Navegando al formulario de lote para ${selectedBovines.length} bovinos');
+
+            final editResult = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BatchTransferFormScreen(
+                  bovines: selectedBovines,
+                  farmId: farmId,
+                ),
+              ),
+            );
+
+            print('📝 [FarmTransfersScreen] Resultado del formulario de lote: $editResult');
+
+            // Recargar la lista si se guardó exitosamente
+            if (editResult == true && context.mounted) {
+              print('🔄 [FarmTransfersScreen] Recargando lista de transferencias...');
+              context.read<FarmTransfersCubit>().refresh(farmId: farmId);
+            }
+          } else {
+            print('⚠️ [FarmTransfersScreen] No se seleccionaron bovinos para el lote');
+          }
+        },
+      );
+    } catch (e, stackTrace) {
+      print('❌ [FarmTransfersScreen] Error inesperado en selección de lote: $e');
+      print('Stack trace: $stackTrace');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error inesperado: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }
