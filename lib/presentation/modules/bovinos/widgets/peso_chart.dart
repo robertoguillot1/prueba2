@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../../../../domain/entities/bovinos/peso_bovino.dart';
+import '../../../../features/cattle/domain/entities/weight_record_entity.dart';
 
 /// Widget de gráfico para evolución de peso
 class PesoChart extends StatelessWidget {
-  final List<PesoBovino> registros;
+  final List<WeightRecordEntity> registros;
 
   const PesoChart({
     super.key,
@@ -20,7 +20,7 @@ class PesoChart extends StatelessWidget {
     }
 
     // Preparar datos para el gráfico
-    final sortedData = List<PesoBovino>.from(registros);
+    final sortedData = List<WeightRecordEntity>.from(registros);
     sortedData.sort((a, b) => a.recordDate.compareTo(b.recordDate));
 
     // Tomar los últimos 10 registros
@@ -65,7 +65,7 @@ class PesoChart extends StatelessWidget {
   }
 
   /// Indicador de ganancia total en el periodo
-  Widget _buildGainIndicator(BuildContext context, List<PesoBovino> data) {
+  Widget _buildGainIndicator(BuildContext context, List<WeightRecordEntity> data) {
     final firstWeight = data.first.weight;
     final lastWeight = data.last.weight;
     final gain = lastWeight - firstWeight;
@@ -101,13 +101,16 @@ class PesoChart extends StatelessWidget {
 
   /// Construye los datos del gráfico
   LineChartData _buildLineChartData(
-    List<PesoBovino> data,
+    List<WeightRecordEntity> data,
     BuildContext context,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Calcular valores min y max para el eje Y
-    final weightValues = data.map((r) => r.weight).toList();
+    final weightValues = data.map((r) => r.weight).whereType<double>().toList();
+    if (weightValues.isEmpty) {
+      return LineChartData(); // Retornar gráfico vacío si no hay datos
+    }
     final minY = weightValues.reduce((a, b) => a < b ? a : b);
     final maxY = weightValues.reduce((a, b) => a > b ? a : b);
 

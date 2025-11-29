@@ -99,7 +99,7 @@ import '../../domain/usecases/bovinos/create_evento_reproductivo.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproduction_cubit.dart';
 import '../../presentation/modules/bovinos/details/cubits/reproductive_event_form_cubit.dart';
 import '../../presentation/modules/bovinos/list/cubits/bovine_list_cubit.dart';
-// Producción (Leche y Peso)
+// Producción (Leche y Peso) - Sistema Viejo
 import '../../domain/repositories/bovinos/produccion_leche_repository.dart';
 import '../../domain/repositories/bovinos/peso_bovino_repository.dart';
 import '../../data/repositories_impl/bovinos/produccion_leche_repository_impl.dart';
@@ -108,8 +108,8 @@ import '../../data/datasources/bovinos/produccion_leche_datasource.dart';
 import '../../data/datasources/bovinos/peso_bovino_datasource.dart';
 import '../../domain/usecases/bovinos/get_producciones_leche_by_bovino.dart';
 import '../../domain/usecases/bovinos/get_pesos_by_bovino.dart';
-import '../../domain/usecases/bovinos/add_milk_production.dart';
-import '../../domain/usecases/bovinos/add_weight_record.dart';
+import '../../domain/usecases/bovinos/add_milk_production.dart' as old;
+import '../../domain/usecases/bovinos/add_weight_record.dart' as old;
 import '../../presentation/modules/bovinos/details/cubits/production_cubit.dart';
 import '../../presentation/modules/bovinos/details/cubits/production_form_cubit.dart';
 // Sanidad (Vacunas)
@@ -119,6 +119,45 @@ import '../../features/cattle/domain/usecases/add_vacuna_bovino.dart';
 import '../../features/cattle/data/repositories/vacuna_bovino_repository_impl.dart';
 import '../../features/cattle/data/datasources/vacuna_bovino_remote_datasource.dart';
 import '../../presentation/modules/bovinos/details/cubits/health_cubit.dart';
+// Nuevo Sistema - Eventos Reproductivos
+import '../../features/cattle/domain/repositories/reproductive_event_repository.dart';
+import '../../features/cattle/data/repositories/reproductive_event_repository_impl.dart';
+import '../../features/cattle/data/datasources/reproductive_event_remote_datasource.dart';
+import '../../features/cattle/domain/usecases/get_reproductive_events_by_bovine.dart';
+import '../../features/cattle/domain/usecases/get_reproductive_event_by_id.dart';
+import '../../features/cattle/domain/usecases/add_reproductive_event.dart';
+import '../../features/cattle/domain/usecases/update_reproductive_event.dart';
+import '../../features/cattle/domain/usecases/delete_reproductive_event.dart';
+// Nuevo Sistema - Producción de Leche
+import '../../features/cattle/domain/repositories/milk_production_repository.dart';
+import '../../features/cattle/data/repositories/milk_production_repository_impl.dart';
+import '../../features/cattle/data/datasources/milk_production_remote_datasource.dart';
+import '../../features/cattle/domain/usecases/get_milk_productions_by_bovine.dart';
+import '../../features/cattle/domain/usecases/get_milk_productions_by_date_range.dart';
+import '../../features/cattle/domain/usecases/get_milk_production_by_id.dart';
+import '../../features/cattle/domain/usecases/add_milk_production.dart';
+import '../../features/cattle/domain/usecases/update_milk_production.dart';
+import '../../features/cattle/domain/usecases/delete_milk_production.dart';
+// Nuevo Sistema - Registros de Peso
+import '../../features/cattle/domain/repositories/weight_record_repository.dart';
+import '../../features/cattle/data/repositories/weight_record_repository_impl.dart';
+import '../../features/cattle/data/datasources/weight_record_remote_datasource.dart';
+import '../../features/cattle/domain/usecases/get_weight_records_by_bovine.dart';
+import '../../features/cattle/domain/usecases/get_weight_record_by_id.dart';
+import '../../features/cattle/domain/usecases/add_weight_record.dart';
+import '../../features/cattle/domain/usecases/update_weight_record.dart';
+import '../../features/cattle/domain/usecases/delete_weight_record.dart';
+// Nuevo Sistema - Transferencias
+import '../../features/cattle/domain/repositories/transfer_repository.dart';
+import '../../features/cattle/data/repositories/transfer_repository_impl.dart';
+import '../../features/cattle/data/datasources/transfer_remote_datasource.dart';
+import '../../features/cattle/domain/usecases/get_transfers_by_bovine.dart';
+import '../../features/cattle/domain/usecases/get_transfers_by_farm.dart';
+import '../../features/cattle/domain/usecases/add_transfer.dart';
+import '../../features/cattle/domain/usecases/update_transfer.dart';
+import '../../features/cattle/domain/usecases/delete_transfer.dart';
+import '../../presentation/modules/bovinos/details/cubits/transfer_cubit.dart';
+import '../../presentation/modules/bovinos/list/cubits/farm_transfers_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -309,6 +348,87 @@ class DependencyInjection {
         deleteBovineUseCase: sl<DeleteBovine>(),
       ),
     );
+
+    // ========== REPRODUCTIVE EVENTS (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<ReproductiveEventRemoteDataSource>(
+      () => ReproductiveEventRemoteDataSourceImpl(),
+    );
+
+    // Repository
+    sl.registerLazySingleton<ReproductiveEventRepository>(
+      () => ReproductiveEventRepositoryImpl(
+        remoteDataSource: sl<ReproductiveEventRemoteDataSource>(),
+      ),
+    );
+
+    // Use Cases
+    sl.registerLazySingleton(() => GetReproductiveEventsByBovine(sl<ReproductiveEventRepository>()));
+    sl.registerLazySingleton(() => GetReproductiveEventById(sl<ReproductiveEventRepository>()));
+    sl.registerLazySingleton(() => AddReproductiveEvent(sl<ReproductiveEventRepository>()));
+    sl.registerLazySingleton(() => UpdateReproductiveEvent(sl<ReproductiveEventRepository>()));
+    sl.registerLazySingleton(() => DeleteReproductiveEvent(sl<ReproductiveEventRepository>()));
+
+    // ========== MILK PRODUCTION (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<MilkProductionRemoteDataSource>(
+      () => MilkProductionRemoteDataSourceImpl(),
+    );
+
+    // Repository
+    sl.registerLazySingleton<MilkProductionRepository>(
+      () => MilkProductionRepositoryImpl(
+        remoteDataSource: sl<MilkProductionRemoteDataSource>(),
+      ),
+    );
+
+    // Use Cases
+    sl.registerLazySingleton(() => GetMilkProductionsByBovine(sl<MilkProductionRepository>()));
+    sl.registerLazySingleton(() => GetMilkProductionsByDateRange(sl<MilkProductionRepository>()));
+    sl.registerLazySingleton(() => GetMilkProductionById(sl<MilkProductionRepository>()));
+    sl.registerLazySingleton(() => AddMilkProduction(sl<MilkProductionRepository>()));
+    sl.registerLazySingleton(() => UpdateMilkProduction(sl<MilkProductionRepository>()));
+    sl.registerLazySingleton(() => DeleteMilkProduction(sl<MilkProductionRepository>()));
+
+    // ========== WEIGHT RECORDS (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<WeightRecordRemoteDataSource>(
+      () => WeightRecordRemoteDataSourceImpl(),
+    );
+
+    // Repository
+    sl.registerLazySingleton<WeightRecordRepository>(
+      () => WeightRecordRepositoryImpl(
+        remoteDataSource: sl<WeightRecordRemoteDataSource>(),
+      ),
+    );
+
+    // Use Cases
+    sl.registerLazySingleton(() => GetWeightRecordsByBovine(sl<WeightRecordRepository>()));
+    sl.registerLazySingleton(() => GetWeightRecordById(sl<WeightRecordRepository>()));
+    sl.registerLazySingleton(() => AddWeightRecord(sl<WeightRecordRepository>()));
+    sl.registerLazySingleton(() => UpdateWeightRecord(sl<WeightRecordRepository>()));
+    sl.registerLazySingleton(() => DeleteWeightRecord(sl<WeightRecordRepository>()));
+
+    // ========== TRANSFERS (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<TransferRemoteDataSource>(
+      () => TransferRemoteDataSourceImpl(),
+    );
+
+    // Repository
+    sl.registerLazySingleton<TransferRepository>(
+      () => TransferRepositoryImpl(
+        remoteDataSource: sl<TransferRemoteDataSource>(),
+      ),
+    );
+
+    // Use Cases
+    sl.registerLazySingleton(() => GetTransfersByBovine(sl<TransferRepository>()));
+    sl.registerLazySingleton(() => GetTransfersByFarm(sl<TransferRepository>()));
+    sl.registerLazySingleton(() => AddTransfer(sl<TransferRepository>()));
+    sl.registerLazySingleton(() => UpdateTransfer(sl<TransferRepository>()));
+    sl.registerLazySingleton(() => DeleteTransfer(sl<TransferRepository>()));
   }
   
   // Getters para Data Sources
@@ -437,35 +557,32 @@ class DependencyInjection {
   }
 
   /// Crea una instancia de ReproductionCubit para un bovino específico
-  static ReproductionCubit createReproductionCubit(String farmId) {
+  static ReproductionCubit createReproductionCubit() {
     return ReproductionCubit(
-      getEventos: GetEventosReproductivosByBovino(
-        repository: _eventosReproductivosRepository!,
-        farmId: farmId,
-      ),
+      getEvents: sl<GetReproductiveEventsByBovine>(),
     );
   }
 
   /// Crea una instancia de ReproductiveEventFormCubit
   static ReproductiveEventFormCubit createReproductiveEventFormCubit() {
     return ReproductiveEventFormCubit(
-      createEvento: CreateEventoReproductivo(_eventosReproductivosRepository!),
+      addEvent: sl<AddReproductiveEvent>(),
     );
   }
 
   /// Crea una instancia de ProductionCubit
   static ProductionCubit createProductionCubit() {
     return ProductionCubit(
-      getProduccionesLeche: GetProduccionesLecheByBovino(_produccionLecheRepository!),
-      getPesos: GetPesosByBovino(_pesoBovinoRepository!),
+      getProduccionesLeche: sl<GetMilkProductionsByBovine>(),
+      getPesos: sl<GetWeightRecordsByBovine>(),
     );
   }
 
   /// Crea una instancia de ProductionFormCubit
   static ProductionFormCubit createProductionFormCubit() {
     return ProductionFormCubit(
-      addMilkProduction: AddMilkProduction(_produccionLecheRepository!),
-      addWeightRecord: AddWeightRecord(_pesoBovinoRepository!),
+      addMilkProduction: sl<AddMilkProduction>(),
+      addWeightRecord: sl<AddWeightRecord>(),
     );
   }
 
@@ -474,6 +591,24 @@ class DependencyInjection {
     return HealthCubit(
       getVacunas: GetVacunasByBovino(_vacunaBovinoRepository!),
       addVacuna: AddVacunaBovino(_vacunaBovinoRepository!),
+    );
+  }
+
+  /// Crea una instancia de TransferCubit
+  static TransferCubit createTransferCubit() {
+    return TransferCubit(
+      getTransfers: sl<GetTransfersByBovine>(),
+      addTransfer: sl<AddTransfer>(),
+      updateTransfer: sl<UpdateTransfer>(),
+      deleteTransfer: sl<DeleteTransfer>(),
+    );
+  }
+
+  /// Crea una instancia de FarmTransfersCubit
+  static FarmTransfersCubit createFarmTransfersCubit() {
+    return FarmTransfersCubit(
+      getTransfers: sl<GetTransfersByFarm>(),
+      deleteTransfer: sl<DeleteTransfer>(),
     );
   }
 

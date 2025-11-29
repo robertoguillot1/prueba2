@@ -169,7 +169,10 @@ class DashboardCubit extends Cubit<DashboardState> {
           message: '${bovine.identifier} (${bovine.name ?? 'Sin nombre'}) tiene solo ${bovine.weight?.toStringAsFixed(1)}kg',
           type: AlertType.critical,
           route: '/cattle/detail',
-          routeArguments: {'bovineId': bovine.id},
+          routeArguments: {
+            'bovine': bovine,  // Objeto completo
+            'farmId': farmId,  // ID de la finca
+          },
         ));
       }
 
@@ -183,7 +186,10 @@ class DashboardCubit extends Cubit<DashboardState> {
           message: '${bovine.identifier} tiene ${bovine.weight?.toStringAsFixed(1)}kg. Considere mejorar alimentación',
           type: AlertType.warning,
           route: '/cattle/detail',
-          routeArguments: {'bovineId': bovine.id},
+          routeArguments: {
+            'bovine': bovine,  // Objeto completo
+            'farmId': farmId,  // ID de la finca
+          },
         ));
       }
 
@@ -197,7 +203,10 @@ class DashboardCubit extends Cubit<DashboardState> {
           message: '${bovine.identifier} tiene ${bovine.age} años y ${bovine.weight?.toStringAsFixed(1)}kg',
           type: AlertType.info,
           route: '/cattle/detail',
-          routeArguments: {'bovineId': bovine.id},
+          routeArguments: {
+            'bovine': bovine,  // Objeto completo
+            'farmId': farmId,  // ID de la finca
+          },
         ));
       }
     }

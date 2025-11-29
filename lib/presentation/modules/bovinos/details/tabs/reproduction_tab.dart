@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/di/dependency_injection.dart' as di;
-import '../../../../../domain/entities/bovinos/evento_reproductivo.dart';
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../../features/cattle/domain/entities/reproductive_event_entity.dart';
 import '../cubits/reproduction_cubit.dart';
 import '../screens/reproductive_event_form_screen.dart';
 
@@ -21,8 +21,8 @@ class ReproductionTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => di.DependencyInjection.createReproductionCubit(farmId)
-        ..loadEvents(bovine.id),
+      create: (_) => di.DependencyInjection.createReproductionCubit()
+        ..loadEvents(bovine.id, farmId),
       child: _ReproductionTabContent(
         bovine: bovine,
         farmId: farmId,
@@ -74,7 +74,7 @@ class _ReproductionTabContent extends StatelessWidget {
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () {
-                    context.read<ReproductionCubit>().refresh(bovine.id);
+                    context.read<ReproductionCubit>().refresh(bovine.id, farmId);
                   },
                   icon: const Icon(Icons.refresh),
                   label: const Text('Reintentar'),
@@ -93,7 +93,7 @@ class _ReproductionTabContent extends StatelessWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<ReproductionCubit>().refresh(bovine.id);
+              context.read<ReproductionCubit>().refresh(bovine.id, farmId);
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child: ListView.builder(
@@ -192,33 +192,33 @@ class _ReproductionTabContent extends StatelessWidget {
     );
 
     if (result == true && context.mounted) {
-      context.read<ReproductionCubit>().refresh(bovine.id);
+      context.read<ReproductionCubit>().refresh(bovine.id, farmId);
     }
   }
 
   /// Navegar al detalle del evento (por ahora solo muestra info)
-  void _navigateToEventDetail(BuildContext context, EventoReproductivo event) {
+  void _navigateToEventDetail(BuildContext context, ReproductiveEventEntity event) {
     // Por ahora, solo mostramos un diálogo con la información
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(event.tipo.displayName),
+        title: Text(event.type.displayName),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Fecha: ${DateFormat('dd/MM/yyyy').format(event.fecha)}'),
+            Text('Fecha: ${DateFormat('dd/MM/yyyy').format(event.eventDate)}'),
             const SizedBox(height: 8),
-            if (event.notas != null && event.notas!.isNotEmpty) ...[
+            if (event.notes != null && event.notes!.isNotEmpty) ...[
               const Text('Notas:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(event.notas!),
+              Text(event.notes!),
               const SizedBox(height: 8),
             ],
-            if (event.detalles.isNotEmpty) ...[
+            if (event.details.isNotEmpty) ...[
               const Text('Detalles:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              ...event.detalles.entries.map(
+              ...event.details.entries.map(
                 (e) => Text('• ${e.key}: ${e.value}'),
               ),
             ],
@@ -237,7 +237,7 @@ class _ReproductionTabContent extends StatelessWidget {
 
 /// Tarjeta individual para un evento reproductivo
 class ReproductionEventTile extends StatelessWidget {
-  final EventoReproductivo event;
+  final ReproductiveEventEntity event;
   final VoidCallback? onTap;
 
   const ReproductionEventTile({
@@ -249,7 +249,7 @@ class ReproductionEventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
-    final color = _getColorForEventType(event.tipo);
+    final color = _getColorForEventType(event.type);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -269,7 +269,7 @@ class ReproductionEventTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  _getIconForEventType(event.tipo),
+                  _getIconForEventType(event.type),
                   color: color,
                   size: 28,
                 ),
@@ -283,7 +283,7 @@ class ReproductionEventTile extends StatelessWidget {
                   children: [
                     // Tipo de evento
                     Text(
-                      event.tipo.displayName,
+                      event.type.displayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -300,7 +300,7 @@ class ReproductionEventTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          dateFormat.format(event.fecha),
+                          dateFormat.format(event.eventDate),
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey.shade700,
                               ),
@@ -338,58 +338,61 @@ class ReproductionEventTile extends StatelessWidget {
   }
 
   /// Obtiene el icono según el tipo de evento
-  IconData _getIconForEventType(TipoEventoReproductivo tipo) {
-    switch (tipo) {
-      case TipoEventoReproductivo.celo:
+  IconData _getIconForEventType(ReproductiveEventType type) {
+    switch (type) {
+      case ReproductiveEventType.heat:
         return Icons.favorite;
-      case TipoEventoReproductivo.montaInseminacion:
+      case ReproductiveEventType.insemination:
         return Icons.pets;
-      case TipoEventoReproductivo.palpacionTacto:
+      case ReproductiveEventType.palpation:
         return Icons.medical_services;
-      case TipoEventoReproductivo.parto:
+      case ReproductiveEventType.calving:
         return Icons.child_care;
-      case TipoEventoReproductivo.aborto:
+      case ReproductiveEventType.abortion:
         return Icons.cancel;
-      case TipoEventoReproductivo.secado:
+      case ReproductiveEventType.drying:
         return Icons.water_drop;
     }
   }
 
   /// Obtiene el color según el tipo de evento
-  Color _getColorForEventType(TipoEventoReproductivo tipo) {
-    switch (tipo) {
-      case TipoEventoReproductivo.celo:
+  Color _getColorForEventType(ReproductiveEventType type) {
+    switch (type) {
+      case ReproductiveEventType.heat:
         return Colors.pink;
-      case TipoEventoReproductivo.montaInseminacion:
+      case ReproductiveEventType.insemination:
         return Colors.blue;
-      case TipoEventoReproductivo.palpacionTacto:
+      case ReproductiveEventType.palpation:
         return Colors.teal;
-      case TipoEventoReproductivo.parto:
+      case ReproductiveEventType.calving:
         return Colors.green;
-      case TipoEventoReproductivo.aborto:
+      case ReproductiveEventType.abortion:
         return Colors.red;
-      case TipoEventoReproductivo.secado:
+      case ReproductiveEventType.drying:
         return Colors.indigo;
     }
   }
 
   /// Obtiene un resumen del evento según su tipo
-  String _getEventSummary(EventoReproductivo event) {
-    switch (event.tipo) {
-      case TipoEventoReproductivo.palpacionTacto:
-        final resultado = event.resultadoPalpacion;
+  String _getEventSummary(ReproductiveEventEntity event) {
+    switch (event.type) {
+      case ReproductiveEventType.palpation:
+        final resultado = event.palpationResult;
         return resultado != null ? 'Resultado: $resultado' : '';
-      case TipoEventoReproductivo.parto:
-        final nacioCria = event.nacioCria;
-        return nacioCria == true ? 'Cría nacida exitosamente' : 'Sin cría';
-      case TipoEventoReproductivo.montaInseminacion:
-        final toro = event.idToro;
-        final pajilla = event.codigoPajilla;
+      case ReproductiveEventType.calving:
+        final nacioCria = event.calfBorn;
+        if (nacioCria == true) {
+          return 'Cría nacida exitosamente';
+        }
+        return 'Sin cría';
+      case ReproductiveEventType.insemination:
+        final toro = event.fatherId;
+        final pajilla = event.semenCode;
         if (toro != null) return 'Toro: $toro';
         if (pajilla != null) return 'Pajilla: $pajilla';
         return '';
       default:
-        return event.notas ?? '';
+        return event.notes ?? '';
     }
   }
 }

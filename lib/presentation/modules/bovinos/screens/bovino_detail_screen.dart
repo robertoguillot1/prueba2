@@ -8,6 +8,7 @@ import '../cubits/form/bovino_form_state.dart';
 import '../details/tabs/reproduction_tab.dart';
 import '../details/tabs/production_tab.dart';
 import '../details/tabs/health_tab.dart';
+import '../details/tabs/transfer_tab.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de detalle/perfil de un Bovino
@@ -53,8 +54,12 @@ class BovinoDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDetailContent(BuildContext context) {
+    // Determinar si es hembra para mostrar tab de Reproducción
+    final isFemale = bovine.gender == BovineGender.female;
+    final tabCount = isFemale ? 5 : 4; // 5 tabs para hembras, 4 para machos (agregado Transporte)
+
     return DefaultTabController(
-      length: 4,
+      length: tabCount,
       child: Builder(
         builder: (BuildContext tabContext) {
           return Scaffold(
@@ -66,12 +71,7 @@ class BovinoDetailScreen extends StatelessWidget {
                     pinned: true,
                     delegate: _StickyTabBarDelegate(
                       TabBar(
-                        tabs: const [
-                          Tab(icon: Icon(Icons.info_outline), text: 'General'),
-                          Tab(icon: Icon(Icons.favorite_outline), text: 'Reproducción'),
-                          Tab(icon: Icon(Icons.show_chart), text: 'Producción'),
-                          Tab(icon: Icon(Icons.medical_services_outlined), text: 'Sanidad'),
-                        ],
+                        tabs: _buildTabs(isFemale),
                         labelColor: Theme.of(context).primaryColor,
                         unselectedLabelColor: Colors.grey,
                         indicatorColor: Theme.of(context).primaryColor,
@@ -81,25 +81,60 @@ class BovinoDetailScreen extends StatelessWidget {
                 ];
               },
               body: TabBarView(
-                children: [
-                  _buildGeneralTab(tabContext),
-                  _buildReproductionTab(tabContext),
-                  _buildProductionTab(tabContext),
-                  _buildHealthTab(tabContext),
-                ],
+                children: _buildTabViews(tabContext, isFemale),
               ),
             ),
-            // FAB solo visible en tabs General (0) y Reproducción (1)
+            // FAB solo visible en tabs General (0) y Reproducción (1 si es hembra)
             // Producción y Sanidad tienen sus propios FABs
-            floatingActionButton: _buildConditionalFAB(tabContext),
+            floatingActionButton: _buildConditionalFAB(tabContext, isFemale),
           );
         },
       ),
     );
   }
 
-  /// FAB condicional que solo aparece en tabs General y Reproducción
-  Widget? _buildConditionalFAB(BuildContext context) {
+  /// Construye la lista de tabs según el género
+  List<Tab> _buildTabs(bool isFemale) {
+    final tabs = <Tab>[
+      const Tab(icon: Icon(Icons.info_outline), text: 'General'),
+    ];
+
+    // Solo agregar tab de Reproducción si es hembra
+    if (isFemale) {
+      tabs.add(const Tab(icon: Icon(Icons.favorite_outline), text: 'Reproducción'));
+    }
+
+    tabs.addAll([
+      const Tab(icon: Icon(Icons.show_chart), text: 'Producción'),
+      const Tab(icon: Icon(Icons.medical_services_outlined), text: 'Sanidad'),
+      const Tab(icon: Icon(Icons.local_shipping), text: 'Transporte'),
+    ]);
+
+    return tabs;
+  }
+
+  /// Construye la lista de TabBarView children según el género
+  List<Widget> _buildTabViews(BuildContext context, bool isFemale) {
+    final views = <Widget>[
+      _buildGeneralTab(context),
+    ];
+
+    // Solo agregar tab de Reproducción si es hembra
+    if (isFemale) {
+      views.add(_buildReproductionTab(context));
+    }
+
+    views.addAll([
+      _buildProductionTab(context),
+      _buildHealthTab(context),
+      _buildTransferTab(context),
+    ]);
+
+    return views;
+  }
+
+  /// FAB condicional que solo aparece en tabs General y Reproducción (si es hembra)
+  Widget? _buildConditionalFAB(BuildContext context, bool isFemale) {
     // Obtener el índice actual del TabController
     final tabController = DefaultTabController.of(context);
     
@@ -108,17 +143,30 @@ class BovinoDetailScreen extends StatelessWidget {
       builder: (context, child) {
         final currentIndex = tabController.index;
         
-        // Solo mostrar en tab General (0) y Reproducción (1)
-        if (currentIndex == 0 || currentIndex == 1) {
-          return FloatingActionButton.extended(
-            onPressed: () => _navigateToEdit(context),
-            icon: const Icon(Icons.edit),
-            label: const Text('Editar'),
-            heroTag: 'edit_bovine_fab', // Evitar conflictos con otros FABs
-          );
+        // Para hembras: mostrar en General (0) y Reproducción (1)
+        // Para machos: solo mostrar en General (0)
+        if (isFemale) {
+          if (currentIndex == 0 || currentIndex == 1) {
+            return FloatingActionButton.extended(
+              onPressed: () => _navigateToEdit(context),
+              icon: const Icon(Icons.edit),
+              label: const Text('Editar'),
+              heroTag: 'edit_bovine_fab',
+            );
+          }
+        } else {
+          // Machos: solo en General (0)
+          if (currentIndex == 0) {
+            return FloatingActionButton.extended(
+              onPressed: () => _navigateToEdit(context),
+              icon: const Icon(Icons.edit),
+              label: const Text('Editar'),
+              heroTag: 'edit_bovine_fab',
+            );
+          }
         }
         
-        // En tabs Producción (2) y Sanidad (3), no mostrar (tienen sus propios FABs)
+        // En tabs Producción y Sanidad, no mostrar (tienen sus propios FABs)
         return const SizedBox.shrink();
       },
     );
@@ -392,6 +440,14 @@ class BovinoDetailScreen extends StatelessWidget {
   // TAB 4: SANIDAD
   Widget _buildHealthTab(BuildContext context) {
     return HealthTab(
+      bovine: bovine,
+      farmId: farmId,
+    );
+  }
+
+  // TAB 5: TRANSPORTE
+  Widget _buildTransferTab(BuildContext context) {
+    return TransferTab(
       bovine: bovine,
       farmId: farmId,
     );

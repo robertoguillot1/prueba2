@@ -286,3 +286,4 @@ Esto eliminaría la necesidad de inferir el propósito.
 
 
 
+

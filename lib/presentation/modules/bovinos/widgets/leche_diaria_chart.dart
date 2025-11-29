@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../../../../domain/entities/bovinos/produccion_leche.dart';
+import '../../../../features/cattle/domain/entities/milk_production_entity.dart';
 
 /// Widget de gráfico para producción diaria de leche
 class LecheDiariaChart extends StatelessWidget {
-  final List<ProduccionLeche> registros;
+  final List<MilkProductionEntity> registros;
 
   const LecheDiariaChart({
     super.key,
@@ -20,7 +20,7 @@ class LecheDiariaChart extends StatelessWidget {
     }
 
     // Preparar datos para el gráfico
-    final sortedData = List<ProduccionLeche>.from(registros);
+    final sortedData = List<MilkProductionEntity>.from(registros);
     sortedData.sort((a, b) => a.recordDate.compareTo(b.recordDate));
 
     // Tomar los últimos 10 registros
@@ -63,13 +63,16 @@ class LecheDiariaChart extends StatelessWidget {
 
   /// Construye los datos del gráfico
   LineChartData _buildLineChartData(
-    List<ProduccionLeche> data,
+    List<MilkProductionEntity> data,
     BuildContext context,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Calcular valores min y max para el eje Y
-    final litersValues = data.map((r) => r.litersProduced).toList();
+    final litersValues = data.map((r) => r.litersProduced).whereType<double>().toList();
+    if (litersValues.isEmpty) {
+      return LineChartData(); // Retornar gráfico vacío si no hay datos
+    }
     final minY = litersValues.reduce((a, b) => a < b ? a : b);
     final maxY = litersValues.reduce((a, b) => a > b ? a : b);
 

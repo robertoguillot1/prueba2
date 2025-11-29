@@ -15,6 +15,7 @@ import '../../presentation/modules/dashboard/screens/dashboard_screen.dart';
 import '../../presentation/modules/bovinos/screens/bovino_menu_screen.dart';
 import '../../presentation/modules/bovinos/list/bovinos_list_screen.dart';
 import '../../presentation/modules/bovinos/screens/bovino_form_screen.dart';
+import '../../presentation/modules/bovinos/screens/bovino_detail_screen.dart';
 
 // Cattle (Clean Architecture)
 import '../../features/cattle/presentation/screens/cattle_list_screen.dart';
@@ -179,6 +180,36 @@ class AppRouter {
             bovine: bovine,
             initialMotherId: initialMotherId,
             initialBirthDate: initialBirthDate,
+          ),
+          settings: settings,
+        );
+
+      case '/cattle/detail':
+        final argsMap = arguments as Map<String, dynamic>?;
+        final bovine = argsMap?['bovine'] as BovineEntity?;
+        final farmId = argsMap?['farmId'] as String?;
+        
+        if (farmId == null) {
+          print('❌ [AppRouter] Error: farmId no proporcionado para CattleDetail');
+          return MaterialPageRoute(
+            builder: (_) => _errorScreen('No se proporcionó el ID de la finca'),
+            settings: settings,
+          );
+        }
+        
+        if (bovine == null) {
+          print('❌ [AppRouter] Error: bovine no proporcionado para CattleDetail');
+          return MaterialPageRoute(
+            builder: (_) => _errorScreen('No se proporcionó el bovino'),
+            settings: settings,
+          );
+        }
+        
+        print('✅ [AppRouter] Navegando a CattleDetail - farmId: $farmId, bovineId: ${bovine.id}');
+        return MaterialPageRoute(
+          builder: (_) => BovinoDetailScreen(
+            bovine: bovine,
+            farmId: farmId,
           ),
           settings: settings,
         );

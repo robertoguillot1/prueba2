@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/di/dependency_injection.dart' as di;
-import '../../../../../domain/entities/bovinos/produccion_leche.dart';
-import '../../../../../domain/entities/bovinos/peso_bovino.dart';
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../../features/cattle/domain/entities/milk_production_entity.dart';
+import '../../../../../features/cattle/domain/entities/weight_record_entity.dart';
 import '../cubits/production_cubit.dart';
 import '../forms/milk_production_form_screen.dart';
 import '../forms/weight_record_form_screen.dart';
@@ -230,7 +230,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   }
 
   /// Vista de producción de leche
-  Widget _buildMilkView(BuildContext context, List<ProduccionLeche> records) {
+  Widget _buildMilkView(BuildContext context, List<MilkProductionEntity> records) {
     if (records.isEmpty) {
       return _buildEmptyState(
         context,
@@ -261,7 +261,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   }
 
   /// Vista de historial de peso
-  Widget _buildWeightView(BuildContext context, List<PesoBovino> records) {
+  Widget _buildWeightView(BuildContext context, List<WeightRecordEntity> records) {
     if (records.isEmpty) {
       return _buildEmptyState(
         context,
@@ -297,7 +297,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   }
 
   /// Estadísticas de leche
-  Widget _buildMilkStats(List<ProduccionLeche> records) {
+  Widget _buildMilkStats(List<MilkProductionEntity> records) {
     if (records.isEmpty) return const SizedBox.shrink();
 
     final total = records.fold<double>(0, (sum, r) => sum + r.litersProduced);
@@ -331,7 +331,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   }
 
   /// Estadísticas de peso
-  Widget _buildWeightStats(List<PesoBovino> records) {
+  Widget _buildWeightStats(List<WeightRecordEntity> records) {
     if (records.isEmpty) return const SizedBox.shrink();
 
     final latest = records.first;
@@ -394,7 +394,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   }
 
   /// Tarjeta de registro de leche
-  Widget _buildMilkRecordCard(BuildContext context, ProduccionLeche record) {
+  Widget _buildMilkRecordCard(BuildContext context, MilkProductionEntity record) {
     final dateFormat = DateFormat('dd/MM/yyyy');
 
     return Card(
@@ -425,8 +425,8 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
   /// Tarjeta de registro de peso
   Widget _buildWeightRecordCard(
     BuildContext context,
-    PesoBovino record,
-    PesoBovino? previousRecord,
+    WeightRecordEntity record,
+    WeightRecordEntity? previousRecord,
   ) {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final gain = previousRecord != null ? record.weight - previousRecord.weight : null;
@@ -590,12 +590,12 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
     String title, value, date;
     String? notes;
 
-    if (record is ProduccionLeche) {
+    if (record is MilkProductionEntity) {
       title = 'Producción de Leche';
       value = '${record.litersProduced.toStringAsFixed(1)} Litros';
       date = dateFormat.format(record.recordDate);
       notes = record.notes;
-    } else if (record is PesoBovino) {
+    } else if (record is WeightRecordEntity) {
       title = 'Registro de Peso';
       value = '${record.weight.toStringAsFixed(1)} kg';
       date = dateFormat.format(record.recordDate);

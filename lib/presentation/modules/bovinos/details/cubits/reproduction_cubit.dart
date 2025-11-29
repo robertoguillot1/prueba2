@@ -1,8 +1,9 @@
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../../domain/entities/bovinos/evento_reproductivo.dart';
-import '../../../../../domain/usecases/bovinos/get_eventos_reproductivos_by_bovino.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../../features/cattle/domain/entities/reproductive_event_entity.dart';
+import '../../../../../features/cattle/domain/usecases/get_reproductive_events_by_bovine.dart';
+import '../../../../../core/errors/failures.dart';
 
 // ============================================
 // ESTADOS
@@ -24,7 +25,7 @@ class ReproductionLoading extends ReproductionState {}
 
 /// Estado con datos cargados
 class ReproductionLoaded extends ReproductionState {
-  final List<EventoReproductivo> events;
+  final List<ReproductiveEventEntity> events;
 
   const ReproductionLoaded(this.events);
 
@@ -48,54 +49,52 @@ class ReproductionError extends ReproductionState {
 
 /// Cubit para gestionar el historial reproductivo de un bovino
 class ReproductionCubit extends Cubit<ReproductionState> {
-  final GetEventosReproductivosByBovino _getEventos;
-  StreamSubscription<List<EventoReproductivo>>? _eventsSubscription;
+  final GetReproductiveEventsByBovine _getEvents;
 
   ReproductionCubit({
-    required GetEventosReproductivosByBovino getEventos,
-  })  : _getEventos = getEventos,
+    required GetReproductiveEventsByBovine getEvents,
+  })  : _getEvents = getEvents,
         super(ReproductionInitial());
 
   /// Carga todos los eventos reproductivos de un bovino
-  void loadEvents(String bovineId) {
-    _eventsSubscription?.cancel(); // Cancelar suscripción previa
+  Future<void> loadEvents(String bovineId, String farmId) async {
     emit(ReproductionLoading());
 
-    try {
-      // Suscribirse al Stream de eventos reproductivos
-      _eventsSubscription = _getEventos(bovineId).listen(
-        (eventos) {
-          try {
-            // Ordenar eventos por fecha (más reciente primero)
-            final sortedEvents = List<EventoReproductivo>.from(eventos);
-            sortedEvents.sort((a, b) => b.fecha.compareTo(a.fecha));
+    final result = await _getEvents(
+      GetReproductiveEventsByBovineParams(
+        bovineId: bovineId,
+        farmId: farmId,
+      ),
+    );
 
-            emit(ReproductionLoaded(sortedEvents));
-          } catch (e) {
-            emit(ReproductionError('Error al procesar eventos: ${e.toString()}'));
-          }
-        },
-        onError: (error) {
-          emit(ReproductionError('Error al cargar eventos: ${error.toString()}'));
-        },
-      );
-    } catch (e) {
-      emit(ReproductionError('Error al cargar eventos: ${e.toString()}'));
-    }
+    result.fold(
+      (failure) {
+        emit(ReproductionError(_getErrorMessage(failure)));
+      },
+      (events) {
+        // Ordenar eventos por fecha (más reciente primero)
+        final sortedEvents = List<ReproductiveEventEntity>.from(events);
+        sortedEvents.sort((a, b) => b.eventDate.compareTo(a.eventDate));
+        emit(ReproductionLoaded(sortedEvents));
+      },
+    );
   }
 
   /// Recarga los eventos (útil después de agregar/editar)
-  void refresh(String bovineId) {
-    loadEvents(bovineId);
+  Future<void> refresh(String bovineId, String farmId) async {
+    await loadEvents(bovineId, farmId);
   }
 
-  @override
-  Future<void> close() {
-    _eventsSubscription?.cancel();
-    return super.close();
+  /// Obtiene un mensaje de error legible desde un Failure
+  String _getErrorMessage(Failure failure) {
+    if (failure is ServerFailure) {
+      return 'Error del servidor: ${failure.message}';
+    } else if (failure is NetworkFailure) {
+      return 'Error de conexión: ${failure.message}';
+    } else if (failure is CacheFailure) {
+      return 'Error de almacenamiento: ${failure.message}';
+    } else {
+      return failure.message;
+    }
   }
 }
-
-
-
-

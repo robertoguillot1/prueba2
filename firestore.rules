@@ -21,9 +21,10 @@ service cloud.firestore {
 
         // Subcolecciones de bovinos:
         // - vacunas (vaccines)
-        // - pesos (weights)
+        // - pesos (weight_records)
         // - eventos reproductivos (reproductive_events)
         // - producción de leche (milk_production)
+        // - transferencias (transfers)
         match /{subcollection=**} {
           allow read, write: if isAuthenticated();
         }

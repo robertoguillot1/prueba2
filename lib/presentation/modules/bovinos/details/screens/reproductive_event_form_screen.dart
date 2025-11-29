@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/di/dependency_injection.dart' as di;
-import '../../../../../domain/entities/bovinos/evento_reproductivo.dart';
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../../features/cattle/domain/entities/reproductive_event_entity.dart';
 import '../cubits/reproductive_event_form_cubit.dart';
 
 /// Pantalla de formulario para eventos reproductivos (Clean Architecture)
 class ReproductiveEventFormScreen extends StatelessWidget {
   final BovineEntity bovine;
   final String farmId;
-  final TipoEventoReproductivo? preselectedType;
+  final ReproductiveEventType? preselectedType;
 
   const ReproductiveEventFormScreen({
     super.key,
@@ -35,7 +35,7 @@ class ReproductiveEventFormScreen extends StatelessWidget {
 class _ReproductiveEventFormContent extends StatefulWidget {
   final BovineEntity bovine;
   final String farmId;
-  final TipoEventoReproductivo? preselectedType;
+  final ReproductiveEventType? preselectedType;
 
   const _ReproductiveEventFormContent({
     required this.bovine,
@@ -51,7 +51,7 @@ class _ReproductiveEventFormContent extends StatefulWidget {
 class _ReproductiveEventFormContentState
     extends State<_ReproductiveEventFormContent> {
   final _formKey = GlobalKey<FormState>();
-  late TipoEventoReproductivo _selectedType;
+  late ReproductiveEventType _selectedType;
   DateTime _selectedDate = DateTime.now();
   final _notesController = TextEditingController();
 
@@ -64,7 +64,7 @@ class _ReproductiveEventFormContentState
   @override
   void initState() {
     super.initState();
-    _selectedType = widget.preselectedType ?? TipoEventoReproductivo.celo;
+    _selectedType = widget.preselectedType ?? ReproductiveEventType.heat;
   }
 
   @override
@@ -89,7 +89,7 @@ class _ReproductiveEventFormContentState
           );
           
           // Si fue un parto, ofrecer registrar la cría
-          if (_selectedType == TipoEventoReproductivo.parto) {
+          if (_selectedType == ReproductiveEventType.calving) {
             _showRegisterOffspringDialog(context);
           } else {
             Navigator.pop(context, true); // Retorna true para indicar éxito
@@ -205,7 +205,7 @@ class _ReproductiveEventFormContentState
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.bovine.breed} • ${widget.bovine.age} años',
+                    '${widget.bovine.breed} • ${widget.bovine.ageDisplay}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey.shade600,
                         ),
@@ -234,7 +234,7 @@ class _ReproductiveEventFormContentState
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: TipoEventoReproductivo.values.map((tipo) {
+          children: ReproductiveEventType.values.map((tipo) {
             final isSelected = _selectedType == tipo;
             return ChoiceChip(
               label: Text(tipo.displayName),
@@ -286,11 +286,11 @@ class _ReproductiveEventFormContentState
   /// Campos específicos según el tipo de evento
   Widget _buildTypeSpecificFields() {
     switch (_selectedType) {
-      case TipoEventoReproductivo.montaInseminacion:
+      case ReproductiveEventType.insemination:
         return _buildInseminationFields();
-      case TipoEventoReproductivo.palpacionTacto:
+      case ReproductiveEventType.palpation:
         return _buildPalpationFields();
-      case TipoEventoReproductivo.parto:
+      case ReproductiveEventType.calving:
         return _buildBirthFields();
       default:
         return const SizedBox.shrink();
@@ -476,22 +476,25 @@ class _ReproductiveEventFormContentState
     final details = <String, dynamic>{};
 
     switch (_selectedType) {
-      case TipoEventoReproductivo.montaInseminacion:
+      case ReproductiveEventType.insemination:
         if (_strawCodeController.text.isNotEmpty) {
-          details['codigoPajilla'] = _strawCodeController.text.trim();
+          details['semenCode'] = _strawCodeController.text.trim();
         }
         break;
 
-      case TipoEventoReproductivo.palpacionTacto:
+      case ReproductiveEventType.palpation:
         if (_palpationResult != null) {
-          details['resultadoPalpacion'] = _palpationResult;
+          details['palpationResult'] = _palpationResult;
         }
         break;
 
-      case TipoEventoReproductivo.parto:
-        details['nacioCria'] = _calfBorn;
+      case ReproductiveEventType.calving:
+        details['calfBorn'] = _calfBorn;
         if (_calfBorn && _calfWeightController.text.isNotEmpty) {
-          details['pesoCria'] = double.tryParse(_calfWeightController.text);
+          final weight = double.tryParse(_calfWeightController.text);
+          if (weight != null) {
+            details['calfWeight'] = weight;
+          }
         }
         break;
 
@@ -509,7 +512,7 @@ class _ReproductiveEventFormContentState
     }
 
     // Validaciones específicas
-    if (_selectedType == TipoEventoReproductivo.palpacionTacto &&
+    if (_selectedType == ReproductiveEventType.palpation &&
         _palpationResult == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -525,10 +528,10 @@ class _ReproductiveEventFormContentState
     context.read<ReproductiveEventFormCubit>().saveEvent(
           farmId: widget.farmId,
           bovineId: widget.bovine.id,
-          tipo: _selectedType,
-          fecha: _selectedDate,
-          detalles: details,
-          notas: _notesController.text,
+          type: _selectedType,
+          eventDate: _selectedDate,
+          details: details,
+          notes: _notesController.text,
         );
   }
 
@@ -541,19 +544,19 @@ class _ReproductiveEventFormContentState
     return gender == BovineGender.male ? Colors.blue : Colors.pink;
   }
 
-  IconData _getIconForEventType(TipoEventoReproductivo tipo) {
+  IconData _getIconForEventType(ReproductiveEventType tipo) {
     switch (tipo) {
-      case TipoEventoReproductivo.celo:
+      case ReproductiveEventType.heat:
         return Icons.favorite;
-      case TipoEventoReproductivo.montaInseminacion:
+      case ReproductiveEventType.insemination:
         return Icons.pets;
-      case TipoEventoReproductivo.palpacionTacto:
+      case ReproductiveEventType.palpation:
         return Icons.medical_services;
-      case TipoEventoReproductivo.parto:
+      case ReproductiveEventType.calving:
         return Icons.child_care;
-      case TipoEventoReproductivo.aborto:
+      case ReproductiveEventType.abortion:
         return Icons.cancel;
-      case TipoEventoReproductivo.secado:
+      case ReproductiveEventType.drying:
         return Icons.water_drop;
     }
   }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../list/bovinos_list_screen.dart';
-import '../create/bovino_create_screen.dart';
-import '../../../../core/di/dependency_injection.dart';
-import '../viewmodels/bovinos_viewmodel.dart';
+import '../list/screens/farm_transfers_screen.dart';
+import 'bovino_form_screen.dart';
 
 /// Pantalla de menú de Bovinos que centraliza todas las funcionalidades
 class BovinoMenuScreen extends StatelessWidget {
@@ -54,14 +52,39 @@ class BovinoMenuScreen extends StatelessWidget {
               subtitle: 'Registrar un nuevo bovino en el sistema',
               color: Colors.green,
               onTap: () {
-                final viewModel = DependencyInjection.createBovinosViewModel();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ChangeNotifierProvider.value(
-                      value: viewModel,
-                      child: BovinoCreateScreen(farmId: farmId),
+                    builder: (_) => BovinoFormScreen(
+                      farmId: farmId,
                     ),
+                  ),
+                ).then((result) {
+                  // Mostrar mensaje de éxito si se creó
+                  if (result == true && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Bovino creado exitosamente'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                });
+              },
+            ),
+
+            // Opción 3: Transporte
+            _buildMenuCard(
+              context,
+              icon: Icons.local_shipping,
+              title: 'Transporte',
+              subtitle: 'Ver y gestionar transferencias y movimientos',
+              color: Colors.blue,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FarmTransfersScreen(farmId: farmId),
                   ),
                 );
               },

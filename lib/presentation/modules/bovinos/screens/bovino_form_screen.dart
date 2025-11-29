@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../features/cattle/domain/usecases/get_cattle_list.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
 import '../cubits/form/bovino_form_cubit.dart';
 import '../cubits/form/bovino_form_state.dart';
+import '../widgets/bovine_selector_field.dart';
 
 /// Pantalla de formulario para crear o editar un Bovino
 class BovinoFormScreen extends StatelessWidget {
@@ -70,6 +72,10 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
   // Genealogía
   String? _motherId;
   String? _fatherId;
+  BovineEntity? _selectedMother;
+  BovineEntity? _selectedFather;
+  List<BovineEntity> _availableBovines = [];
+  bool _isLoadingBovines = false;
 
   // Nuevos campos
   int _previousCalvings = 0;
@@ -94,12 +100,91 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
       _selectedBirthDate = widget.initialBirthDate!;
     }
     
+    // Cargar lista de bovinos disponibles para genealogía
+    _loadAvailableBovines();
+    
     if (isEditMode) {
       _loadBovineData();
     } else {
       // Si es MACHO, forzar propósito a CARNE
       if (_selectedGender == BovineGender.male) {
         _selectedPurpose = BovinePurpose.meat;
+      }
+    }
+  }
+
+  /// Carga la lista de bovinos disponibles para selección de padres
+  Future<void> _loadAvailableBovines() async {
+    setState(() {
+      _isLoadingBovines = true;
+    });
+
+    try {
+      final getCattleList = di.sl<GetCattleList>();
+      final result = await getCattleList(GetCattleListParams(farmId: widget.farmId));
+
+      result.fold(
+        (failure) {
+          // Si hay error, continuar sin la lista (no es crítico)
+          setState(() {
+            _isLoadingBovines = false;
+            _availableBovines = [];
+          });
+        },
+        (bovines) {
+          setState(() {
+            _availableBovines = bovines;
+            _isLoadingBovines = false;
+          });
+
+          // Si estamos editando y tenemos IDs de padres, buscar los bovinos correspondientes
+          if (isEditMode && (_motherId != null || _fatherId != null)) {
+            _loadSelectedParents();
+          } else if (widget.initialMotherId != null) {
+            // Si hay initialMotherId, buscar la madre
+            try {
+              final mother = _availableBovines.firstWhere(
+                (b) => b.id == widget.initialMotherId,
+              );
+              setState(() {
+                _selectedMother = mother;
+                _motherId = mother.id;
+              });
+            } catch (e) {
+              // Madre no encontrada en la lista
+            }
+          }
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _isLoadingBovines = false;
+        _availableBovines = [];
+      });
+    }
+  }
+
+  /// Carga los bovinos seleccionados como padre y madre
+  void _loadSelectedParents() {
+    if (_fatherId != null) {
+      try {
+        final father = _availableBovines.firstWhere((b) => b.id == _fatherId);
+        setState(() {
+          _selectedFather = father;
+        });
+      } catch (e) {
+        // Padre no encontrado en la lista
+      }
+    }
+
+    if (_motherId != null) {
+      try {
+        final mother = _availableBovines.firstWhere((b) => b.id == _motherId);
+        setState(() {
+          _selectedMother = mother;
+        });
+      } catch (e) {
+        // Madre no encontrada en la lista
       }
     }
   }
@@ -232,13 +317,44 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
 
                 const SizedBox(height: 24),
 
-                // Sección: Genealogía (si aplica)
-                if (_motherId != null) ...[
-                  _buildSectionTitle('Genealogía', Icons.family_restroom),
-                  const SizedBox(height: 12),
-                  _buildGenealogyInfo(),
-                  const SizedBox(height: 24),
-                ],
+                // Sección: Genealogía
+                _buildSectionTitle('Genealogía', Icons.family_restroom),
+                const SizedBox(height: 12),
+                if (_isLoadingBovines)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (_availableBovines.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.orange.shade700),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'No hay bovinos registrados. Registra algunos bovinos antes de asignar padres.',
+                            style: TextStyle(
+                              color: Colors.orange.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  _buildGenealogySection(),
+
+                const SizedBox(height: 24),
 
                 // Sección: Características
                 _buildSectionTitle('Características', Icons.pets),
@@ -355,59 +471,50 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     );
   }
 
-  Widget _buildGenealogyInfo() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_motherId != null) ...[
-            Row(
-              children: [
-                Icon(Icons.favorite, size: 16, color: Colors.pink.shade400),
-                const SizedBox(width: 8),
-                Text(
-                  'Madre: $_motherId',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          if (_fatherId != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.male, size: 16, color: Colors.blue.shade700),
-                const SizedBox(width: 8),
-                Text(
-                  'Padre: $_fatherId',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            'Esta información se registrará automáticamente',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontStyle: FontStyle.italic,
-            ),
+  Widget _buildGenealogySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Vincula los padres de este animal si están registrados en el inventario.',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade700,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        BovineSelectorField(
+          label: 'Padre (Sire)',
+          hint: 'Selecciona el padre',
+          prefixIcon: Icons.male,
+          selectedBovine: _selectedFather,
+          availableBovines: _availableBovines,
+          sexFilter: SexFilter.male,
+          excludeBovineId: widget.bovine?.id,
+          onSelect: (bovine) {
+            setState(() {
+              _selectedFather = bovine;
+              _fatherId = bovine?.id;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        BovineSelectorField(
+          label: 'Madre (Dam)',
+          hint: 'Selecciona la madre',
+          prefixIcon: Icons.female,
+          selectedBovine: _selectedMother,
+          availableBovines: _availableBovines,
+          sexFilter: SexFilter.female,
+          excludeBovineId: widget.bovine?.id,
+          onSelect: (bovine) {
+            setState(() {
+              _selectedMother = bovine;
+              _motherId = bovine?.id;
+            });
+          },
+        ),
+      ],
     );
   }
 
