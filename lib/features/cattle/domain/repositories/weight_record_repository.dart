@@ -40,3 +40,5 @@ abstract class WeightRecordRepository {
   );
 }
 
+
+

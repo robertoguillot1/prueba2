@@ -94,3 +94,5 @@ class WeightRecordModel extends WeightRecordEntity {
   }
 }
 
+
+

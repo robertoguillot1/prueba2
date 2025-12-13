@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../list/bovinos_list_screen.dart';
 import '../list/screens/farm_transfers_screen.dart';
+import '../list/screens/farm_health_screen.dart';
+import '../list/screens/farm_production_screen.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de menú de Bovinos que centraliza todas las funcionalidades
@@ -85,6 +87,40 @@ class BovinoMenuScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FarmTransfersScreen(farmId: farmId),
+                  ),
+                );
+              },
+            ),
+
+            // Opción 4: Sanidad (Vacunación)
+            _buildMenuCard(
+              context,
+              icon: Icons.vaccines,
+              title: 'Sanidad',
+              subtitle: 'Ver y gestionar vacunas y tratamientos',
+              color: Colors.red,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FarmHealthScreen(farmId: farmId),
+                  ),
+                );
+              },
+            ),
+
+            // Opción 5: Producción (Leche y Peso)
+            _buildMenuCard(
+              context,
+              icon: Icons.analytics,
+              title: 'Producción',
+              subtitle: 'Ver producción de leche y registros de peso',
+              color: Colors.purple,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FarmProductionScreen(farmId: farmId),
                   ),
                 );
               },

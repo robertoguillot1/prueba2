@@ -26,3 +26,5 @@ class DeleteTransfer implements UseCase<Either<Failure, void>, DeleteTransferPar
   }
 }
 
+
+

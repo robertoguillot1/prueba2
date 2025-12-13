@@ -158,6 +158,8 @@ import '../../features/cattle/domain/usecases/update_transfer.dart';
 import '../../features/cattle/domain/usecases/delete_transfer.dart';
 import '../../presentation/modules/bovinos/details/cubits/transfer_cubit.dart';
 import '../../presentation/modules/bovinos/list/cubits/farm_transfers_cubit.dart';
+import '../../presentation/modules/bovinos/list/cubits/farm_health_cubit.dart';
+import '../../presentation/modules/bovinos/list/cubits/farm_production_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -609,6 +611,23 @@ class DependencyInjection {
     return FarmTransfersCubit(
       getTransfers: sl<GetTransfersByFarm>(),
       deleteTransfer: sl<DeleteTransfer>(),
+    );
+  }
+
+  /// Crea una instancia de FarmHealthCubit
+  static FarmHealthCubit createFarmHealthCubit() {
+    return FarmHealthCubit(
+      getVacunasByBovino: GetVacunasByBovino(_vacunaBovinoRepository!),
+      getCattleList: sl<GetCattleList>(),
+    );
+  }
+
+  /// Crea una instancia de FarmProductionCubit
+  static FarmProductionCubit createFarmProductionCubit() {
+    return FarmProductionCubit(
+      getMilkProductions: sl<GetMilkProductionsByBovine>(),
+      getWeightRecords: sl<GetWeightRecordsByBovine>(),
+      getCattleList: sl<GetCattleList>(),
     );
   }
 

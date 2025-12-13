@@ -29,3 +29,5 @@ class DeleteBovine implements UseCase<Either<Failure, void>, DeleteBovineParams>
 
 
 
+
+

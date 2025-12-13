@@ -9,6 +9,7 @@ import '../details/tabs/reproduction_tab.dart';
 import '../details/tabs/production_tab.dart';
 import '../details/tabs/health_tab.dart';
 import '../details/tabs/transfer_tab.dart';
+import '../widgets/genealogy_widget.dart';
 import 'bovino_form_screen.dart';
 
 /// Pantalla de detalle/perfil de un Bovino
@@ -387,6 +388,13 @@ class BovinoDetailScreen extends StatelessWidget {
               valueColor: _getStatusColor(bovine.status),
             ),
           ],
+        ),
+        const SizedBox(height: 24),
+        _buildSectionTitle('Genealogía', Icons.family_restroom),
+        const SizedBox(height: 16),
+        GenealogyWidget(
+          bovine: bovine,
+          farmId: farmId,
         ),
         const SizedBox(height: 24),
         _buildSectionTitle('Información del Sistema', Icons.settings),

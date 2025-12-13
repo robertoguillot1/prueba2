@@ -94,3 +94,5 @@ class MilkProductionModel extends MilkProductionEntity {
   }
 }
 
+
+

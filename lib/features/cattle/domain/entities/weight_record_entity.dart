@@ -67,3 +67,5 @@ class WeightRecordEntity extends Equatable {
       ];
 }
 
+
+

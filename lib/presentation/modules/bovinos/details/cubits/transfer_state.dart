@@ -39,3 +39,5 @@ class TransferOperationSuccess extends TransferState {
   List<Object?> get props => [message];
 }
 
+
+

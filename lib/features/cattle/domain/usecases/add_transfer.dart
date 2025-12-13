@@ -24,3 +24,5 @@ class AddTransfer implements UseCase<Either<Failure, TransferEntity>, AddTransfe
   }
 }
 
+
+

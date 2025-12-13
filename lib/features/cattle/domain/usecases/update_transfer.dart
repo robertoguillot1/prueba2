@@ -24,3 +24,5 @@ class UpdateTransfer implements UseCase<Either<Failure, TransferEntity>, UpdateT
   }
 }
 
+
+
