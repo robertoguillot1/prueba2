@@ -27,6 +27,10 @@ import '../../presentation/modules/porcinos/list/cerdos_list_screen.dart';
 import '../../presentation/modules/ovinos/list/ovejas_list_screen.dart';
 import '../../presentation/modules/avicultura/list/gallinas_list_screen.dart';
 import '../../presentation/modules/trabajadores/list/trabajadores_list_screen.dart';
+import '../../presentation/modules/trabajadores/screens/trabajadores_menu_screen.dart';
+
+// Finance
+import '../../presentation/modules/finance/screens/finance_screen.dart';
 
 // Entities
 import '../../domain/entities/farm/farm.dart';
@@ -232,8 +236,13 @@ class AppRouter {
         return _buildFarmRoute((farmId) => OvejasListScreen(farmId: farmId));
 
       case '/trabajadores':
+        return _buildFarmRoute((farmId) => TrabajadoresMenuScreen(farmId: farmId));
       case '/trabajadores/list':
         return _buildFarmRoute((farmId) => TrabajadoresListScreen(farmId: farmId));
+
+      // ========== FINANCE ==========
+      case '/finance':
+        return _buildFarmRoute((farmId) => FinanceScreen(farmId: farmId));
 
       default:
         print('❌ [AppRouter] Ruta no encontrada: $routeName');

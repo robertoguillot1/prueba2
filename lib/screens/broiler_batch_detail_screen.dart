@@ -238,7 +238,7 @@ class _BroilerBatchDetailScreenState extends State<BroilerBatchDetailScreen> wit
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: _getExpenseTypeColor(expense.tipo).withOpacity(0.1),
+                        backgroundColor: _getExpenseTypeColor(expense.tipo).withValues(alpha: 0.1),
                         child: Icon(
                           _getExpenseTypeIcon(expense.tipo),
                           color: _getExpenseTypeColor(expense.tipo),
@@ -431,7 +431,7 @@ class _BroilerBatchDetailScreenState extends State<BroilerBatchDetailScreen> wit
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildLegendItem(Colors.grey.withOpacity(0.5), 'Estándar Ideal'),
+                      _buildLegendItem(Colors.grey.withValues(alpha: 0.5), 'Estándar Ideal'),
                       const SizedBox(width: 16),
                       _buildLegendItem(widget.farm.primaryColor, 'Peso Actual'),
                     ],

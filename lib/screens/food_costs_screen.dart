@@ -174,7 +174,7 @@ class FoodCostsScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: farm.primaryColor.withOpacity(0.05),
+                  color: farm.primaryColor.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -241,7 +241,7 @@ class FoodCostsScreen extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: farm.primaryColor.withOpacity(0.1),
+                  backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                   child: Icon(Icons.shopping_cart, color: farm.primaryColor),
                 ),
                 title: Text(

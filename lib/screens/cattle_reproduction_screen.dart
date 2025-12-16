@@ -219,7 +219,7 @@ class CattleReproductionScreen extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: statusColor.withOpacity(0.1),
+          backgroundColor: statusColor.withValues(alpha: 0.1),
           child: Icon(
             cow.breedingStatus == BreedingStatus.prenada
                 ? Icons.pregnant_woman

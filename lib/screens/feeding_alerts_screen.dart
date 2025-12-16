@@ -143,7 +143,7 @@ class FeedingAlertsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: alert.levelColor.withOpacity(alert.isRead ? 0.2 : 0.5),
+          color: alert.levelColor.withValues(alpha: alert.isRead ? 0.2 : 0.5),
           width: alert.isRead ? 1 : 2,
         ),
       ),
@@ -165,7 +165,7 @@ class FeedingAlertsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: alert.levelColor.withOpacity(0.1),
+                      color: alert.levelColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

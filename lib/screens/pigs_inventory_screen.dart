@@ -226,7 +226,7 @@ class _PigsInventoryScreenState extends State<PigsInventoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getStageColor(pig.feedingStage).withOpacity(0.1),
+                      color: _getStageColor(pig.feedingStage).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

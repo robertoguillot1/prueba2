@@ -178,8 +178,8 @@ class LecheDiariaChart extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                Colors.blue.withOpacity(0.3),
-                Colors.blue.withOpacity(0.05),
+                Colors.blue.withValues(alpha: 0.3),
+                Colors.blue.withValues(alpha: 0.05),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

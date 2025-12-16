@@ -42,3 +42,8 @@ class UnknownFailure extends Failure {
   const UnknownFailure(super.message);
 }
 
+/// Error de base de datos
+class DatabaseFailure extends Failure {
+  DatabaseFailure([super.message = 'Database Error']);
+}
+

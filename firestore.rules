@@ -29,6 +29,35 @@ service cloud.firestore {
           allow read, write: if isAuthenticated();
         }
       }
+
+      // Finanzas de la finca
+      match /expenses/{expenseId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /loans/{loanId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /payments/{paymentId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      // Trabajadores de la finca
+      match /workers/{workerId} {
+        allow read, write: if isAuthenticated();
+
+        // Subcolecciones de trabajadores:
+        // - pagos
+        // - prestamos
+        match /pagos/{pagoId} {
+          allow read, write: if isAuthenticated();
+        }
+
+        match /prestamos/{prestamoId} {
+          allow read, write: if isAuthenticated();
+        }
+      }
     }
 
     // ===============================================

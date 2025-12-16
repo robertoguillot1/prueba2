@@ -111,7 +111,7 @@ class LactationCurveChart extends StatelessWidget {
                     horizontalInterval: maxLiters > 0 ? (maxLiters / 5).ceilToDouble() : 5,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
+                        color: Colors.grey.withValues(alpha: 0.2),
                         strokeWidth: 1,
                       );
                     },
@@ -154,7 +154,7 @@ class LactationCurveChart extends StatelessWidget {
                   ),
                   borderData: FlBorderData(
                     show: true,
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   ),
                   lineBarsData: [
                     LineChartBarData(
@@ -176,7 +176,7 @@ class LactationCurveChart extends StatelessWidget {
                       ),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -213,9 +213,9 @@ class LactationCurveChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

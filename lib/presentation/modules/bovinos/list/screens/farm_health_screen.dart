@@ -141,7 +141,7 @@ class _FarmHealthScreenContent extends StatelessWidget {
     IconData icon,
   ) {
     return Card(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -162,7 +162,7 @@ class _FarmHealthScreenContent extends StatelessWidget {
                   Text(
                     message,
                     // Usar opacidad para un tono más suave sin depender de MaterialColor
-                    style: TextStyle(color: color.withOpacity(0.7)),
+                    style: TextStyle(color: color.withValues(alpha: 0.7)),
                   ),
                 ],
               ),
@@ -192,10 +192,10 @@ class _FarmHealthScreenContent extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: refuerzoAtrasado
-                      ? Colors.red.withOpacity(0.15)
+                      ? Colors.red.withValues(alpha: 0.15)
                       : hasRefuerzo
-                          ? Colors.orange.withOpacity(0.15)
-                          : Colors.green.withOpacity(0.15),
+                          ? Colors.orange.withValues(alpha: 0.15)
+                          : Colors.green.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -438,9 +438,22 @@ class _FarmHealthScreenContent extends StatelessWidget {
           );
         },
         (bovines) {
-          final bovine = bovines.firstWhere(
+          // Normalizar a BovineEntity para evitar problemas de tipo
+          final List<BovineEntity> list = bovines.map((b) => b as BovineEntity).toList();
+
+          if (list.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No se encontró el bovino'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+
+          final bovine = list.firstWhere(
             (b) => b.id == bovineId,
-            orElse: () => bovines.first,
+            orElse: () => list.first,
           );
 
           Navigator.push(

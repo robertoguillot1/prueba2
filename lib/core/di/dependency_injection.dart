@@ -3,17 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/datasources/ovinos/ovejas_datasource.dart';
-import '../../data/datasources/bovinos/bovinos_datasource.dart';
+// import '../../data/datasources/bovinos/bovinos_datasource.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
 import '../../data/datasources/porcinos/cerdos_datasource.dart';
 import '../../data/datasources/trabajadores/trabajadores_datasource.dart';
 import '../../data/datasources/avicultura/gallinas_datasource.dart';
 import '../../data/repositories_impl/ovinos/ovejas_repository_impl.dart';
-import '../../data/repositories_impl/bovinos/bovinos_repository_impl.dart';
+// import '../../data/repositories_impl/bovinos/bovinos_repository_impl.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
 import '../../data/repositories_impl/porcinos/cerdos_repository_impl.dart';
 import '../../data/repositories_impl/trabajadores/trabajadores_repository_impl.dart';
 import '../../data/repositories_impl/avicultura/gallinas_repository_impl.dart';
 import '../../domain/repositories/ovinos/ovejas_repository.dart';
-import '../../domain/repositories/bovinos/bovinos_repository.dart';
+// import '../../domain/repositories/bovinos/bovinos_repository.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
 import '../../domain/repositories/porcinos/cerdos_repository.dart';
 import '../../domain/repositories/trabajadores/trabajadores_repository.dart';
 import '../../domain/repositories/avicultura/gallinas_repository.dart';
@@ -23,10 +23,10 @@ import '../../domain/usecases/ovinos/create_oveja.dart';
 import '../../domain/usecases/ovinos/update_oveja.dart';
 import '../../domain/usecases/ovinos/delete_oveja.dart';
 import '../../domain/usecases/ovinos/search_ovejas.dart';
-import '../../domain/usecases/bovinos/get_all_bovinos.dart';
-import '../../domain/usecases/bovinos/create_bovino.dart';
-import '../../domain/usecases/bovinos/update_bovino.dart';
-import '../../domain/usecases/bovinos/delete_bovino.dart';
+// import '../../domain/usecases/bovinos/get_all_bovinos.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
+// import '../../domain/usecases/bovinos/create_bovino.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
+// import '../../domain/usecases/bovinos/update_bovino.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
+// import '../../domain/usecases/bovinos/delete_bovino.dart'; // ELIMINADO: Usar CattleRepository (sistema nuevo)
 import '../../domain/usecases/porcinos/get_all_cerdos.dart';
 import '../../domain/usecases/porcinos/create_cerdo.dart';
 import '../../domain/usecases/porcinos/update_cerdo.dart';
@@ -36,6 +36,7 @@ import '../../domain/usecases/trabajadores/create_trabajador.dart';
 import '../../domain/usecases/trabajadores/update_trabajador.dart';
 import '../../domain/usecases/trabajadores/delete_trabajador.dart';
 import '../../domain/usecases/trabajadores/get_trabajadores_activos.dart';
+import '../../domain/usecases/trabajadores/search_trabajadores.dart';
 import '../../domain/usecases/avicultura/get_all_gallinas.dart';
 import '../../domain/usecases/avicultura/create_gallina.dart';
 import '../../presentation/modules/ovinos/viewmodels/ovejas_viewmodel.dart';
@@ -48,7 +49,8 @@ import '../../data/datasources/remote/ovinos/ovinos_remote_datasource.dart';
 import '../../data/datasources/remote/bovinos/bovinos_remote_datasource.dart';
 import '../../data/datasources/remote/porcinos/porcinos_remote_datasource.dart';
 import '../../data/datasources/remote/avicultura/avicultura_remote_datasource.dart';
-import '../../data/datasources/remote/trabajadores/trabajadores_remote_datasource.dart';
+// Trabajadores Remote DataSource (legacy - para trabajadores, no para pagos/préstamos)
+// import '../../data/datasources/remote/trabajadores/trabajadores_remote_datasource.dart';
 import '../../data/datasources/local/ovinos/ovinos_local_datasource.dart';
 import '../../core/network/connectivity_service.dart';
 import '../../data/sync/sync_manager.dart';
@@ -82,7 +84,9 @@ import '../../presentation/modules/bovinos/cubits/form/bovino_form_cubit.dart';
 import '../../presentation/modules/farms/cubits/farm_form_cubit.dart';
 // Cattle Module (Clean Architecture)
 import '../../features/cattle/data/datasources/cattle_remote_datasource.dart';
+import '../../features/cattle/data/datasources/local/cattle_local_datasource.dart';
 import '../../features/cattle/data/repositories/cattle_repository_impl.dart';
+import '../../features/cattle/data/repositories/cattle_hybrid_repository_impl.dart';
 import '../../features/cattle/domain/repositories/cattle_repository.dart';
 import '../../features/cattle/domain/usecases/get_cattle_list.dart';
 import '../../features/cattle/domain/usecases/get_bovine.dart';
@@ -90,6 +94,10 @@ import '../../features/cattle/domain/usecases/add_bovine.dart';
 import '../../features/cattle/domain/usecases/update_bovine.dart';
 import '../../features/cattle/domain/usecases/delete_bovine.dart';
 import '../../features/cattle/presentation/cubit/cattle_cubit.dart';
+// Trabajadores Module (Clean Architecture - Pagos y Préstamos)
+import '../../features/trabajadores/data/datasources/trabajadores_remote_datasource.dart';
+import '../../features/trabajadores/data/datasources/local/trabajadores_local_datasource.dart';
+import '../../features/trabajadores/data/repositories/trabajadores_hybrid_repository_impl.dart';
 // Eventos Reproductivos (Sistema Viejo)
 import '../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
 import '../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
@@ -160,6 +168,41 @@ import '../../presentation/modules/bovinos/details/cubits/transfer_cubit.dart';
 import '../../presentation/modules/bovinos/list/cubits/farm_transfers_cubit.dart';
 import '../../presentation/modules/bovinos/list/cubits/farm_health_cubit.dart';
 import '../../presentation/modules/bovinos/list/cubits/farm_production_cubit.dart';
+// Feeding Module (Nuevo Sistema)
+import '../../features/cattle/domain/repositories/feeding_repository.dart';
+import '../../features/cattle/data/repositories/feeding_repository_impl.dart';
+import '../../features/cattle/data/datasources/feeding_local_datasource.dart';
+import '../../features/cattle/domain/usecases/feeding/get_feeding_schedules.dart';
+import '../../features/cattle/domain/usecases/feeding/save_feeding_schedule.dart';
+import '../../features/cattle/domain/usecases/feeding/calculate_nutritional_requirements.dart';
+// Finance Module (Clean Architecture)
+import '../../features/finance/data/datasources/finance_remote_datasource.dart';
+import '../../features/finance/data/repositories/finance_repository_impl.dart';
+import '../../features/finance/domain/repositories/finance_repository.dart';
+import '../../features/finance/domain/usecases/get_expenses.dart';
+import '../../features/finance/domain/usecases/add_expense.dart';
+import '../../features/finance/domain/usecases/update_expense.dart';
+import '../../features/finance/domain/usecases/delete_expense.dart';
+import '../../features/finance/domain/usecases/get_loans.dart';
+import '../../features/finance/domain/usecases/add_loan.dart';
+import '../../features/finance/domain/usecases/update_loan.dart';
+import '../../features/finance/domain/usecases/delete_loan.dart';
+import '../../features/finance/domain/usecases/get_payments.dart';
+import '../../features/finance/domain/usecases/add_payment.dart';
+import '../../features/finance/domain/usecases/update_payment.dart';
+import '../../features/finance/domain/usecases/delete_payment.dart';
+import '../../presentation/modules/bovinos/details/cubits/feeding_cubit.dart';
+// Trabajadores Extras
+import '../../features/trabajadores/domain/usecases/get_pagos.dart';
+import '../../features/trabajadores/domain/usecases/add_pago.dart';
+import '../../features/trabajadores/domain/usecases/update_pago.dart';
+import '../../features/trabajadores/domain/usecases/delete_pago.dart';
+import '../../features/trabajadores/domain/usecases/get_prestamos.dart';
+import '../../features/trabajadores/domain/usecases/add_prestamo.dart';
+import '../../features/trabajadores/domain/usecases/update_prestamo.dart';
+import '../../features/trabajadores/domain/usecases/delete_prestamo.dart';
+import '../../presentation/modules/trabajadores/cubits/pagos_cubit.dart';
+import '../../presentation/modules/trabajadores/cubits/prestamos_cubit.dart';
 
 /// Instancia global de GetIt para inyección de dependencias
 final GetIt sl = GetIt.instance;
@@ -190,7 +233,7 @@ class DependencyInjection {
   
   // Data Sources
   static OvejasDataSource? _ovejasDataSource;
-  static BovinosDataSource? _bovinosDataSource;
+  // static BovinosDataSource? _bovinosDataSource; // ELIMINADO: Usar CattleRepository (sistema nuevo)
   static CerdosDataSource? _cerdosDataSource;
   static TrabajadoresDataSource? _trabajadoresDataSource;
   static GallinasDataSource? _gallinasDataSource;
@@ -200,7 +243,7 @@ class DependencyInjection {
   
   // Repositories
   static OvejasRepository? _ovejasRepository;
-  static BovinosRepository? _bovinosRepository;
+  // static BovinosRepository? _bovinosRepository; // ELIMINADO: Usar CattleRepository (sistema nuevo)
   static CerdosRepository? _cerdosRepository;
   static TrabajadoresRepository? _trabajadoresRepository;
   static GallinasRepository? _gallinasRepository;
@@ -214,9 +257,8 @@ class DependencyInjection {
     _sharedPreferences = await SharedPreferences.getInstance();
     
     // Inicializar base de datos
-    await AppDatabase.initialize();
     try {
-      await AppDatabase.database;
+      await AppDatabase.initialize();
     } catch (e) {
       debugPrint('Error inicializando base de datos: $e');
       // Continuar sin base de datos si falla (modo web sin soporte)
@@ -233,7 +275,7 @@ class DependencyInjection {
     _bovinosRemoteDataSource = BovinosRemoteDataSourceImpl(_apiClient!);
     _porcinosRemoteDataSource = PorcinosRemoteDataSourceImpl(_apiClient!);
     _aviculturaRemoteDataSource = AviculturaRemoteDataSourceImpl(_apiClient!);
-    _trabajadoresRemoteDataSource = TrabajadoresRemoteDataSourceImpl(_apiClient!);
+    // _trabajadoresRemoteDataSource = TrabajadoresRemoteDataSourceImpl(_apiClient!); // Legacy - no usado para pagos/préstamos
     
     // Inicializar Local Data Sources
     _ovinosLocalDataSource = OvinosLocalDataSourceImpl();
@@ -262,7 +304,7 @@ class DependencyInjection {
     
     // Inicializar Data Sources locales (legacy)
     _ovejasDataSource = OvejasDataSourceImpl(_sharedPreferences!);
-    _bovinosDataSource = BovinosDataSourceImpl(_sharedPreferences!);
+    // _bovinosDataSource = BovinosDataSourceImpl(_sharedPreferences!); // ELIMINADO: Usar CattleRepository (sistema nuevo)
     _cerdosDataSource = CerdosDataSourceImpl(_sharedPreferences!);
     _trabajadoresDataSource = TrabajadoresDataSourceImpl(_sharedPreferences!);
     _gallinasDataSource = GallinasDataSourceImpl(_sharedPreferences!);
@@ -272,7 +314,7 @@ class DependencyInjection {
     
     // Inicializar Repositories
     _ovejasRepository = OvejasRepositoryImpl(_ovejasDataSource!);
-    _bovinosRepository = BovinosRepositoryImpl(_bovinosDataSource!);
+    // _bovinosRepository = BovinosRepositoryImpl(_bovinosDataSource!); // ELIMINADO: Usar CattleRepository (sistema nuevo)
     _cerdosRepository = CerdosRepositoryImpl(_cerdosDataSource!);
     _trabajadoresRepository = TrabajadoresRepositoryImpl(_trabajadoresDataSource!);
     _gallinasRepository = GallinasRepositoryImpl(_gallinasDataSource!);
@@ -282,6 +324,13 @@ class DependencyInjection {
     // Vacunas Bovino (Firestore)
     final vacunaBovinoDataSource = VacunaBovinoRemoteDataSourceImpl();
     _vacunaBovinoRepository = VacunaBovinoRepositoryImpl(vacunaBovinoDataSource);
+    
+    // Registrar repositorio en GetIt
+    sl.registerFactory<VacunaBovinoRepository>(() => _vacunaBovinoRepository!);
+    
+    // Registrar UseCases de Sanidad
+    sl.registerLazySingleton(() => GetVacunasByBovino(sl<VacunaBovinoRepository>()));
+    sl.registerLazySingleton(() => AddVacunaBovino(sl<VacunaBovinoRepository>()));
     
     // ========== REGISTRO CON GET_IT ==========
     // CORE - Firebase Auth
@@ -323,15 +372,22 @@ class DependencyInjection {
     // FARMS - Use Cases (no se registran como singleton porque necesitan userId)
     // Se crearán directamente en los factory methods
 
-    // CATTLE - Data Source
+    // CATTLE - Data Sources
     sl.registerLazySingleton<CattleRemoteDataSource>(
       () => CattleRemoteDataSourceImpl(),
     );
+    
+    sl.registerLazySingleton<CattleLocalDataSource>(
+      () => CattleLocalDataSourceImpl(),
+    );
 
-    // CATTLE - Repository
+    // CATTLE - Repository (Hybrid: Online/Offline)
     sl.registerLazySingleton<CattleRepository>(
-      () => CattleRepositoryImpl(
+      () => CattleHybridRepositoryImpl(
+        connectivityService: _connectivityService!,
         remoteDataSource: sl<CattleRemoteDataSource>(),
+        localDataSource: sl<CattleLocalDataSource>(),
+        syncManager: _syncManager!,
       ),
     );
 
@@ -350,6 +406,37 @@ class DependencyInjection {
         deleteBovineUseCase: sl<DeleteBovine>(),
       ),
     );
+
+    // ========== FINANCE (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<FinanceRemoteDataSource>(
+      () => FinanceRemoteDataSourceImpl(),
+    );
+
+    // Repository
+    sl.registerLazySingleton<FinanceRepository>(
+      () => FinanceRepositoryImpl(
+        remoteDataSource: sl<FinanceRemoteDataSource>(),
+      ),
+    );
+
+    // Use Cases - Expenses
+    sl.registerLazySingleton(() => GetExpenses(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => AddExpense(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => UpdateExpense(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => DeleteExpense(sl<FinanceRepository>()));
+
+    // Use Cases - Loans
+    sl.registerLazySingleton(() => GetLoans(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => AddLoan(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => UpdateLoan(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => DeleteLoan(sl<FinanceRepository>()));
+
+    // Use Cases - Payments
+    sl.registerLazySingleton(() => GetPayments(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => AddPayment(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => UpdatePayment(sl<FinanceRepository>()));
+    sl.registerLazySingleton(() => DeletePayment(sl<FinanceRepository>()));
 
     // ========== REPRODUCTIVE EVENTS (Nuevo Sistema) ==========
     // Data Source
@@ -430,123 +517,126 @@ class DependencyInjection {
     sl.registerLazySingleton(() => GetTransfersByFarm(sl<TransferRepository>()));
     sl.registerLazySingleton(() => AddTransfer(sl<TransferRepository>()));
     sl.registerLazySingleton(() => UpdateTransfer(sl<TransferRepository>()));
+    // ========== TRANSFERS (Nuevo Sistema) ==========
+    // ... (existing transfer code)
     sl.registerLazySingleton(() => DeleteTransfer(sl<TransferRepository>()));
-  }
-  
-  // Getters para Data Sources
-  static OvejasDataSource get ovejasDataSource => _ovejasDataSource!;
-  static BovinosDataSource get bovinosDataSource => _bovinosDataSource!;
-  static CerdosDataSource get cerdosDataSource => _cerdosDataSource!;
-  static TrabajadoresDataSource get trabajadoresDataSource => _trabajadoresDataSource!;
-  static GallinasDataSource get gallinasDataSource => _gallinasDataSource!;
-  
-  // Getters para Repositories
-  static OvejasRepository get ovejasRepository => _ovejasRepository!;
-  static BovinosRepository get bovinosRepository => _bovinosRepository!;
-  static CerdosRepository get cerdosRepository => _cerdosRepository!;
-  static TrabajadoresRepository get trabajadoresRepository => _trabajadoresRepository!;
-  static GallinasRepository get gallinasRepository => _gallinasRepository!;
-  
-  // Factory methods para ViewModels
-  static OvejasViewModel createOvejasViewModel() {
-    return OvejasViewModel(
-      getAllOvejas: GetAllOvejas(_ovejasRepository!),
-      getOvejaById: GetOvejaById(_ovejasRepository!),
-      createOveja: CreateOveja(_ovejasRepository!),
-      updateOveja: UpdateOveja(_ovejasRepository!),
-      deleteOveja: DeleteOveja(_ovejasRepository!),
-      searchOvejas: SearchOvejas(_ovejasRepository!),
+
+    // ========== FEEDING (Nuevo Sistema) ==========
+    // Data Source
+    sl.registerLazySingleton<FeedingLocalDataSource>(
+      () => FeedingLocalDataSourceImpl(),
     );
-  }
-  
-  static BovinosViewModel createBovinosViewModel() {
-    return BovinosViewModel(
-      getAllBovinos: GetAllBovinos(_bovinosRepository!),
-      createBovino: CreateBovino(_bovinosRepository!),
-      updateBovino: UpdateBovino(_bovinosRepository!),
-      deleteBovino: DeleteBovino(_bovinosRepository!),
+
+    // Repository
+    sl.registerLazySingleton<FeedingRepository>(
+      () => FeedingRepositoryImpl(sl<FeedingLocalDataSource>()),
     );
-  }
-  
-  static CerdosViewModel createCerdosViewModel() {
-    return CerdosViewModel(
-      getAllCerdos: GetAllCerdos(_cerdosRepository!),
-      createCerdo: CreateCerdo(_cerdosRepository!),
-      updateCerdo: UpdateCerdo(_cerdosRepository!),
-      deleteCerdo: DeleteCerdo(_cerdosRepository!),
+
+    // Use Cases
+    sl.registerLazySingleton(() => GetFeedingSchedules(sl<FeedingRepository>()));
+    sl.registerLazySingleton(() => SaveFeedingSchedule(sl<FeedingRepository>()));
+    sl.registerLazySingleton(() => CalculateNutritionalRequirements(sl<FeedingRepository>()));
+
+    // ========== TRABAJADORES EXTRAS (PAGOS Y PRÉSTAMOS) ==========
+    // Data Sources
+    sl.registerLazySingleton<TrabajadoresRemoteDataSource>(
+      () => TrabajadoresRemoteDataSourceImpl(),
     );
-  }
-  
-  static TrabajadoresViewModel createTrabajadoresViewModel() {
-    return TrabajadoresViewModel(
-      getAllTrabajadores: GetAllTrabajadores(_trabajadoresRepository!),
-      createTrabajador: CreateTrabajador(_trabajadoresRepository!),
-      updateTrabajador: UpdateTrabajador(_trabajadoresRepository!),
-      deleteTrabajador: DeleteTrabajador(_trabajadoresRepository!),
-      getTrabajadoresActivos: GetTrabajadoresActivos(_trabajadoresRepository!),
+    sl.registerLazySingleton<TrabajadoresLocalDataSource>(
+      () => TrabajadoresLocalDataSourceImpl(),
     );
-  }
-  
-  static GallinasViewModel createGallinasViewModel() {
-    return GallinasViewModel(
-      getAllGallinas: GetAllGallinas(_gallinasRepository!),
-      createGallina: CreateGallina(_gallinasRepository!),
-    );
-  }
-  
-  /// Crea una instancia de FarmsCubit para un usuario
-  static FarmsCubit createFarmsCubit(String userId) {
-    final farmRepository = sl<FarmRepository>();
-    return FarmsCubit(
-      getFarmsStream: GetFarmsStream(
-        repository: farmRepository,
-        userId: userId,
+
+    // Repository (Hybrid - reemplaza el anterior para pagos y préstamos)
+    // Nota: El TrabajadoresRepository existente se mantiene para trabajadores
+    // pero se actualiza para usar el híbrido para pagos y préstamos
+    sl.registerLazySingleton<TrabajadoresRepository>(
+      () => TrabajadoresHybridRepositoryImpl(
+        connectivityService: _connectivityService!,
+        remoteDataSource: sl<TrabajadoresRemoteDataSource>(),
+        localDataSource: sl<TrabajadoresLocalDataSource>(),
+        syncManager: _syncManager!,
+        legacyDataSource: _trabajadoresDataSource!,
       ),
-      deleteFarmUseCase: DeleteFarm(farmRepository),
-      setCurrentFarmUseCase: SetCurrentFarm(farmRepository),
-      farmRepository: farmRepository,
+    );
+
+    // Use Cases Pagos
+    sl.registerLazySingleton(() => GetPagos(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => AddPago(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => UpdatePago(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => DeletePago(sl<TrabajadoresRepository>()));
+    
+    // Use Cases Prestamos
+    sl.registerLazySingleton(() => GetPrestamos(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => AddPrestamo(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => UpdatePrestamo(sl<TrabajadoresRepository>()));
+    sl.registerLazySingleton(() => DeletePrestamo(sl<TrabajadoresRepository>()));
+  }
+  
+  // ... (existing factories)
+
+  /// Crea una instancia de PagosCubit
+  static PagosCubit createPagosCubit() {
+    return PagosCubit(
+      getPagos: sl<GetPagos>(),
+      addPago: sl<AddPago>(),
+      updatePago: sl<UpdatePago>(),
+      deletePago: sl<DeletePago>(),
+    );
+  }
+
+  /// Crea una instancia de PrestamosCubit
+  static PrestamosCubit createPrestamosCubit() {
+    return PrestamosCubit(
+      getPrestamos: sl<GetPrestamos>(),
+      addPrestamo: sl<AddPrestamo>(),
+      updatePrestamo: sl<UpdatePrestamo>(),
+      deletePrestamo: sl<DeletePrestamo>(),
+    );
+  }
+
+  // Getters para Services
+  static AuthService get authService => _authService!;
+  static PhotoService get photoService => _photoService!;
+  static ReportService get reportService => _reportService!;
+  static ConnectivityService get connectivityService => _connectivityService!;
+  static SyncManager get syncManager => _syncManager!;
+  static ApiClient get apiClient => _apiClient!;
+  // static BovinosRepository get bovinosRepository => _bovinosRepository!; // ELIMINADO: Usar sl<CattleRepository>() en su lugar
+
+  // Factory methods for Cubits/ViewModels (Restored)
+  
+  static FarmsCubit createFarmsCubit(String userId) {
+    final curFarmRepo = sl<FarmRepository>();
+    return FarmsCubit(
+      getFarmsStream: GetFarmsStream(repository: curFarmRepo, userId: userId),
+      deleteFarmUseCase: DeleteFarm(curFarmRepo),
+      setCurrentFarmUseCase: SetCurrentFarm(curFarmRepo),
+      farmRepository: curFarmRepo,
       userId: userId,
     );
   }
 
-  /// Crea una instancia de FarmFormCubit para un usuario
   static FarmFormCubit createFarmFormCubit(String userId) {
+    final curFarmRepo = sl<FarmRepository>();
     return FarmFormCubit(
-      createFarmUseCase: CreateFarm(sl<FarmRepository>()),
-      updateFarmUseCase: UpdateFarm(sl<FarmRepository>()),
+      createFarmUseCase: CreateFarm(curFarmRepo),
+      updateFarmUseCase: UpdateFarm(curFarmRepo),
       userId: userId,
     );
   }
 
-  /// Crea una instancia de DashboardCubit con todos los streams necesarios
   static DashboardCubit createDashboardCubit(String farmId) {
     return DashboardCubit(
       farmId: farmId,
-      getBovinosStream: GetBovinosStream(
-        repository: _bovinosRepository!,
-        farmId: farmId,
-      ),
-      getCerdosStream: GetCerdosStream(
-        repository: _cerdosRepository!,
-        farmId: farmId,
-      ),
-      getOvejasStream: GetOvejasStream(
-        repository: _ovejasRepository!,
-        farmId: farmId,
-      ),
-      getGallinasStream: GetGallinasStream(
-        repository: _gallinasRepository!,
-        farmId: farmId,
-      ),
-      getTrabajadoresStream: GetTrabajadoresStream(
-        repository: _trabajadoresRepository!,
-        farmId: farmId,
-      ),
-      cattleRepository: sl(), // Inyectamos el CattleRepository del nuevo sistema
+      // getBovinosStream: null, // ELIMINADO: Sistema legacy de bovinos eliminado. Usar cattleRepository en su lugar
+      getCerdosStream: GetCerdosStream(repository: _cerdosRepository!, farmId: farmId),
+      getOvejasStream: GetOvejasStream(repository: _ovejasRepository!, farmId: farmId),
+      getGallinasStream: GetGallinasStream(repository: _gallinasRepository!, farmId: farmId),
+      getTrabajadoresStream: GetTrabajadoresStream(repository: _trabajadoresRepository!, farmId: farmId),
+      cattleRepository: sl<CattleRepository>(), // Usar este para bovinos (sistema nuevo)
     );
   }
 
-  /// Crea una instancia de CattleCubit para una finca específica
   static CattleCubit createCattleCubit() {
     return CattleCubit(
       getCattleListUseCase: sl<GetCattleList>(),
@@ -558,45 +648,86 @@ class DependencyInjection {
     );
   }
 
-  /// Crea una instancia de ReproductionCubit para un bovino específico
-  static ReproductionCubit createReproductionCubit() {
-    return ReproductionCubit(
-      getEvents: sl<GetReproductiveEventsByBovine>(),
+  static BovinoFormCubit createBovineFormCubit() => sl<BovinoFormCubit>();
+  
+    // Legacy ViewModels
+  static OvejasViewModel createOvejasViewModel() => OvejasViewModel(
+    getAllOvejas: GetAllOvejas(_ovejasRepository!),
+    getOvejaById: GetOvejaById(_ovejasRepository!),
+    createOveja: CreateOveja(_ovejasRepository!),
+    updateOveja: UpdateOveja(_ovejasRepository!),
+    deleteOveja: DeleteOveja(_ovejasRepository!),
+    searchOvejas: SearchOvejas(_ovejasRepository!),
+  );
+
+  static CerdosViewModel createCerdosViewModel() => CerdosViewModel(
+    getAllCerdos: GetAllCerdos(_cerdosRepository!),
+    createCerdo: CreateCerdo(_cerdosRepository!),
+    updateCerdo: UpdateCerdo(_cerdosRepository!),
+    deleteCerdo: DeleteCerdo(_cerdosRepository!),
+  );
+
+  static GallinasViewModel createGallinasViewModel() => GallinasViewModel(
+    getAllGallinas: GetAllGallinas(_gallinasRepository!),
+    createGallina: CreateGallina(_gallinasRepository!),
+    // Assuming other use cases are similar
+  );
+
+  static TrabajadoresViewModel createTrabajadoresViewModel() => TrabajadoresViewModel(
+    getAllTrabajadores: GetAllTrabajadores(_trabajadoresRepository!),
+    createTrabajador: CreateTrabajador(_trabajadoresRepository!),
+    updateTrabajador: UpdateTrabajador(_trabajadoresRepository!),
+    deleteTrabajador: DeleteTrabajador(_trabajadoresRepository!),
+    getTrabajadoresActivos: GetTrabajadoresActivos(_trabajadoresRepository!),
+    searchTrabajadores: SearchTrabajadores(_trabajadoresRepository!),
+  );
+
+  static FarmHealthCubit createFarmHealthCubit() {
+    return FarmHealthCubit(
+      getVacunasByBovino: GetVacunasByBovino(_vacunaBovinoRepository!),
+      getCattleList: sl<GetCattleList>(),
     );
   }
 
-  /// Crea una instancia de ReproductiveEventFormCubit
+  static ProductionFormCubit createProductionFormCubit() {
+    return ProductionFormCubit(
+      addMilkProduction: sl<AddMilkProduction>(), 
+      addWeightRecord: sl<AddWeightRecord>(),
+    );
+  }
+
   static ReproductiveEventFormCubit createReproductiveEventFormCubit() {
     return ReproductiveEventFormCubit(
       addEvent: sl<AddReproductiveEvent>(),
     );
   }
 
-  /// Crea una instancia de ProductionCubit
+  static HealthCubit createHealthCubit() {
+    return HealthCubit(
+      getVacunas: sl<GetVacunasByBovino>(),
+      addVacuna: sl<AddVacunaBovino>(),
+    );
+  }
+
   static ProductionCubit createProductionCubit() {
     return ProductionCubit(
       getProduccionesLeche: sl<GetMilkProductionsByBovine>(),
       getPesos: sl<GetWeightRecordsByBovine>(),
+    ); 
+  }
+
+  static ReproductionCubit createReproductionCubit() {
+    return ReproductionCubit(
+      getEvents: sl<GetReproductiveEventsByBovine>(),
     );
   }
 
-  /// Crea una instancia de ProductionFormCubit
-  static ProductionFormCubit createProductionFormCubit() {
-    return ProductionFormCubit(
-      addMilkProduction: sl<AddMilkProduction>(),
-      addWeightRecord: sl<AddWeightRecord>(),
+  static BovineListCubit createBovineListCubit() {
+    return BovineListCubit(
+      getCattleList: sl<GetCattleList>(),
     );
   }
 
-  /// Crea una instancia de HealthCubit
-  static HealthCubit createHealthCubit() {
-    return HealthCubit(
-      getVacunas: GetVacunasByBovino(_vacunaBovinoRepository!),
-      addVacuna: AddVacunaBovino(_vacunaBovinoRepository!),
-    );
-  }
-
-  /// Crea una instancia de TransferCubit
   static TransferCubit createTransferCubit() {
     return TransferCubit(
       getTransfers: sl<GetTransfersByBovine>(),
@@ -606,7 +737,14 @@ class DependencyInjection {
     );
   }
 
-  /// Crea una instancia de FarmTransfersCubit
+  static FarmProductionCubit createFarmProductionCubit() {
+     return FarmProductionCubit(
+        getMilkProductions: sl<GetMilkProductionsByBovine>(),
+        getWeightRecords: sl<GetWeightRecordsByBovine>(),
+        getCattleList: sl<GetCattleList>(),
+     );
+  }
+
   static FarmTransfersCubit createFarmTransfersCubit() {
     return FarmTransfersCubit(
       getTransfers: sl<GetTransfersByFarm>(),
@@ -614,36 +752,13 @@ class DependencyInjection {
     );
   }
 
-  /// Crea una instancia de FarmHealthCubit
-  static FarmHealthCubit createFarmHealthCubit() {
-    return FarmHealthCubit(
-      getVacunasByBovino: GetVacunasByBovino(_vacunaBovinoRepository!),
-      getCattleList: sl<GetCattleList>(),
+  static FeedingCubit createFeedingCubit() {
+    return FeedingCubit(
+      getSchedules: sl<GetFeedingSchedules>(),
+      saveSchedule: sl<SaveFeedingSchedule>(),
+      calculateRequirements: sl<CalculateNutritionalRequirements>(),
     );
   }
 
-  /// Crea una instancia de FarmProductionCubit
-  static FarmProductionCubit createFarmProductionCubit() {
-    return FarmProductionCubit(
-      getMilkProductions: sl<GetMilkProductionsByBovine>(),
-      getWeightRecords: sl<GetWeightRecordsByBovine>(),
-      getCattleList: sl<GetCattleList>(),
-    );
-  }
-
-  /// Crea una instancia de BovineListCubit (sistema nuevo - Firestore)
-  static BovineListCubit createBovineListCubit() {
-    return BovineListCubit(
-      getCattleList: sl<GetCattleList>(),
-    );
-  }
-  
-  // Getters para Services
-  static AuthService get authService => _authService!;
-  static PhotoService get photoService => _photoService!;
-  static ReportService get reportService => _reportService!;
-  static ConnectivityService get connectivityService => _connectivityService!;
-  static SyncManager get syncManager => _syncManager!;
-  static ApiClient get apiClient => _apiClient!;
 }
 

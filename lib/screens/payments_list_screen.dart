@@ -210,7 +210,7 @@ class PaymentsListScreen extends StatelessWidget {
                 ...activeWorkers.map((worker) {
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: updatedFarm.primaryColor.withOpacity(0.1),
+                      backgroundColor: updatedFarm.primaryColor.withValues(alpha: 0.1),
                       child: Text(
                         worker.fullName.isNotEmpty ? worker.fullName[0].toUpperCase() : '?',
                         style: TextStyle(

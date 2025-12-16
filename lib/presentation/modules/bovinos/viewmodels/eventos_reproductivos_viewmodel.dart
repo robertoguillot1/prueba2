@@ -9,11 +9,11 @@ import '../../base/base_viewmodel.dart';
 /// ViewModel para gestión de Eventos Reproductivos
 class EventosReproductivosViewModel extends BaseViewModel {
   final CreateEventoReproductivo createEvento;
-  final RegistrarPartoConCria registrarPartoConCria;
+  final RegistrarPartoConCria? registrarPartoConCria; // Opcional: sistema legacy eliminado
 
   EventosReproductivosViewModel({
     required this.createEvento,
-    required this.registrarPartoConCria,
+    this.registrarPartoConCria, // Opcional
   });
 
   // Estado
@@ -55,7 +55,25 @@ class EventosReproductivosViewModel extends BaseViewModel {
     setLoading(true);
     clearError();
 
-    final result = await registrarPartoConCria(
+    // Si registrarPartoConCria no está disponible, solo registrar el evento
+    if (registrarPartoConCria == null) {
+      final eventoResult = await createEvento(eventoParto);
+      return switch (eventoResult) {
+        Success<EventoReproductivo>(:final data) => () {
+          _eventos.add(data);
+          _eventos.sort((a, b) => b.fecha.compareTo(a.fecha));
+          setLoading(false);
+          return {'evento': data, 'cria': null};
+        }(),
+        Error<EventoReproductivo>(:final failure) => () {
+          setError(getErrorMessage(failure));
+          setLoading(false);
+          return null;
+        }(),
+      };
+    }
+
+    final result = await registrarPartoConCria!(
       eventoParto: eventoParto,
       crearCria: crearCria,
       datosCria: datosCria,

@@ -404,7 +404,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.15),
+            color: Colors.blue.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.local_drink, color: Colors.blue),
@@ -438,7 +438,7 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.15),
+            color: Colors.green.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.monitor_weight, color: Colors.green),
@@ -518,10 +518,10 @@ class _ProductionTabContentState extends State<_ProductionTabContent> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Colors.blue.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),

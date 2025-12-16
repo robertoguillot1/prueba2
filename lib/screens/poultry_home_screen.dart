@@ -382,7 +382,7 @@ class _PoultryHomeScreenState extends State<PoultryHomeScreen> with SingleTicker
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: widget.farm.primaryColor.withOpacity(0.1),
+                  color: widget.farm.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -688,9 +688,9 @@ class _PoultryHomeScreenState extends State<PoultryHomeScreen> with SingleTicker
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: estadoColor.withOpacity(0.1),
+                  color: estadoColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: estadoColor.withOpacity(0.3)),
+                  border: Border.all(color: estadoColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

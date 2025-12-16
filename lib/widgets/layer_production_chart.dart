@@ -105,7 +105,7 @@ class LayerProductionChart extends StatelessWidget {
           horizontalInterval: 10,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               strokeWidth: 1,
             );
           },
@@ -143,7 +143,7 @@ class LayerProductionChart extends StatelessWidget {
         ),
         borderData: FlBorderData(
           show: true,
-          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         lineBarsData: [
           LineChartBarData(
@@ -170,7 +170,7 @@ class LayerProductionChart extends StatelessWidget {
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
             ),
           ),
         ],

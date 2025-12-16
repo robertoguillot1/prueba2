@@ -83,6 +83,109 @@ class BovinoMapper {
   static List<BovineEntity> toEntityList(List<old.Bovino> bovinos) {
     return bovinos.map((bovino) => toEntity(bovino)).toList();
   }
+
+  /// Convierte un BovineEntity (nuevo) a Bovino (viejo)
+  /// Útil para mantener compatibilidad con widgets legacy
+  static old.Bovino fromEntity(BovineEntity entity) {
+    return old.Bovino(
+      id: entity.id,
+      farmId: entity.farmId,
+      identification: entity.identifier,
+      name: entity.name,
+      category: _mapCategoryFromEntity(entity),
+      gender: _mapGenderFromEntity(entity.gender),
+      currentWeight: entity.weight,
+      birthDate: entity.birthDate,
+      productionStage: _mapProductionStageFromEntity(entity.productionStage),
+      healthStatus: _mapHealthStatusFromEntity(entity.healthStatus),
+      breedingStatus: entity.breedingStatus != null 
+          ? _mapBreedingStatusFromEntity(entity.breedingStatus!)
+          : null,
+      lastHeatDate: entity.lastHeatDate,
+      inseminationDate: entity.inseminationDate,
+      expectedCalvingDate: entity.expectedCalvingDate,
+      previousCalvings: entity.previousCalvings,
+      notes: entity.notes,
+      photoUrl: entity.photoUrl,
+      idPadre: entity.fatherId,
+      nombrePadre: null, // No disponible en BovineEntity
+      idMadre: entity.motherId,
+      nombreMadre: null, // No disponible en BovineEntity
+      raza: entity.breed,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    );
+  }
+
+  /// Mapea el género de nuevo a viejo
+  static old.BovinoGender _mapGenderFromEntity(BovineGender gender) {
+    switch (gender) {
+      case BovineGender.male:
+        return old.BovinoGender.male;
+      case BovineGender.female:
+        return old.BovinoGender.female;
+    }
+  }
+
+  /// Mapea la categoría desde BovineEntity (calculada) a BovinoCategory
+  static old.BovinoCategory _mapCategoryFromEntity(BovineEntity entity) {
+    final category = entity.category;
+    switch (category) {
+      case BovineCategory.ternero:
+        return old.BovinoCategory.ternero;
+      case BovineCategory.ternera:
+        return old.BovinoCategory.novilla; // Corregido: ternilla -> novilla
+      case BovineCategory.novillo:
+        return old.BovinoCategory.ternero; // Aproximación
+      case BovineCategory.novilla:
+        return old.BovinoCategory.novilla;
+      case BovineCategory.toro:
+        return old.BovinoCategory.toro;
+      case BovineCategory.vaca:
+        return old.BovinoCategory.vaca;
+    }
+  }
+
+  /// Mapea ProductionStage de nuevo a viejo
+  static old.ProductionStage _mapProductionStageFromEntity(ProductionStage stage) {
+    switch (stage) {
+      case ProductionStage.raising:
+        return old.ProductionStage.levante;
+      case ProductionStage.productive:
+        return old.ProductionStage.produccion;
+      case ProductionStage.dry:
+        return old.ProductionStage.descarte; // Aproximación
+    }
+  }
+
+  /// Mapea HealthStatus de nuevo a viejo
+  static old.HealthStatus _mapHealthStatusFromEntity(HealthStatus status) {
+    switch (status) {
+      case HealthStatus.healthy:
+        return old.HealthStatus.sano;
+      case HealthStatus.sick:
+        return old.HealthStatus.enfermo;
+      case HealthStatus.underTreatment:
+        return old.HealthStatus.tratamiento;
+      case HealthStatus.recovering:
+        return old.HealthStatus.enfermo; // Aproximación
+    }
+  }
+
+  /// Mapea BreedingStatus de nuevo a viejo
+  static old.BreedingStatus _mapBreedingStatusFromEntity(BreedingStatus status) {
+    switch (status) {
+      case BreedingStatus.notSpecified:
+      case BreedingStatus.empty:
+        return old.BreedingStatus.vacia;
+      case BreedingStatus.pregnant:
+        return old.BreedingStatus.prenada;
+      case BreedingStatus.inseminated:
+        return old.BreedingStatus.enCelo; // Aproximación
+      case BreedingStatus.served:
+        return old.BreedingStatus.enCelo; // Aproximación
+    }
+  }
 }
 
 

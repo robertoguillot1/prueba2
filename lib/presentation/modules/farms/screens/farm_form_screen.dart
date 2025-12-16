@@ -160,7 +160,7 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
                       Colors.grey.shade800,
                     ]
                   : [
-                      primaryColor.withOpacity(0.05),
+                      primaryColor.withValues(alpha: 0.05),
                       Colors.white,
                     ],
             ),
@@ -176,10 +176,10 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
+                      color: primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: primaryColor.withOpacity(0.3),
+                        color: primaryColor.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -270,10 +270,10 @@ class _FarmFormScreenState extends State<FarmFormScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.1),
+                              color: primaryColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: primaryColor.withOpacity(0.3),
+                                color: primaryColor.withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),

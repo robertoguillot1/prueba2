@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../domain/entities/trabajadores/trabajador.dart';
 import '../../../../presentation/widgets/custom_text_field.dart';
 import '../../../../presentation/widgets/custom_date_picker.dart';
 import '../../../../presentation/widgets/custom_dropdown.dart';
 import '../../../../presentation/widgets/form_section.dart';
 import '../../../../core/validators/form_validators.dart';
+import '../../../../utils/thousands_formatter.dart';
 
 /// Widget reutilizable para formulario de Trabajador
 class TrabajadorForm extends StatefulWidget {
@@ -41,10 +43,14 @@ class _TrabajadorFormState extends State<TrabajadorForm> {
     super.initState();
     final trabajador = widget.initialTrabajador;
     _fullNameController = TextEditingController(text: trabajador?.fullName);
-    _identificationController = TextEditingController(text: trabajador?.identification);
+    _identificationController = TextEditingController(
+      text: trabajador?.identification,
+    );
     _positionController = TextEditingController(text: trabajador?.position);
     _salaryController = TextEditingController(
-      text: trabajador?.salary.toStringAsFixed(0),
+      text: trabajador != null
+          ? NumberFormat('#,###', 'es').format(trabajador.salary.toInt()).replaceAll(',', '.')
+          : '',
     );
     _laborDescriptionController = TextEditingController(
       text: trabajador?.laborDescription,
@@ -78,9 +84,14 @@ class _TrabajadorFormState extends State<TrabajadorForm> {
       id: widget.initialTrabajador?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       farmId: widget.farmId,
       fullName: _fullNameController.text.trim(),
-      identification: _identificationController.text.trim(),
+      identification: _identificationController.text.trim().isEmpty
+          ? '' // Si está vacío, guardar como cadena vacía
+          : _identificationController.text.trim(),
       position: _positionController.text.trim(),
-      salary: double.tryParse(_salaryController.text) ?? 0.0,
+      salary: double.tryParse(
+            ThousandsFormatter.getNumericValue(_salaryController.text),
+          ) ??
+          0.0,
       startDate: _startDate!,
       isActive: _isActive,
       workerType: _workerType,
@@ -119,12 +130,15 @@ class _TrabajadorFormState extends State<TrabajadorForm> {
               ),
               const SizedBox(height: 16),
               CustomTextField(
-                label: 'Identificación *',
+                label: 'Identificación (Opcional)',
                 controller: _identificationController,
                 hint: 'Ej: 1234567890',
                 validator: (value) {
-                  return FormValidators.required(value, fieldName: 'La identificación') ??
-                      FormValidators.minLength(value, 7, fieldName: 'La identificación');
+                  // Si se ingresa identificación, validar que tenga al menos 7 caracteres
+                  if (value != null && value.trim().isNotEmpty) {
+                    return FormValidators.minLength(value, 7, fieldName: 'La identificación');
+                  }
+                  return null; // Opcional, no requiere validación si está vacío
                 },
                 prefixIcon: Icons.badge,
               ),
@@ -167,8 +181,9 @@ class _TrabajadorFormState extends State<TrabajadorForm> {
               CustomTextField(
                 label: 'Salario *',
                 controller: _salaryController,
-                hint: 'Ej: 1000000',
+                hint: 'Ej: 1.000.000',
                 keyboardType: TextInputType.number,
+                inputFormatters: [ThousandsFormatter()], // Formato con puntos para miles
                 validator: (value) {
                   return FormValidators.required(value, fieldName: 'El salario') ??
                       FormValidators.positiveNumber(value, fieldName: 'El salario');

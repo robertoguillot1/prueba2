@@ -286,7 +286,7 @@ class CattleWeightProductionScreen extends StatelessWidget {
               ),
               children: [
                 TableRow(
-                  decoration: BoxDecoration(color: farm.primaryColor.withOpacity(0.1)),
+                  decoration: BoxDecoration(color: farm.primaryColor.withValues(alpha: 0.1)),
                   children: [
                     _buildTableCell('Fecha', isHeader: true),
                     _buildTableCell('Peso (kg)', isHeader: true),

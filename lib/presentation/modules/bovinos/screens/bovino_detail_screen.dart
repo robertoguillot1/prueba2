@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import '../widgets/genealogy_widget.dart';
+import '../details/tabs/transfer_tab.dart';
+import '../screens/bovino_form_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
+import '../../../../presentation/widgets/photo/photo_display_widget.dart';
 import '../cubits/form/bovino_form_cubit.dart';
 import '../cubits/form/bovino_form_state.dart';
 import '../details/tabs/reproduction_tab.dart';
 import '../details/tabs/production_tab.dart';
 import '../details/tabs/health_tab.dart';
-import '../details/tabs/transfer_tab.dart';
-import '../widgets/genealogy_widget.dart';
-import 'bovino_form_screen.dart';
+import '../details/tabs/feeding_tab.dart'; // Import at top
 
-/// Pantalla de detalle/perfil de un Bovino
 class BovinoDetailScreen extends StatelessWidget {
   final BovineEntity bovine;
   final String farmId;
@@ -27,67 +29,44 @@ class BovinoDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => di.sl<BovinoFormCubit>(),
-      child: BlocListener<BovinoFormCubit, BovinoFormState>(
-        listener: (context, state) {
-          if (state is BovinoFormDeleted) {
-            // Mostrar mensaje de éxito
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-              ),
-            );
-            // Cerrar pantalla y regresar a la lista con resultado true
-            Navigator.pop(context, true);
-          } else if (state is BovinoFormError) {
-            // Mostrar mensaje de error
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        child: _buildDetailContent(context),
-      ),
-    );
-  }
-
-  Widget _buildDetailContent(BuildContext context) {
-    // Determinar si es hembra para mostrar tab de Reproducción
-    final isFemale = bovine.gender == BovineGender.female;
-    final tabCount = isFemale ? 5 : 4; // 5 tabs para hembras, 4 para machos (agregado Transporte)
-
-    return DefaultTabController(
-      length: tabCount,
       child: Builder(
-        builder: (BuildContext tabContext) {
-          return Scaffold(
-            body: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  _buildSliverAppBar(context),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _StickyTabBarDelegate(
-                      TabBar(
-                        tabs: _buildTabs(isFemale),
-                        labelColor: Theme.of(context).primaryColor,
-                        unselectedLabelColor: Colors.grey,
-                        indicatorColor: Theme.of(context).primaryColor,
+        builder: (context) {
+          final isFemale = bovine.gender == BovineGender.female;
+          // Base tabs: General, Production, Health, Feeding, Transport
+          // If female: + Reproduction
+          final tabCount = isFemale ? 6 : 5;
+
+          return DefaultTabController(
+            length: tabCount,
+            child: Scaffold(
+              body: NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return <Widget>[
+                    _buildSliverAppBar(context),
+                    SliverPersistentHeader(
+                      delegate: _StickyTabBarDelegate(
+                        TabBar(
+                          tabs: _buildTabs(isFemale),
+                          isScrollable: true,
+                          labelColor: Theme.of(context).primaryColor,
+                          indicatorColor: Theme.of(context).primaryColor,
+                          tabAlignment: TabAlignment.start,
+                        ),
                       ),
+                      pinned: true,
                     ),
-                  ),
-                ];
-              },
-              body: TabBarView(
-                children: _buildTabViews(tabContext, isFemale),
+                  ];
+                },
+                body: TabBarView(
+                  children: _buildTabViews(context, isFemale),
+                ),
+              ),
+              floatingActionButton: Builder(
+                builder: (context) {
+                  return _buildConditionalFAB(context, isFemale) ?? const SizedBox.shrink();
+                }
               ),
             ),
-            // FAB solo visible en tabs General (0) y Reproducción (1 si es hembra)
-            // Producción y Sanidad tienen sus propios FABs
-            floatingActionButton: _buildConditionalFAB(tabContext, isFemale),
           );
         },
       ),
@@ -108,6 +87,7 @@ class BovinoDetailScreen extends StatelessWidget {
     tabs.addAll([
       const Tab(icon: Icon(Icons.show_chart), text: 'Producción'),
       const Tab(icon: Icon(Icons.medical_services_outlined), text: 'Sanidad'),
+      const Tab(icon: Icon(Icons.restaurant), text: 'Alimentación'), // NEW TAB
       const Tab(icon: Icon(Icons.local_shipping), text: 'Transporte'),
     ]);
 
@@ -128,6 +108,7 @@ class BovinoDetailScreen extends StatelessWidget {
     views.addAll([
       _buildProductionTab(context),
       _buildHealthTab(context),
+      FeedingTab(bovineId: bovine.id, farmId: farmId), // NEW TAB VIEW
       _buildTransferTab(context),
     ]);
 
@@ -182,6 +163,11 @@ class BovinoDetailScreen extends StatelessWidget {
       pinned: true,
       actions: [
         IconButton(
+          icon: const Icon(Icons.camera_alt),
+          onPressed: () => _showPhotoOptions(context),
+          tooltip: 'Agregar/Editar foto',
+        ),
+        IconButton(
           icon: const Icon(Icons.delete, color: Colors.red),
           onPressed: () => _showDeleteConfirmation(context),
           tooltip: 'Eliminar bovino',
@@ -194,7 +180,7 @@ class BovinoDetailScreen extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                _getGenderColor(bovine.gender).withOpacity(0.3),
+                _getGenderColor(bovine.gender).withValues(alpha: 0.3),
                 theme.scaffoldBackgroundColor,
               ],
             ),
@@ -206,22 +192,48 @@ class BovinoDetailScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 16), // Reducido de 60 a 16
                 // Avatar/Foto del animal (más pequeño)
-                Container(
-                  width: 100, // Reducido de 120 a 100
-                  height: 100, // Reducido de 120 a 100
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _getGenderColor(bovine.gender).withOpacity(0.2),
-                    border: Border.all(
-                      color: _getGenderColor(bovine.gender),
-                      width: 3,
+                Stack(
+                  children: [
+                    PhotoDisplayWidget(
+                      photoUrl: bovine.photoUrl,
+                      entityId: bovine.id,
+                      module: 'cattle',
+                      size: 100,
+                      placeholder: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _getGenderColor(bovine.gender).withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: _getGenderColor(bovine.gender),
+                            width: 3,
+                          ),
+                        ),
+                        child: Icon(
+                          _getGenderIcon(bovine.gender),
+                          size: 50, // Reducido de 60 a 50
+                          color: _getGenderColor(bovine.gender),
+                        ),
+                      ),
+                      onTap: () => _showPhotoOptions(context),
                     ),
-                  ),
-                  child: Icon(
-                    _getGenderIcon(bovine.gender),
-                    size: 50, // Reducido de 60 a 50
-                    color: _getGenderColor(bovine.gender),
-                  ),
+                    // Botón de cámara flotante
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: IconButton(
+                          icon: const Icon(Icons.camera_alt, size: 18),
+                          color: Colors.white,
+                          onPressed: () => _showPhotoOptions(context),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12), // Reducido de 16 a 12
                 // Identificador
@@ -294,7 +306,7 @@ class BovinoDetailScreen extends StatelessWidget {
     return Chip(
       avatar: Icon(icon, size: 16, color: color),
       label: Text(label),
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: color.withValues(alpha: 0.1),
       side: BorderSide(color: color, width: 1),
       labelStyle: TextStyle(
         color: color,
@@ -545,6 +557,91 @@ class BovinoDetailScreen extends StatelessWidget {
       // Si se editó exitosamente, cerrar la pantalla de detalle
       // para que la lista se actualice
       Navigator.pop(context, true);
+    }
+  }
+
+  Future<void> _showPhotoOptions(BuildContext context) async {
+    final photoService = di.DependencyInjection.photoService;
+    final option = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Seleccionar de galería'),
+              onTap: () => Navigator.pop(context, 'gallery'),
+            ),
+            if (bovine.photoUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Eliminar foto', style: TextStyle(color: Colors.red)),
+                onTap: () => Navigator.pop(context, 'delete'),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (option == null) return;
+
+    File? photo;
+    if (option == 'camera') {
+      photo = await photoService.takePhoto();
+    } else if (option == 'gallery') {
+      photo = await photoService.pickFromGallery();
+    } else if (option == 'delete') {
+      // Eliminar foto
+      if (bovine.photoUrl != null) {
+        await photoService.deletePhoto(bovine.photoUrl!);
+        // Actualizar el bovino sin foto
+        final cubit = context.read<BovinoFormCubit>();
+        await cubit.updatePhoto(bovine, farmId, null);
+        // Esperar a que se complete la actualización y recargar
+        if (context.mounted) {
+          // Usar BlocListener para detectar cuando se complete
+          final updatedBovine = bovine.copyWith(photoUrl: null);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => BovinoDetailScreen(
+                bovine: updatedBovine,
+                farmId: farmId,
+              ),
+            ),
+          );
+        }
+      }
+      return;
+    }
+
+    if (photo != null) {
+      final compressed = await photoService.compressImage(photo);
+      if (compressed != null) {
+        final savedPath = await photoService.savePhoto(compressed, bovine.id, 'cattle');
+        if (savedPath != null && context.mounted) {
+          // Actualizar el bovino con la nueva foto
+          final cubit = context.read<BovinoFormCubit>();
+          await cubit.updatePhoto(bovine, farmId, savedPath);
+          // Esperar a que se complete la actualización y recargar
+          if (context.mounted) {
+            final updatedBovine = bovine.copyWith(photoUrl: savedPath);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => BovinoDetailScreen(
+                  bovine: updatedBovine,
+                  farmId: farmId,
+                ),
+              ),
+            );
+          }
+        }
+      }
     }
   }
 

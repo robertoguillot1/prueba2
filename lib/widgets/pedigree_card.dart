@@ -28,7 +28,7 @@ class PedigreeCard extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isCurrent
-              ? primaryColor.withOpacity(0.15)
+              ? primaryColor.withValues(alpha: 0.15)
               : isUnknown
                   ? Colors.grey.shade100
                   : Colors.white,
@@ -44,8 +44,8 @@ class PedigreeCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isCurrent
-                  ? primaryColor.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.1),
+                  ? primaryColor.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.1),
               blurRadius: isCurrent ? 8 : 4,
               offset: const Offset(0, 2),
             ),
@@ -58,7 +58,7 @@ class PedigreeCard extends StatelessWidget {
             CircleAvatar(
               radius: 28,
               backgroundColor: isCurrent
-                  ? primaryColor.withOpacity(0.2)
+                  ? primaryColor.withValues(alpha: 0.2)
                   : isUnknown
                       ? Colors.grey.shade300
                       : Colors.grey.shade200,
@@ -131,7 +131,7 @@ class PedigreeCard extends StatelessWidget {
               Icon(
                 Icons.touch_app,
                 size: 12,
-                color: primaryColor.withOpacity(0.7),
+                color: primaryColor.withValues(alpha: 0.7),
               ),
             ],
           ],

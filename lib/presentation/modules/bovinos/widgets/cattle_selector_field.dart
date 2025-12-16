@@ -305,7 +305,7 @@ class _CattleSelectorModalState extends State<_CattleSelectorModal> {
                           subtitle: const Text('Dejar como desconocido'),
                           onTap: () => widget.onSelect(null),
                           selected: widget.selectedBovinoId == null,
-                          selectedTileColor: color.withOpacity(0.1),
+                          selectedTileColor: color.withValues(alpha: 0.1),
                         );
                       }
                       
@@ -315,7 +315,7 @@ class _CattleSelectorModalState extends State<_CattleSelectorModal> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: isSelected
-                              ? color.withOpacity(0.2)
+                              ? color.withValues(alpha: 0.2)
                               : Colors.grey.shade200,
                           child: Icon(
                             bovino.gender == BovinoGender.male
@@ -361,7 +361,7 @@ class _CattleSelectorModalState extends State<_CattleSelectorModal> {
                             : null,
                         onTap: () => widget.onSelect(bovino),
                         selected: isSelected,
-                        selectedTileColor: color.withOpacity(0.1),
+                        selectedTileColor: color.withValues(alpha: 0.1),
                       );
                     },
                   ),

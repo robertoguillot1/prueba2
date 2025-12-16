@@ -21,9 +21,11 @@ class ThousandsFormatter extends TextInputFormatter {
       );
     }
 
-    // Formatear con separador de miles
-    final formatter = NumberFormat('#,###');
-    final formatted = formatter.format(int.parse(digitsOnly));
+    // Formatear con separador de miles usando puntos
+    final formatter = NumberFormat('#,###', 'es'); // Usar locale español
+    var formatted = formatter.format(int.parse(digitsOnly));
+    // Asegurar que use puntos en lugar de comas (algunos locales usan comas)
+    formatted = formatted.replaceAll(',', '.');
 
     return TextEditingValue(
       text: formatted,
@@ -32,7 +34,7 @@ class ThousandsFormatter extends TextInputFormatter {
   }
 
   static String getNumericValue(String formattedValue) {
-    // Remover todos los caracteres que no sean dígitos
+    // Remover todos los caracteres que no sean dígitos (puntos, comas, espacios, etc.)
     return formattedValue.replaceAll(RegExp(r'[^\d]'), '');
   }
 }

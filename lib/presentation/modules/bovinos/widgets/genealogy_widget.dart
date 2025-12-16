@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../features/cattle/domain/entities/bovine_entity.dart';
 import '../../../../features/cattle/domain/usecases/get_cattle_list.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
-import '../../screens/bovino_detail_screen.dart';
+import '../screens/bovino_detail_screen.dart';
 
 /// Widget para mostrar el árbol genealógico de un bovino
 class GenealogyWidget extends StatefulWidget {
@@ -268,7 +268,7 @@ class _GenealogyWidgetState extends State<GenealogyWidget> {
           border: Border.all(color: color, width: 2),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -336,7 +336,7 @@ class _GenealogyWidgetState extends State<GenealogyWidget> {
         border: Border.all(color: Colors.green, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.3),
+            color: Colors.green.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

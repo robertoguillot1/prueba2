@@ -100,7 +100,7 @@ class _GoatSheepInventoryScreenState extends State<GoatSheepInventoryScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       Icon(Icons.warning, color: Colors.orange[700]),
@@ -121,7 +121,7 @@ class _GoatSheepInventoryScreenState extends State<GoatSheepInventoryScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       Icon(Icons.error, color: Colors.red[700]),
@@ -367,10 +367,10 @@ class _GoatSheepInventoryScreenState extends State<GoatSheepInventoryScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: isNearParto
-                            ? Colors.orange.withOpacity(0.2)
+                            ? Colors.orange.withValues(alpha: 0.2)
                             : isPastParto
-                                ? Colors.red.withOpacity(0.2)
-                                : Colors.green.withOpacity(0.2),
+                                ? Colors.red.withValues(alpha: 0.2)
+                                : Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(

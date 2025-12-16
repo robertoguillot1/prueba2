@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Campo de texto personalizado y reutilizable
 class CustomTextField extends StatelessWidget {
@@ -15,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function()? onTap;
   final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -31,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.readOnly = false,
+    this.inputFormatters,
   });
 
   @override
@@ -45,6 +48,7 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       onChanged: onChanged,
       onTap: onTap,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

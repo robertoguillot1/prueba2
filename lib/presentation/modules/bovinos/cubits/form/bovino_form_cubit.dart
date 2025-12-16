@@ -280,6 +280,32 @@ class BovinoFormCubit extends Cubit<BovinoFormState> {
     }
   }
 
+  /// Actualiza solo la foto del bovino
+  Future<void> updatePhoto(BovineEntity bovine, String farmId, String? photoUrl) async {
+    emit(const BovinoFormLoading());
+
+    try {
+      final updatedBovine = bovine.copyWith(
+        photoUrl: photoUrl,
+        updatedAt: DateTime.now(),
+      );
+
+      final result = await updateBovineUseCase.call(
+        UpdateBovineParams(bovine: updatedBovine),
+      );
+
+      result.fold(
+        (failure) => emit(BovinoFormError(failure.message)),
+        (updatedBovineResult) => emit(BovinoFormSuccess(
+          bovine: updatedBovineResult,
+          isEdit: true,
+        )),
+      );
+    } catch (e) {
+      emit(BovinoFormError('Error inesperado al actualizar foto: $e'));
+    }
+  }
+
   /// Resetea el formulario
   void reset() {
     _currentBovine = null;

@@ -94,8 +94,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       Colors.grey.shade900,
                     ]
                   : [
-                      primaryColor.withOpacity(0.1),
-                      primaryColor.withOpacity(0.05),
+                      primaryColor.withValues(alpha: 0.1),
+                      primaryColor.withValues(alpha: 0.05),
                       Colors.white,
                     ],
             ),
@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
+                          color: primaryColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(

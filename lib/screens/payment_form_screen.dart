@@ -170,7 +170,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: widget.farm.primaryColor.withOpacity(0.1),
+                        backgroundColor: widget.farm.primaryColor.withValues(alpha: 0.1),
                         child: Text(
                           widget.worker.fullName.isNotEmpty 
                               ? widget.worker.fullName[0].toUpperCase() 
@@ -300,9 +300,9 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [

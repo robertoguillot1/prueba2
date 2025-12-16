@@ -77,7 +77,7 @@ class PigProfileScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         child: Text(
                           (updatedPig.identification ?? '?')[0].toUpperCase(),
                           style: const TextStyle(
@@ -300,7 +300,7 @@ class PigProfileScreen extends StatelessWidget {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.blue.withOpacity(0.1),
+                                                color: Colors.blue.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Row(
@@ -450,9 +450,9 @@ class PigProfileScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: farm.primaryColor.withOpacity(0.1),
+          color: farm.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: farm.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: farm.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

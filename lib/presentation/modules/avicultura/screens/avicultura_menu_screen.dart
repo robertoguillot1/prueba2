@@ -81,7 +81,7 @@ class AviculturaMenuScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 24.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.0),
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

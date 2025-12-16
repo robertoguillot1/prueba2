@@ -175,7 +175,7 @@ class _LoanFormScreenState extends State<LoanFormScreen> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: widget.farm.primaryColor.withOpacity(0.1),
+                        backgroundColor: widget.farm.primaryColor.withValues(alpha: 0.1),
                         child: Text(
                           widget.worker.fullName.isNotEmpty 
                               ? widget.worker.fullName[0].toUpperCase() 

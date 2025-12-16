@@ -56,16 +56,18 @@ class TrabajadoresMenuScreen extends StatelessWidget {
                 context,
                 icon: Icons.payments,
                 title: 'Registro de Pagos/Nómina',
-                subtitle: 'Gestionar pagos, salarios y nómina de trabajadores',
+                subtitle: 'Gestionar pagos por trabajador',
                 color: Colors.green,
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => PaymentsListScreen(farm: farm),
-                  //   ),
-                  // );
-                  debugPrint('Funcionalidad pendiente: Registro de Pagos/Nómina');
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Seleccione un trabajador para gestionar sus pagos')),
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TrabajadoresListScreen(farmId: farmId),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -75,16 +77,18 @@ class TrabajadoresMenuScreen extends StatelessWidget {
                 context,
                 icon: Icons.account_balance_wallet,
                 title: 'Control de Préstamos',
-                subtitle: 'Gestionar préstamos otorgados a trabajadores',
+                subtitle: 'Gestionar préstamos por trabajador',
                 color: Colors.orange,
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => LoansListScreen(farm: farm),
-                  //   ),
-                  // );
-                  debugPrint('Funcionalidad pendiente: Control de Préstamos');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Seleccione un trabajador para gestionar sus préstamos')),
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TrabajadoresListScreen(farmId: farmId),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -138,7 +142,7 @@ class TrabajadoresMenuScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

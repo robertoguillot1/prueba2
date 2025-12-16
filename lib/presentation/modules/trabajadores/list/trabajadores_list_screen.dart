@@ -110,8 +110,11 @@ class _TrabajadoresListScreenState extends State<TrabajadoresListScreen> {
                     hint: 'Buscar trabajadores...',
                     controller: _searchController,
                     onSearch: (query) {
-                      // TODO: Implementar búsqueda cuando esté disponible
-                      _viewModel.loadTrabajadores(widget.farmId);
+                      if (query.trim().isEmpty) {
+                        _viewModel.loadTrabajadores(widget.farmId);
+                      } else {
+                        _viewModel.searchTrabajadoresByQuery(widget.farmId, query);
+                      }
                     },
                     onClear: () {
                       _viewModel.loadTrabajadores(widget.farmId);

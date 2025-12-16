@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:dartz/dartz.dart' hide State; // Ocultar State de dartz para evitar conflicto con Flutter
 import '../../../../domain/entities/bovinos/bovino.dart';
-import '../../../../domain/repositories/bovinos/bovinos_repository.dart';
-import '../../../../core/di/dependency_injection.dart';
-import '../../../../core/utils/result.dart';
+import '../../../../features/cattle/domain/repositories/cattle_repository.dart';
+import '../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../core/errors/failures.dart';
+import '../mappers/bovino_mapper.dart';
 import 'pedigree_card.dart';
 import '../details/bovino_details_screen.dart';
 
@@ -24,12 +27,12 @@ class PedigreeTreeWidget extends StatefulWidget {
 }
 
 class _PedigreeTreeWidgetState extends State<PedigreeTreeWidget> {
-  late final BovinosRepository _repository;
+  late final CattleRepository _repository;
   
   @override
   void initState() {
     super.initState();
-    _repository = DependencyInjection.bovinosRepository;
+    _repository = GetIt.instance<CattleRepository>();
     _loadPedigree();
   }
   
@@ -50,89 +53,109 @@ class _PedigreeTreeWidgetState extends State<PedigreeTreeWidget> {
     });
 
     try {
-      // Cargar padre y madre
+      // Cargar padre y madre usando CattleRepository
       if (widget.bovino.idPadre != null) {
-        final padreResult = await _repository.getBovinoById(
-          widget.bovino.idPadre!,
+        final padreResult = await (_repository as dynamic).getBovineById(
           widget.farmId,
-        );
-        switch (padreResult) {
-          case Success<Bovino>(:final data):
-            _padre = data;
+          widget.bovino.idPadre!,
+        ) as Either<Failure, BovineEntity>;
+        
+        padreResult.fold(
+          (failure) {
+            // Ignorar error silenciosamente
+          },
+          (bovineEntity) {
+            _padre = BovinoMapper.fromEntity(bovineEntity);
             
             // Cargar abuelos paternos
             if (_padre!.idPadre != null) {
-              final abueloPaternoResult = await _repository.getBovinoById(
-                _padre!.idPadre!,
+              (_repository as dynamic).getBovineById(
                 widget.farmId,
-              );
-              switch (abueloPaternoResult) {
-                case Success<Bovino>(:final data):
-                  _abueloPaterno = data;
-                case Error<Bovino>():
-                  // Ignorar error silenciosamente
-                  break;
-              }
+                _padre!.idPadre!,
+              ).then((result) {
+                (result as Either<Failure, BovineEntity>).fold(
+                  (failure) {},
+                  (abueloEntity) {
+                    if (mounted) {
+                      setState(() {
+                        _abueloPaterno = BovinoMapper.fromEntity(abueloEntity);
+                      });
+                    }
+                  },
+                );
+              });
             }
             if (_padre!.idMadre != null) {
-              final abuelaPaternaResult = await _repository.getBovinoById(
-                _padre!.idMadre!,
+              (_repository as dynamic).getBovineById(
                 widget.farmId,
-              );
-              switch (abuelaPaternaResult) {
-                case Success<Bovino>(:final data):
-                  _abuelaPaterna = data;
-                case Error<Bovino>():
-                  // Ignorar error silenciosamente
-                  break;
-              }
+                _padre!.idMadre!,
+              ).then((result) {
+                (result as Either<Failure, BovineEntity>).fold(
+                  (failure) {},
+                  (abuelaEntity) {
+                    if (mounted) {
+                      setState(() {
+                        _abuelaPaterna = BovinoMapper.fromEntity(abuelaEntity);
+                      });
+                    }
+                  },
+                );
+              });
             }
-          case Error<Bovino>():
-            // Ignorar error silenciosamente
-            break;
-        }
+          },
+        );
       }
 
       if (widget.bovino.idMadre != null) {
-        final madreResult = await _repository.getBovinoById(
-          widget.bovino.idMadre!,
+        final madreResult = await (_repository as dynamic).getBovineById(
           widget.farmId,
-        );
-        switch (madreResult) {
-          case Success<Bovino>(:final data):
-            _madre = data;
+          widget.bovino.idMadre!,
+        ) as Either<Failure, BovineEntity>;
+        
+        madreResult.fold(
+          (failure) {
+            // Ignorar error silenciosamente
+          },
+          (bovineEntity) {
+            _madre = BovinoMapper.fromEntity(bovineEntity);
             
             // Cargar abuelos maternos
             if (_madre!.idPadre != null) {
-              final abueloMaternoResult = await _repository.getBovinoById(
-                _madre!.idPadre!,
+              (_repository as dynamic).getBovineById(
                 widget.farmId,
-              );
-              switch (abueloMaternoResult) {
-                case Success<Bovino>(:final data):
-                  _abueloMaterno = data;
-                case Error<Bovino>():
-                  // Ignorar error silenciosamente
-                  break;
-              }
+                _madre!.idPadre!,
+              ).then((result) {
+                (result as Either<Failure, BovineEntity>).fold(
+                  (failure) {},
+                  (abueloEntity) {
+                    if (mounted) {
+                      setState(() {
+                        _abueloMaterno = BovinoMapper.fromEntity(abueloEntity);
+                      });
+                    }
+                  },
+                );
+              });
             }
             if (_madre!.idMadre != null) {
-              final abuelaMaternaResult = await _repository.getBovinoById(
-                _madre!.idMadre!,
+              (_repository as dynamic).getBovineById(
                 widget.farmId,
-              );
-              switch (abuelaMaternaResult) {
-                case Success<Bovino>(:final data):
-                  _abuelaMaterna = data;
-                case Error<Bovino>():
-                  // Ignorar error silenciosamente
-                  break;
-              }
+                _madre!.idMadre!,
+              ).then((result) {
+                (result as Either<Failure, BovineEntity>).fold(
+                  (failure) {},
+                  (abuelaEntity) {
+                    if (mounted) {
+                      setState(() {
+                        _abuelaMaterna = BovinoMapper.fromEntity(abuelaEntity);
+                      });
+                    }
+                  },
+                );
+              });
             }
-          case Error<Bovino>():
-            // Ignorar error silenciosamente
-            break;
-        }
+          },
+        );
       }
     } catch (e) {
       setState(() {
@@ -382,7 +405,7 @@ class _PedigreeLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.5)
+      ..color = color.withValues(alpha: 0.5)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 

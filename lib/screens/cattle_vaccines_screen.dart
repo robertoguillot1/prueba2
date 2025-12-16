@@ -122,7 +122,7 @@ class CattleVaccinesScreen extends StatelessWidget {
                             child: ListTile(
                               contentPadding: const EdgeInsets.all(16),
                               leading: CircleAvatar(
-                                backgroundColor: farm.primaryColor.withOpacity(0.1),
+                                backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                                 child: Icon(Icons.medical_services, color: farm.primaryColor),
                               ),
                               title: Text(

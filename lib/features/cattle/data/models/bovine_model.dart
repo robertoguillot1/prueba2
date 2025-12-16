@@ -27,6 +27,7 @@ class BovineModel extends BovineEntity {
     DateTime? inseminationDate,
     DateTime? expectedCalvingDate,
     String? notes,
+    String? photoUrl,
   }) : super(
           id: id,
           farmId: farmId,
@@ -50,6 +51,7 @@ class BovineModel extends BovineEntity {
           inseminationDate: inseminationDate,
           expectedCalvingDate: expectedCalvingDate,
           notes: notes,
+          photoUrl: photoUrl,
         );
 
   /// Crea un modelo desde JSON de Firestore
@@ -95,6 +97,7 @@ class BovineModel extends BovineEntity {
           ? (json['expectedCalvingDate'] as Timestamp).toDate()
           : null,
       notes: json['notes'] as String?,
+      photoUrl: json['photoUrl'] as String?,
     );
   }
 
@@ -122,6 +125,7 @@ class BovineModel extends BovineEntity {
       if (inseminationDate != null) 'inseminationDate': Timestamp.fromDate(inseminationDate!),
       if (expectedCalvingDate != null) 'expectedCalvingDate': Timestamp.fromDate(expectedCalvingDate!),
       if (notes != null) 'notes': notes,
+      if (photoUrl != null) 'photoUrl': photoUrl,
     };
   }
 
@@ -149,6 +153,7 @@ class BovineModel extends BovineEntity {
     DateTime? inseminationDate,
     DateTime? expectedCalvingDate,
     String? notes,
+    String? photoUrl,
   }) {
     return BovineModel(
       id: id ?? this.id,
@@ -173,6 +178,7 @@ class BovineModel extends BovineEntity {
       inseminationDate: inseminationDate ?? this.inseminationDate,
       expectedCalvingDate: expectedCalvingDate ?? this.expectedCalvingDate,
       notes: notes ?? this.notes,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 

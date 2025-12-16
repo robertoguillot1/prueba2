@@ -7,6 +7,7 @@ import '../../../../domain/usecases/trabajadores/create_trabajador.dart';
 import '../../../../domain/usecases/trabajadores/update_trabajador.dart';
 import '../../../../domain/usecases/trabajadores/delete_trabajador.dart';
 import '../../../../domain/usecases/trabajadores/get_trabajadores_activos.dart';
+import '../../../../domain/usecases/trabajadores/search_trabajadores.dart';
 import '../../base/base_viewmodel.dart';
 
 /// ViewModel para gestión de Trabajadores
@@ -19,6 +20,7 @@ class TrabajadoresViewModel extends BaseViewModel {
   final UpdateTrabajador updateTrabajador;
   final DeleteTrabajador deleteTrabajador;
   final GetTrabajadoresActivos getTrabajadoresActivos;
+  final SearchTrabajadores searchTrabajadores;
 
   TrabajadoresViewModel({
     required this.getAllTrabajadores,
@@ -26,6 +28,7 @@ class TrabajadoresViewModel extends BaseViewModel {
     required this.updateTrabajador,
     required this.deleteTrabajador,
     required this.getTrabajadoresActivos,
+    required this.searchTrabajadores,
   });
 
   // Estado
@@ -179,6 +182,32 @@ class TrabajadoresViewModel extends BaseViewModel {
   void toggleShowOnlyActivos() {
     _showOnlyActivos = !_showOnlyActivos;
     notifyListeners();
+  }
+
+  /// Busca trabajadores por nombre, identificación o cargo
+  /// 
+  /// [farmId] - ID de la finca
+  /// [query] - Término de búsqueda
+  Future<void> searchTrabajadoresByQuery(String farmId, String query) async {
+    if (query.trim().isEmpty) {
+      // Si la búsqueda está vacía, cargar todos
+      await loadTrabajadores(farmId);
+      return;
+    }
+
+    setLoading(true);
+    clearError();
+
+    final result = await searchTrabajadores(farmId, query);
+    
+    switch (result) {
+      case Success<List<Trabajador>>(:final data):
+        _trabajadores = data;
+        setLoading(false);
+      case Error<List<Trabajador>>(:final failure):
+        setError(getErrorMessage(failure));
+        setLoading(false);
+    }
   }
 
   /// Limpia la lista y el estado

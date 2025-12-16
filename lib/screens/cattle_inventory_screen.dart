@@ -297,7 +297,7 @@ class _CattleInventoryScreenState extends State<CattleInventoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getStageColor(cattle.productionStage).withOpacity(0.1),
+                      color: _getStageColor(cattle.productionStage).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

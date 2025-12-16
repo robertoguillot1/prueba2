@@ -328,7 +328,7 @@ class FarmStatisticsScreen extends StatelessWidget {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: farm.primaryColor.withOpacity(0.1),
+                        backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                         child: Text(
                           worker.fullName.isNotEmpty ? worker.fullName[0].toUpperCase() : '?',
                           style: TextStyle(
@@ -552,8 +552,8 @@ class FarmStatisticsScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           backgroundColor: cow.currentWeight >= avgForCow
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.orange.withOpacity(0.1),
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.orange.withValues(alpha: 0.1),
                           child: Icon(
                             cow.currentWeight >= avgForCow
                                 ? Icons.trending_up

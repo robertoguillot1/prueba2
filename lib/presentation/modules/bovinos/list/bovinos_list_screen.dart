@@ -196,7 +196,7 @@ class _BovinosListContentState extends State<_BovinosListContent> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: genderColor.withOpacity(0.15),
+            color: genderColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(

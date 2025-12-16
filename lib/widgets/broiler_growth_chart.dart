@@ -77,7 +77,7 @@ class BroilerGrowthChart extends StatelessWidget {
           horizontalInterval: 500, // Cada 500 gramos
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               strokeWidth: 1,
             );
           },
@@ -116,14 +116,14 @@ class BroilerGrowthChart extends StatelessWidget {
         ),
         borderData: FlBorderData(
           show: true,
-          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         lineBarsData: [
           // Línea de referencia estándar
           LineChartBarData(
             spots: standardSpots,
             isCurved: true,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
             barWidth: 2,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
@@ -149,7 +149,7 @@ class BroilerGrowthChart extends StatelessWidget {
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
             ),
           ),
         ],

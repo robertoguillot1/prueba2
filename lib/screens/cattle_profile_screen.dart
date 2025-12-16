@@ -99,7 +99,7 @@ class CattleProfileScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         child: Text(
                           (cattle.name ?? cattle.identification ?? '?')[0].toUpperCase(),
                           style: const TextStyle(
@@ -124,7 +124,7 @@ class CattleProfileScreen extends StatelessWidget {
                           'ID: ${cattle.identification}',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -231,7 +231,7 @@ class CattleProfileScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
@@ -614,7 +614,7 @@ class CattleProfileScreen extends StatelessWidget {
                                   return ListTile(
                                     contentPadding: EdgeInsets.zero,
                                     leading: CircleAvatar(
-                                      backgroundColor: farm.primaryColor.withOpacity(0.2),
+                                      backgroundColor: farm.primaryColor.withValues(alpha: 0.2),
                                       child: Icon(
                                         child.gender == CattleGender.male
                                             ? Icons.male
@@ -939,7 +939,7 @@ class CattleProfileScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(

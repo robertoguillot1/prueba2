@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../domain/entities/ovinos/oveja.dart';
 import '../../../../domain/repositories/ovinos/ovejas_repository.dart';
 import '../../../datasources/remote/ovinos/ovinos_remote_datasource.dart';
@@ -26,6 +28,15 @@ class OvinosHybridRepository implements OvejasRepository {
 
   @override
   Future<Result<List<Oveja>>> getAllOvejas(String farmId) async {
+    // En modo web, solo usar remoto (SQLite no está disponible)
+    if (kIsWeb) {
+      final result = await _remoteDataSource.fetchAll(farmId);
+      if (result.isSuccess) {
+        return Success((result as Success<List<OvejaModel>>).data.cast<Oveja>().toList());
+      }
+      return result.map((models) => models.cast<Oveja>().toList());
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
@@ -34,38 +45,73 @@ class OvinosHybridRepository implements OvejasRepository {
       if (result.isSuccess) {
         // Guardar en local para uso offline
         final models = (result as Success<List<OvejaModel>>).data;
-        for (final model in models) {
-          await _localDataSource.save(farmId, model);
+        try {
+          for (final model in models) {
+            await _localDataSource.save(farmId, model);
+          }
+        } catch (_) {
+          // Ignorar errores de SQLite
         }
         return Success(models.cast<Oveja>().toList());
       }
     }
     
     // Si no hay conexión o falló, usar local
-    final localResult = await _localDataSource.fetchAll(farmId);
-    return localResult.map((models) => models.cast<Oveja>().toList());
+    try {
+      final localResult = await _localDataSource.fetchAll(farmId);
+      return localResult.map((models) => models.cast<Oveja>().toList());
+    } catch (e) {
+      if (e.toString().contains('SQLite')) {
+        return const Success([]);
+      }
+      return Error(CacheFailure('Error al obtener ovejas: $e'));
+    }
   }
 
   @override
   Future<Result<Oveja>> getOvejaById(String id, String farmId) async {
+    // En modo web, solo usar remoto
+    if (kIsWeb) {
+      final result = await _remoteDataSource.fetchById(farmId, id);
+      return result.map((model) => model as Oveja);
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
       final result = await _remoteDataSource.fetchById(farmId, id);
       if (result.isSuccess) {
         final model = (result as Success<OvejaModel>).data;
-        await _localDataSource.save(farmId, model);
+        try {
+          await _localDataSource.save(farmId, model);
+        } catch (_) {
+          // Ignorar errores de SQLite
+        }
         return Success(model);
       }
     }
     
-    final localResult = await _localDataSource.fetchById(farmId, id);
-    return localResult.map((model) => model as Oveja);
+    try {
+      final localResult = await _localDataSource.fetchById(farmId, id);
+      return localResult.map((model) => model as Oveja);
+    } catch (e) {
+      if (e.toString().contains('SQLite')) {
+        return Error(NotFoundFailure('Oveja no encontrada en caché local'));
+      }
+      return Error(CacheFailure('Error al obtener oveja: $e'));
+    }
   }
 
   @override
   Future<Result<Oveja>> createOveja(Oveja oveja) async {
     final model = OvejaModel.fromEntity(oveja);
+
+    // En modo web, solo usar remoto
+    if (kIsWeb) {
+      final result = await _remoteDataSource.create(oveja.farmId, model);
+      return result.map((created) => created as Oveja);
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
@@ -73,20 +119,28 @@ class OvinosHybridRepository implements OvejasRepository {
       final result = await _remoteDataSource.create(oveja.farmId, model);
       if (result.isSuccess) {
         final created = (result as Success<OvejaModel>).data;
-        await _localDataSource.save(oveja.farmId, created);
+        try {
+          await _localDataSource.save(oveja.farmId, created);
+        } catch (_) {
+          // Ignorar errores de SQLite
+        }
         return Success(created);
       }
     }
     
     // Guardar localmente y añadir a cola de sincronización
-    await _localDataSource.save(oveja.farmId, model);
-    await _syncManager.addToSyncQueue(
-      tableName: 'ovinos',
-      operation: 'CREATE',
-      entityId: model.id,
-      farmId: model.farmId,
-      data: model.toJson(),
-    );
+    try {
+      await _localDataSource.save(oveja.farmId, model);
+      await _syncManager.addToSyncQueue(
+        tableName: 'ovinos',
+        operation: 'CREATE',
+        entityId: model.id,
+        farmId: model.farmId,
+        data: model.toJson(),
+      );
+    } catch (e) {
+      return Error(CacheFailure('Error al guardar oveja localmente: $e'));
+    }
     
     return Success(model);
   }
@@ -94,51 +148,80 @@ class OvinosHybridRepository implements OvejasRepository {
   @override
   Future<Result<Oveja>> updateOveja(Oveja oveja) async {
     final model = OvejaModel.fromEntity(oveja);
+
+    // En modo web, solo usar remoto
+    if (kIsWeb) {
+      final result = await _remoteDataSource.update(oveja.farmId, model);
+      return result.map((updated) => updated as Oveja);
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
       final result = await _remoteDataSource.update(oveja.farmId, model);
       if (result.isSuccess) {
         final updated = (result as Success<OvejaModel>).data;
-        await _localDataSource.save(oveja.farmId, updated);
+        try {
+          await _localDataSource.save(oveja.farmId, updated);
+        } catch (_) {
+          // Ignorar errores de SQLite
+        }
         return Success(updated);
       }
     }
     
     // Guardar localmente y añadir a cola de sincronización
-    await _localDataSource.save(oveja.farmId, model);
-    await _syncManager.addToSyncQueue(
-      tableName: 'ovinos',
-      operation: 'UPDATE',
-      entityId: model.id,
-      farmId: model.farmId,
-      data: model.toJson(),
-    );
+    try {
+      await _localDataSource.save(oveja.farmId, model);
+      await _syncManager.addToSyncQueue(
+        tableName: 'ovinos',
+        operation: 'UPDATE',
+        entityId: model.id,
+        farmId: model.farmId,
+        data: model.toJson(),
+      );
+    } catch (e) {
+      return Error(CacheFailure('Error al guardar oveja localmente: $e'));
+    }
     
     return Success(model);
   }
 
   @override
   Future<Result<void>> deleteOveja(String id, String farmId) async {
+    // En modo web, solo usar remoto
+    if (kIsWeb) {
+      final result = await _remoteDataSource.delete(farmId, id);
+      return result;
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
       final result = await _remoteDataSource.delete(farmId, id);
       if (result.isSuccess) {
-        await _localDataSource.delete(farmId, id);
+        try {
+          await _localDataSource.delete(farmId, id);
+        } catch (_) {
+          // Ignorar errores de SQLite
+        }
         return const Success(null);
       }
     }
     
     // Eliminar localmente y añadir a cola de sincronización
-    await _localDataSource.delete(farmId, id);
-    await _syncManager.addToSyncQueue(
-      tableName: 'ovinos',
-      operation: 'DELETE',
-      entityId: id,
-      farmId: farmId,
-      data: {'id': id},
-    );
+    try {
+      await _localDataSource.delete(farmId, id);
+      await _syncManager.addToSyncQueue(
+        tableName: 'ovinos',
+        operation: 'DELETE',
+        entityId: id,
+        farmId: farmId,
+        data: {'id': id},
+      );
+    } catch (e) {
+      return Error(CacheFailure('Error al eliminar oveja localmente: $e'));
+    }
     
     return const Success(null);
   }
@@ -162,6 +245,12 @@ class OvinosHybridRepository implements OvejasRepository {
 
   @override
   Future<Result<List<Oveja>>> searchOvejas(String farmId, String query) async {
+    // En modo web, solo usar remoto
+    if (kIsWeb) {
+      final result = await _remoteDataSource.search(farmId, query);
+      return result.map((models) => models.cast<Oveja>().toList());
+    }
+
     final hasConnection = await _connectivityService.hasConnection();
     
     if (hasConnection) {
@@ -172,8 +261,15 @@ class OvinosHybridRepository implements OvejasRepository {
       }
     }
     
-    final localResult = await _localDataSource.search(farmId, query);
-    return localResult.map((models) => models.cast<Oveja>().toList());
+    try {
+      final localResult = await _localDataSource.search(farmId, query);
+      return localResult.map((models) => models.cast<Oveja>().toList());
+    } catch (e) {
+      if (e.toString().contains('SQLite')) {
+        return const Success([]);
+      }
+      return Error(CacheFailure('Error al buscar ovejas: $e'));
+    }
   }
 }
 

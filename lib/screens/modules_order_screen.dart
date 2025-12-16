@@ -76,7 +76,7 @@ class _ModulesOrderScreenState extends State<ModulesOrderScreen> {
               color: Colors.grey.shade100,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
@@ -129,7 +129,7 @@ class _ModulesOrderScreenState extends State<ModulesOrderScreen> {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: module.color.withOpacity(0.1),
+            color: module.color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(module.iconData, color: module.color),

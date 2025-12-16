@@ -36,7 +36,7 @@ class WorkerCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: farm.primaryColor.withOpacity(0.1),
+                    backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                     child: Text(
                       worker.fullName.isNotEmpty ? worker.fullName[0].toUpperCase() : '?',
                       style: TextStyle(

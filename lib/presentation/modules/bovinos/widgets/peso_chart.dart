@@ -74,7 +74,7 @@ class PesoChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
+        color: (isPositive ? Colors.green : Colors.red).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -218,8 +218,8 @@ class PesoChart extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                Colors.green.withOpacity(0.3),
-                Colors.green.withOpacity(0.05),
+                Colors.green.withValues(alpha: 0.3),
+                Colors.green.withValues(alpha: 0.05),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

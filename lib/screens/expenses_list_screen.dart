@@ -136,7 +136,7 @@ class ExpensesListScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: updatedFarm.primaryColor.withOpacity(0.1),
+                          backgroundColor: updatedFarm.primaryColor.withValues(alpha: 0.1),
                           child: Icon(
                             Icons.receipt,
                             color: updatedFarm.primaryColor,
@@ -155,7 +155,7 @@ class ExpensesListScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.1),
+                                    color: Colors.red.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(

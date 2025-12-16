@@ -84,7 +84,7 @@ class TripDetailsScreen extends StatelessWidget {
                         DateFormat('dd/MM/yyyy').format(trip.tripDate),
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -203,7 +203,7 @@ class TripDetailsScreen extends StatelessWidget {
                                     margin: const EdgeInsets.only(bottom: 8),
                                     child: ListTile(
                                       leading: CircleAvatar(
-                                        backgroundColor: farm.primaryColor.withOpacity(0.1),
+                                        backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                                         child: Icon(
                                           Icons.agriculture,
                                           color: farm.primaryColor,

@@ -13,6 +13,7 @@ import '../../porcinos/screens/porcicultura_menu_screen.dart';
 import '../../ovinos/screens/caprinos_menu_screen.dart';
 import '../../avicultura/screens/avicultura_menu_screen.dart';
 import '../../trabajadores/screens/trabajadores_menu_screen.dart';
+import '../../finance/screens/finance_screen.dart';
 
 /// Pantalla principal del Dashboard Operativo Inteligente
 class DashboardScreen extends StatefulWidget {
@@ -242,6 +243,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
               ),
+              SummaryCardWidget(
+                icon: Icons.account_balance_wallet,
+                title: 'Finanzas',
+                total: 0, // No hay total para mostrar aquí
+                color: Colors.purple,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FinanceScreen(farmId: widget.farmId),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -387,7 +402,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: alert.color.withOpacity(0.5),
+          color: alert.color.withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -412,7 +427,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: alert.color.withOpacity(isDark ? 0.3 : 0.1),
+                  color: alert.color.withValues(alpha: isDark ? 0.3 : 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -437,7 +452,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: alert.color.withOpacity(isDark ? 0.3 : 0.2),
+                            color: alert.color.withValues(alpha: isDark ? 0.3 : 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(

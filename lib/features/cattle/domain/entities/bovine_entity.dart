@@ -27,6 +27,7 @@ class BovineEntity extends Equatable {
   final DateTime? inseminationDate; // Fecha de inseminación (solo hembras)
   final DateTime? expectedCalvingDate; // Fecha esperada de parto (solo hembras)
   final String? notes; // Notas adicionales
+  final String? photoUrl; // Ruta de la foto del bovino
 
   const BovineEntity({
     required this.id,
@@ -51,6 +52,7 @@ class BovineEntity extends Equatable {
     this.inseminationDate,
     this.expectedCalvingDate,
     this.notes,
+    this.photoUrl,
   });
 
   /// Calcula la edad del bovino en años basada en birthDate
@@ -139,6 +141,7 @@ class BovineEntity extends Equatable {
     DateTime? inseminationDate,
     DateTime? expectedCalvingDate,
     String? notes,
+    String? photoUrl,
   }) {
     return BovineEntity(
       id: id ?? this.id,
@@ -163,6 +166,7 @@ class BovineEntity extends Equatable {
       inseminationDate: inseminationDate ?? this.inseminationDate,
       expectedCalvingDate: expectedCalvingDate ?? this.expectedCalvingDate,
       notes: notes ?? this.notes,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 

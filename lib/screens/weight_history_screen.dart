@@ -114,7 +114,7 @@ class WeightHistoryScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: farm.primaryColor.withOpacity(0.1),
+          backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
           child: Text(
             pig.identification?.substring(0, 1).toUpperCase() ?? '🐷',
             style: TextStyle(color: farm.primaryColor),

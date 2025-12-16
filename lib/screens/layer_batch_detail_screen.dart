@@ -588,7 +588,7 @@ class _LayerBatchDetailScreenState extends State<LayerBatchDetailScreen> with Si
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: widget.farm.primaryColor.withOpacity(0.1),
+                    backgroundColor: widget.farm.primaryColor.withValues(alpha: 0.1),
                     child: Icon(Icons.egg, color: widget.farm.primaryColor),
                   ),
                   title: Text(

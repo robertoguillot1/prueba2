@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/di/dependency_injection.dart' as di;
 import '../../../../presentation/modules/bovinos/screens/bovino_form_screen.dart';
 import '../../../../presentation/modules/bovinos/screens/bovino_detail_screen.dart';
+import '../../../../presentation/widgets/photo/photo_display_widget.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../cubit/cattle_cubit.dart';
 import '../cubit/cattle_state.dart';
@@ -238,23 +239,29 @@ class _BovineCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Avatar con indicador de género
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: _getGenderColor(bovine.gender).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _getGenderColor(bovine.gender),
-                    width: 2,
+              // Avatar con foto o indicador de género
+              PhotoDisplayWidget(
+                photoUrl: bovine.photoUrl,
+                entityId: bovine.id,
+                module: 'cattle',
+                size: 60,
+                placeholder: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: _getGenderColor(bovine.gender).withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _getGenderColor(bovine.gender),
+                      width: 2,
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Icon(
-                    _getGenderIcon(bovine.gender),
-                    color: _getGenderColor(bovine.gender),
-                    size: 30,
+                  child: Center(
+                    child: Icon(
+                      _getGenderIcon(bovine.gender),
+                      color: _getGenderColor(bovine.gender),
+                      size: 30,
+                    ),
                   ),
                 ),
               ),
@@ -333,7 +340,7 @@ class _BovineCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getPurposeColor(bovine.purpose).withOpacity(0.2),
+                      color: _getPurposeColor(bovine.purpose).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

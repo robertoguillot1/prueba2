@@ -219,7 +219,7 @@ class _CattleSelectorListState extends State<_CattleSelectorList> {
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundColor: isSelected
-                            ? widget.farm.primaryColor.withOpacity(0.2)
+                            ? widget.farm.primaryColor.withValues(alpha: 0.2)
                             : Colors.grey.shade200,
                         child: Icon(
                           cattle.gender == CattleGender.male
@@ -265,7 +265,7 @@ class _CattleSelectorListState extends State<_CattleSelectorList> {
                           : null,
                       onTap: () => widget.onSelect(cattle),
                       selected: isSelected,
-                      selectedTileColor: widget.farm.primaryColor.withOpacity(0.1),
+                      selectedTileColor: widget.farm.primaryColor.withValues(alpha: 0.1),
                     );
                   },
                 ),

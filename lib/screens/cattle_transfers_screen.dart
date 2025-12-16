@@ -110,7 +110,7 @@ class CattleTransfersScreen extends StatelessWidget {
                                   Row(
                                     children: [
                                       CircleAvatar(
-                                        backgroundColor: Colors.blue.withOpacity(0.1),
+                                        backgroundColor: Colors.blue.withValues(alpha: 0.1),
                                         child: const Icon(
                                           Icons.airport_shuttle,
                                           color: Colors.blue,
@@ -244,7 +244,7 @@ class CattleTransfersScreen extends StatelessWidget {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: farm.primaryColor.withOpacity(0.1),
+                                  backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                                   child: Icon(
                                     transfer.reason == 'venta' ? Icons.sell :
                                     transfer.reason == 'reproduccion' ? Icons.child_care :

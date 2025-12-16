@@ -4,6 +4,7 @@ import '../list/screens/farm_transfers_screen.dart';
 import '../list/screens/farm_health_screen.dart';
 import '../list/screens/farm_production_screen.dart';
 import 'bovino_form_screen.dart';
+import 'cattle_global_reports_screen.dart';
 
 /// Pantalla de menú de Bovinos que centraliza todas las funcionalidades
 class BovinoMenuScreen extends StatelessWidget {
@@ -125,6 +126,23 @@ class BovinoMenuScreen extends StatelessWidget {
                 );
               },
             ),
+
+            // Opción 6: Reportes Globales
+            _buildMenuCard(
+              context,
+              icon: Icons.pie_chart,
+              title: 'Reportes Globales',
+              subtitle: 'Estadísticas generales del hato',
+              color: Colors.teal,
+              onTap: () {
+                Navigator.push(
+                  context,
+                   MaterialPageRoute(
+                    builder: (_) => CattleGlobalReportsScreen(farmId: farmId),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -155,8 +173,8 @@ class BovinoMenuScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
+                color.withValues(alpha: 0.1),
+                color.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -167,7 +185,7 @@ class BovinoMenuScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

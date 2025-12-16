@@ -74,7 +74,7 @@ class GoatSheepProfileScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         child: Text(
                           (updatedAnimal.name ?? updatedAnimal.identification ?? '?')[0].toUpperCase(),
                           style: const TextStyle(
@@ -99,7 +99,7 @@ class GoatSheepProfileScreen extends StatelessWidget {
                           'ID: ${updatedAnimal.identification}',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -304,7 +304,7 @@ class GoatSheepProfileScreen extends StatelessWidget {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.blue.withOpacity(0.1),
+                                                color: Colors.blue.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Row(
@@ -454,9 +454,9 @@ class GoatSheepProfileScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: farm.primaryColor.withOpacity(0.1),
+          color: farm.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: farm.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: farm.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

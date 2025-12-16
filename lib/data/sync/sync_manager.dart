@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/network/connectivity_service.dart';
 import '../../core/utils/result.dart';
 import '../../core/errors/failures.dart';
@@ -18,6 +19,11 @@ class SyncManager {
 
   /// Sincroniza todas las operaciones pendientes
   Future<Result<void>> syncAll(String farmId) async {
+    // En modo web, no hay cola de sincronización (SQLite no disponible)
+    if (kIsWeb) {
+      return const Success(null);
+    }
+
     if (!await _connectivityService.hasConnection()) {
       return const Error(NetworkFailure('Sin conexión a internet'));
     }
@@ -43,13 +49,20 @@ class SyncManager {
 
   /// Obtiene las operaciones pendientes de sincronización
   Future<List<Map<String, dynamic>>> _getPendingOperations(String farmId) async {
-    final db = await AppDatabase.database;
-    return await db.query(
-      'sync_queue',
-      where: 'farmId = ?',
-      whereArgs: [farmId],
-      orderBy: 'createdAt ASC',
-    );
+    if (kIsWeb) {
+      return []; // En web no hay cola de sincronización
+    }
+    try {
+      final db = await AppDatabase.database;
+      return await db.query(
+        'sync_queue',
+        where: 'farmId = ?',
+        whereArgs: [farmId],
+        orderBy: 'createdAt ASC',
+      );
+    } catch (e) {
+      return []; // Si hay error, retornar lista vacía
+    }
   }
 
   /// Sincroniza una operación individual
@@ -99,6 +112,10 @@ class SyncManager {
         return entityId.isEmpty
             ? '/farms/$farmId/trabajadores'
             : '/farms/$farmId/trabajadores/$entityId';
+      case 'cattle':
+        return entityId.isEmpty
+            ? '/farms/$farmId/cattle'
+            : '/farms/$farmId/cattle/$entityId';
       default:
         throw Exception('Tabla desconocida: $tableName');
     }
@@ -112,64 +129,92 @@ class SyncManager {
     required String farmId,
     required Map<String, dynamic> data,
   }) async {
-    final db = await AppDatabase.database;
-    await db.insert('sync_queue', {
-      'tableName': tableName,
-      'operation': operation,
-      'entityId': entityId,
-      'farmId': farmId,
-      'data': jsonEncode(data),
-      'createdAt': DateTime.now().toIso8601String(),
-      'retryCount': 0,
-    });
+    // En modo web, no hay cola de sincronización (SQLite no disponible)
+    if (kIsWeb) {
+      return;
+    }
+    try {
+      final db = await AppDatabase.database;
+      await db.insert('sync_queue', {
+        'tableName': tableName,
+        'operation': operation,
+        'entityId': entityId,
+        'farmId': farmId,
+        'data': jsonEncode(data),
+        'createdAt': DateTime.now().toIso8601String(),
+        'retryCount': 0,
+      });
+    } catch (e) {
+      // Ignorar errores de SQLite en web
+    }
   }
 
   /// Incrementa el contador de reintentos
   Future<void> _incrementRetryCount(int id) async {
-    final db = await AppDatabase.database;
-    final current = await db.query(
-      'sync_queue',
-      columns: ['retryCount'],
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    if (current.isNotEmpty) {
-      final currentCount = current.first['retryCount'] as int;
-      await db.update(
+    if (kIsWeb) return;
+    try {
+      final db = await AppDatabase.database;
+      final current = await db.query(
         'sync_queue',
-        {'retryCount': currentCount + 1},
+        columns: ['retryCount'],
         where: 'id = ?',
         whereArgs: [id],
       );
+      if (current.isNotEmpty) {
+        final currentCount = current.first['retryCount'] as int;
+        await db.update(
+          'sync_queue',
+          {'retryCount': currentCount + 1},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    } catch (_) {
+      // Ignorar errores de SQLite
     }
   }
 
   /// Elimina una operación de la cola
   Future<void> _removeFromSyncQueue(int id) async {
-    final db = await AppDatabase.database;
-    await db.delete('sync_queue', where: 'id = ?', whereArgs: [id]);
+    if (kIsWeb) return;
+    try {
+      final db = await AppDatabase.database;
+      await db.delete('sync_queue', where: 'id = ?', whereArgs: [id]);
+    } catch (_) {
+      // Ignorar errores de SQLite
+    }
   }
 
   /// Marca una entidad como sincronizada
   Future<void> _markAsSynced(String tableName, String entityId) async {
-    final db = await AppDatabase.database;
-    await db.update(
-      tableName,
-      {'synced': 1},
-      where: 'id = ?',
-      whereArgs: [entityId],
-    );
+    if (kIsWeb) return;
+    try {
+      final db = await AppDatabase.database;
+      await db.update(
+        tableName,
+        {'synced': 1},
+        where: 'id = ?',
+        whereArgs: [entityId],
+      );
+    } catch (_) {
+      // Ignorar errores de SQLite
+    }
   }
 
   /// Limpia operaciones antiguas (más de 30 días)
   Future<void> cleanOldOperations() async {
-    final db = await AppDatabase.database;
-    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-    await db.delete(
-      'sync_queue',
-      where: 'createdAt < ?',
-      whereArgs: [thirtyDaysAgo.toIso8601String()],
-    );
+    if (kIsWeb) return;
+    try {
+      final db = await AppDatabase.database;
+      final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+      await db.delete(
+        'sync_queue',
+        where: 'createdAt < ?',
+        whereArgs: [thirtyDaysAgo.toIso8601String()],
+      );
+    } catch (_) {
+      // Ignorar errores de SQLite
+    }
   }
 }
 

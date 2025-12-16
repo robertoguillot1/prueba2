@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
 import '../../../../domain/entities/bovinos/evento_reproductivo.dart';
 import '../../../../domain/entities/bovinos/bovino.dart';
 import '../../../../domain/usecases/bovinos/create_evento_reproductivo.dart';
-import '../../../../domain/usecases/bovinos/registrar_parto_con_cria.dart';
+// import '../../../../domain/usecases/bovinos/registrar_parto_con_cria.dart'; // TEMPORALMENTE DESHABILITADO: requiere migración
 import '../../../../domain/repositories/bovinos/eventos_reproductivos_repository.dart';
-import '../../../../domain/repositories/bovinos/bovinos_repository.dart';
+// import '../../../../domain/repositories/bovinos/bovinos_repository.dart'; // ELIMINADO: usar CattleRepository
 import '../../../../data/repositories_impl/bovinos/eventos_reproductivos_repository_impl.dart';
 import '../../../../data/datasources/bovinos/eventos_reproductivos_datasource.dart';
-import '../../../../core/di/dependency_injection.dart';
+import '../../../../features/cattle/domain/repositories/cattle_repository.dart';
+import '../../../../features/cattle/domain/entities/bovine_entity.dart';
+import '../../../../features/cattle/data/models/bovine_model.dart';
+import '../mappers/bovino_mapper.dart';
 import '../viewmodels/eventos_reproductivos_viewmodel.dart';
 import '../viewmodels/bovinos_viewmodel.dart';
 import '../widgets/cattle_selector_field.dart';
@@ -105,14 +109,13 @@ class _EventoReproductivoFormScreenState extends State<EventoReproductivoFormScr
     final prefs = await SharedPreferences.getInstance();
     final eventosDataSource = EventosReproductivosDataSourceImpl(prefs);
     final eventosRepository = EventosReproductivosRepositoryImpl(eventosDataSource);
-    final bovinosRepository = DependencyInjection.bovinosRepository;
+    // final bovinosRepository = DependencyInjection.bovinosRepository; // ELIMINADO: sistema legacy
     
     final eventosViewModel = EventosReproductivosViewModel(
       createEvento: CreateEventoReproductivo(eventosRepository),
-      registrarPartoConCria: RegistrarPartoConCria(
-        eventosRepository: eventosRepository,
-        bovinosRepository: bovinosRepository,
-      ),
+      // registrarPartoConCria: null, // TEMPORALMENTE DESHABILITADO: requiere migración a CattleRepository
+      // Cuando se registre un parto, solo se registrará el evento sin crear la cría automáticamente
+      // TODO: Implementar creación de cría usando CattleRepository directamente
     );
     
     final detalles = _buildDetalles();

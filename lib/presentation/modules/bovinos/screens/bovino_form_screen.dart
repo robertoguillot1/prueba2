@@ -870,7 +870,7 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: category.color.withOpacity(0.1),
+        color: category.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: category.color, width: 2),
       ),
@@ -916,7 +916,7 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
           ),
           Icon(
             Icons.auto_awesome,
-            color: category.color.withOpacity(0.6),
+            color: category.color.withValues(alpha: 0.6),
             size: 20,
           ),
         ],

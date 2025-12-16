@@ -4,6 +4,10 @@ import '../../../domain/entities/trabajadores/trabajador.dart';
 import '../../../domain/repositories/trabajadores/trabajadores_repository.dart';
 import '../../datasources/trabajadores/trabajadores_datasource.dart';
 import '../../models/trabajadores/trabajador_model.dart';
+import '../../../features/trabajadores/domain/entities/pago.dart';
+import '../../../features/trabajadores/domain/entities/prestamo.dart';
+import '../../../features/trabajadores/data/models/pago_model.dart';
+import '../../../features/trabajadores/data/models/prestamo_model.dart';
 
 /// Implementación del repositorio de Trabajadores
 class TrabajadoresRepositoryImpl implements TrabajadoresRepository {
@@ -91,5 +95,81 @@ class TrabajadoresRepositoryImpl implements TrabajadoresRepository {
       return Error(CacheFailure('Error al buscar trabajadores: $e'));
     }
   }
-}
 
+  // === PAGOS ===
+  @override
+  Future<Result<List<Pago>>> getPagosByTrabajador(String workerId) async {
+    try {
+      final models = await dataSource.getPagosByTrabajador(workerId);
+      return Success(models);
+    } catch (e) {
+      return Error(CacheFailure('Error al obtener pagos: $e'));
+    }
+  }
+
+  @override
+  Future<Result<Pago>> createPago(Pago pago) async {
+    try {
+      // Ensure we pass a Model to the DataSource
+      final model = pago is PagoModel ? pago : PagoModel.fromEntity(pago);
+      final createdValues = await dataSource.createPago(model);
+      return Success(createdValues);
+    } catch (e) {
+       return Error(CacheFailure('Error al crear pago: $e'));
+    }
+  }
+
+  @override
+  Future<Result<Pago>> updatePago(Pago pago) async {
+    // Este método no está implementado en el data source legacy
+    // El repositorio híbrido es el que debe usarse para pagos/préstamos
+    return Error(CacheFailure('updatePago no está disponible en el sistema legacy. Use TrabajadoresHybridRepository.'));
+  }
+
+  @override
+  Future<Result<void>> deletePago(String workerId, String pagoId) async {
+    // Este método no está implementado en el data source legacy
+    // El repositorio híbrido es el que debe usarse para pagos/préstamos
+    return Error(CacheFailure('deletePago no está disponible en el sistema legacy. Use TrabajadoresHybridRepository.'));
+  }
+
+  // === PRESTAMOS ===
+  @override
+  Future<Result<List<Prestamo>>> getPrestamosByTrabajador(String workerId) async {
+    try {
+      final models = await dataSource.getPrestamosByTrabajador(workerId);
+      return Success(models);
+    } catch (e) {
+      return Error(CacheFailure('Error al obtener préstamos: $e'));
+    }
+  }
+
+  @override
+  Future<Result<Prestamo>> createPrestamo(Prestamo prestamo) async {
+    try {
+      final model = prestamo is PrestamoModel ? prestamo : PrestamoModel.fromEntity(prestamo);
+      final created = await dataSource.createPrestamo(model);
+      return Success(created);
+    } catch (e) {
+      return Error(CacheFailure('Error al crear préstamo: $e'));
+    }
+  }
+
+  @override
+  Future<Result<Prestamo>> updatePrestamo(Prestamo prestamo) async {
+    try {
+      final model = prestamo is PrestamoModel ? prestamo : PrestamoModel.fromEntity(prestamo);
+      final updated = await dataSource.updatePrestamo(model);
+      return Success(updated);
+    } catch (e) {
+      return Error(CacheFailure('Error al actualizar préstamo: $e'));
+    }
+  }
+
+  @override
+  Future<Result<void>> deletePrestamo(String workerId, String prestamoId) async {
+    // Este método no está implementado en el data source legacy
+    // El repositorio híbrido es el que debe usarse para pagos/préstamos
+    return Error(CacheFailure('deletePrestamo no está disponible en el sistema legacy. Use TrabajadoresHybridRepository.'));
+  }
+}

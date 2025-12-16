@@ -157,7 +157,7 @@ class _HealthTabContent extends StatelessWidget {
   ) {
     return Card(
       elevation: 2,
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: color, width: 2),
@@ -185,7 +185,7 @@ class _HealthTabContent extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: color.withOpacity(0.8),
+                      color: color.withValues(alpha: 0.8),
                     ),
                   ),
                 ],

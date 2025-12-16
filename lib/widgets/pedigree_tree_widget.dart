@@ -338,7 +338,7 @@ class PedigreeTreePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = primaryColor.withOpacity(0.4)
+      ..color = primaryColor.withValues(alpha: 0.4)
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
 

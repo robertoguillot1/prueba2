@@ -269,9 +269,9 @@ class _FoodManagementScreenState extends State<FoodManagementScreen> with Single
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: stageColor.withOpacity(0.1),
+        color: stageColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: stageColor.withOpacity(0.3)),
+        border: Border.all(color: stageColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,7 +384,7 @@ class _FoodManagementScreenState extends State<FoodManagementScreen> with Single
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -445,7 +445,7 @@ class _FoodManagementScreenState extends State<FoodManagementScreen> with Single
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: widget.farm.primaryColor.withOpacity(0.05),
+        color: widget.farm.primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -560,7 +560,7 @@ class _FoodManagementScreenState extends State<FoodManagementScreen> with Single
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: farm.primaryColor.withOpacity(0.05),
+                  color: farm.primaryColor.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -630,7 +630,7 @@ class _FoodManagementScreenState extends State<FoodManagementScreen> with Single
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: farm.primaryColor.withOpacity(0.1),
+                  backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
                   child: Icon(Icons.shopping_cart, color: farm.primaryColor),
                 ),
                 title: Text(

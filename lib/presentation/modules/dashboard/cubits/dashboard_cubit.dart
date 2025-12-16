@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/bovinos/bovino.dart' as old;
+import '../../../../domain/repositories/bovinos/bovinos_repository.dart' as old;
+import '../../../../core/utils/result.dart';
 import '../../../../domain/entities/porcinos/cerdo.dart';
 import '../../../../domain/entities/ovinos/oveja.dart';
 import '../../../../domain/entities/avicultura/gallina.dart';
@@ -18,7 +20,7 @@ import '../models/dashboard_alert.dart';
 /// Cubit para manejar el estado del Dashboard
 class DashboardCubit extends Cubit<DashboardState> {
   final String farmId; // ID de la finca actual
-  final GetBovinosStream getBovinosStream;
+  final GetBovinosStream? getBovinosStream; // Opcional: sistema legacy eliminado
   final GetCerdosStream getCerdosStream;
   final GetOvejasStream getOvejasStream;
   final GetGallinasStream getGallinasStream;
@@ -43,7 +45,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   DashboardCubit({
     required this.farmId,
-    required this.getBovinosStream,
+    this.getBovinosStream, // Opcional: sistema legacy eliminado
     required this.getCerdosStream,
     required this.getOvejasStream,
     required this.getGallinasStream,
@@ -56,15 +58,19 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(DashboardLoading());
 
     // Suscribirse a todos los streams
-    _bovinosSubscription = getBovinosStream().listen(
-      (bovinos) {
-        _bovinos = bovinos;
-        _recalculateState();
-      },
-      onError: (error) {
-        emit(DashboardError('Error al cargar bovinos: $error'));
-      },
-    );
+    // Sistema legacy de bovinos eliminado - usar solo cattleRepository
+    final bovinosStream = getBovinosStream;
+    if (bovinosStream != null) {
+      _bovinosSubscription = bovinosStream!().listen(
+        (bovinos) {
+          _bovinos = bovinos;
+          _recalculateState();
+        },
+        onError: (error) {
+          emit(DashboardError('Error al cargar bovinos: $error'));
+        },
+      );
+    }
 
     _cerdosSubscription = getCerdosStream().listen(
       (cerdos) {

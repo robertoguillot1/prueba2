@@ -457,7 +457,7 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
                             _isActive = value;
                           });
                         },
-                        activeColor: Colors.green,
+                        activeThumbColor: Colors.green,
                       ),
                     ],
                   ),

@@ -176,7 +176,7 @@ class _ReproductiveEventFormContentState
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: _getGenderColor(widget.bovine.gender).withOpacity(0.15),
+                color: _getGenderColor(widget.bovine.gender).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -268,7 +268,7 @@ class _ReproductiveEventFormContentState
       leading: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
@@ -350,10 +350,11 @@ class _ReproductiveEventFormContentState
               icon: Icon(Icons.cancel, color: Colors.red),
             ),
           ],
-          selected: _palpationResult != null ? {_palpationResult!} : {},
+          selected: _palpationResult != null ? {_palpationResult!} : <String>{},
+          emptySelectionAllowed: true, // Permitir selección vacía inicialmente
           onSelectionChanged: (Set<String> selected) {
             setState(() {
-              _palpationResult = selected.first;
+              _palpationResult = selected.isNotEmpty ? selected.first : null;
             });
           },
         ),

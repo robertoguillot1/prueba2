@@ -7,6 +7,8 @@ import '../../../../domain/entities/trabajadores/trabajador.dart';
 import '../../../../presentation/widgets/info_card.dart';
 import '../../../../presentation/widgets/status_chip.dart';
 import '../../../../presentation/widgets/custom_button.dart';
+import '../screens/pagos_list_screen.dart';
+import '../screens/prestamos_list_screen.dart';
 
 /// Pantalla de detalles de un Trabajador
 class TrabajadorDetailsScreen extends StatelessWidget {
@@ -84,6 +86,44 @@ class TrabajadorDetailsScreen extends StatelessWidget {
         Navigator.pop(context, true);
       }
     });
+  }
+
+  Widget _buildFinanceCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -213,6 +253,60 @@ class TrabajadorDetailsScreen extends StatelessWidget {
                 icon: Icons.description,
               ),
             ],
+            const SizedBox(height: 32),
+            
+            // Gestión Financiera
+             Text(
+              'Gestión Financiera',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildFinanceCard(
+                    context,
+                    title: 'Pagos',
+                    icon: Icons.payments,
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PagosListScreen(
+                            farmId: farmId,
+                            workerId: trabajador.id,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildFinanceCard(
+                    context,
+                    title: 'Préstamos',
+                    icon: Icons.account_balance_wallet,
+                    color: Colors.orange,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PrestamosListScreen(
+                            farmId: farmId,
+                            workerId: trabajador.id,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+
             const SizedBox(height: 32),
             // Botones de acción
             Row(

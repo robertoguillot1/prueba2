@@ -104,8 +104,8 @@ class WorkerProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
             colors: [
-              farm.primaryColor.withOpacity(0.1),
-              farm.primaryColor.withOpacity(0.05),
+              farm.primaryColor.withValues(alpha: 0.1),
+              farm.primaryColor.withValues(alpha: 0.05),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -116,7 +116,7 @@ class WorkerProfileScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: farm.primaryColor.withOpacity(0.1),
+              backgroundColor: farm.primaryColor.withValues(alpha: 0.1),
               child: Text(
                 worker.fullName.isNotEmpty ? worker.fullName[0].toUpperCase() : '?',
                 style: TextStyle(
@@ -336,7 +336,7 @@ class WorkerProfileScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.payments, size: 16, color: Colors.green),
@@ -364,9 +364,9 @@ class WorkerProfileScreen extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
+                                        color: Colors.blue.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                                        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
                                       ),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +468,7 @@ class WorkerProfileScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
+                                color: Colors.orange.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.account_balance_wallet, size: 16, color: Colors.orange),
@@ -496,9 +496,9 @@ class WorkerProfileScreen extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: Colors.orange.withOpacity(0.1),
+                                        color: Colors.orange.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                                        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                                       ),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,

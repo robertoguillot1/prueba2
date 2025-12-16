@@ -95,7 +95,7 @@ class PesoChart extends StatelessWidget {
                       dotData: FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: lineColor.withOpacity(0.2),
+                        color: lineColor.withValues(alpha: 0.2),
                       ),
                     ),
                   ],
