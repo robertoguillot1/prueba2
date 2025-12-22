@@ -55,6 +55,7 @@ class TransferCubit extends Cubit<TransferState> {
     String? notes,
     String? transporterName,
     String? vehicleInfo,
+    String? mobilizationGuidePhotoUrl,
   }) async {
     final transfer = TransferEntity(
       id: '', // Firestore generará el ID
@@ -68,6 +69,7 @@ class TransferCubit extends Cubit<TransferState> {
       notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
       transporterName: transporterName?.trim().isEmpty == true ? null : transporterName?.trim(),
       vehicleInfo: vehicleInfo?.trim().isEmpty == true ? null : vehicleInfo?.trim(),
+      mobilizationGuidePhotoUrl: mobilizationGuidePhotoUrl,
       createdAt: DateTime.now(),
     );
 

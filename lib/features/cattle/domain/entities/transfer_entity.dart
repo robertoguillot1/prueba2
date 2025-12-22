@@ -52,6 +52,7 @@ class TransferEntity extends Equatable {
   final String? notes;
   final String? transporterName;
   final String? vehicleInfo;
+  final String? mobilizationGuidePhotoUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -67,6 +68,7 @@ class TransferEntity extends Equatable {
     this.notes,
     this.transporterName,
     this.vehicleInfo,
+    this.mobilizationGuidePhotoUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -92,6 +94,7 @@ class TransferEntity extends Equatable {
         notes,
         transporterName,
         vehicleInfo,
+        mobilizationGuidePhotoUrl,
         createdAt,
         updatedAt,
       ];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../widgets/genealogy_widget.dart';
 import '../details/tabs/transfer_tab.dart';
 import '../screens/bovino_form_screen.dart';
@@ -13,7 +14,9 @@ import '../cubits/form/bovino_form_state.dart';
 import '../details/tabs/reproduction_tab.dart';
 import '../details/tabs/production_tab.dart';
 import '../details/tabs/health_tab.dart';
-import '../details/tabs/feeding_tab.dart'; // Import at top
+import '../details/tabs/feeding_tab.dart';
+import 'bovino_photo_gallery_screen.dart';
+import 'bovino_photo_viewer_screen.dart';
 
 class BovinoDetailScreen extends StatelessWidget {
   final BovineEntity bovine;
@@ -163,6 +166,11 @@ class BovinoDetailScreen extends StatelessWidget {
       pinned: true,
       actions: [
         IconButton(
+          icon: const Icon(Icons.photo_library),
+          onPressed: () => _navigateToPhotoGallery(context),
+          tooltip: 'Galería de fotos',
+        ),
+        IconButton(
           icon: const Icon(Icons.camera_alt),
           onPressed: () => _showPhotoOptions(context),
           tooltip: 'Agregar/Editar foto',
@@ -216,7 +224,13 @@ class BovinoDetailScreen extends StatelessWidget {
                           color: _getGenderColor(bovine.gender),
                         ),
                       ),
-                      onTap: () => _showPhotoOptions(context),
+                      onTap: () {
+                        if (bovine.photoUrl != null && bovine.photoUrl!.isNotEmpty) {
+                          _viewPhoto(context, bovine.photoUrl!);
+                        } else {
+                          _showPhotoOptions(context);
+                        }
+                      },
                     ),
                     // Botón de cámara flotante
                     Positioned(
@@ -560,6 +574,41 @@ class BovinoDetailScreen extends StatelessWidget {
     }
   }
 
+  void _navigateToPhotoGallery(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BovinoPhotoGalleryScreen(
+          bovine: bovine,
+          farmId: farmId,
+        ),
+      ),
+    ).then((result) {
+      // Si se hizo algún cambio en la galería, recargar la pantalla
+      if (result == true && context.mounted) {
+        Navigator.pop(context, true);
+      }
+    });
+  }
+
+  void _viewPhoto(BuildContext context, String photoUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BovinoPhotoViewerScreen(
+          photoUrl: photoUrl,
+          bovine: bovine,
+          farmId: farmId,
+        ),
+      ),
+    ).then((result) {
+      // Si se hizo algún cambio, recargar la pantalla
+      if (result == true && context.mounted) {
+        Navigator.pop(context, true);
+      }
+    });
+  }
+
   Future<void> _showPhotoOptions(BuildContext context) async {
     final photoService = di.DependencyInjection.photoService;
     final option = await showModalBottomSheet<String>(
@@ -591,7 +640,7 @@ class BovinoDetailScreen extends StatelessWidget {
 
     if (option == null) return;
 
-    File? photo;
+    dynamic photo;
     if (option == 'camera') {
       photo = await photoService.takePhoto();
     } else if (option == 'gallery') {

@@ -381,8 +381,6 @@ class _BovinoFormContentState extends State<_BovinoFormContent> {
                 const SizedBox(height: 12),
                 _buildHealthStatusSelector(),
                 const SizedBox(height: 16),
-                _buildProductionStageSelector(),
-                const SizedBox(height: 16),
                 _buildStatusSelector(),
 
                 const SizedBox(height: 24),

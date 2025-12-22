@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:typed_data';
 import '../../../core/services/photo_service.dart';
 import '../../../core/di/dependency_injection.dart';
 
@@ -31,7 +34,34 @@ class PhotoDisplayWidget extends StatelessWidget {
       builder: (context, snapshot) {
         final path = snapshot.data;
         
-        if (path != null && File(path).existsSync()) {
+        if (path == null) {
+          return _buildPlaceholder(context);
+        }
+        
+        // En web, las fotos pueden ser URLs de blob o http
+        if (kIsWeb) {
+          if (path.startsWith('blob:') || path.startsWith('http') || path.startsWith('data:')) {
+            return GestureDetector(
+              onTap: onTap,
+              child: ClipOval(
+                child: Image.network(
+                  path,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildPlaceholder(context);
+                  },
+                ),
+              ),
+            );
+          }
+          // Si no es una URL válida, mostrar placeholder
+          return _buildPlaceholder(context);
+        }
+        
+        // Para móvil/desktop, usar File
+        if (File(path).existsSync()) {
           return GestureDetector(
             onTap: onTap,
             child: ClipOval(
@@ -54,6 +84,19 @@ class PhotoDisplayWidget extends StatelessWidget {
   }
 
   Future<String?> _getPhotoPath() async {
+    // En web, photoUrl puede ser una URL de blob o http directamente
+    if (kIsWeb) {
+      if (photoUrl != null && (photoUrl!.startsWith('blob:') || photoUrl!.startsWith('http') || photoUrl!.startsWith('data:'))) {
+        return photoUrl;
+      }
+      if (photoPath != null && (photoPath!.startsWith('blob:') || photoPath!.startsWith('http') || photoPath!.startsWith('data:'))) {
+        return photoPath;
+      }
+      // En web, no podemos usar PhotoService.getPhotoPath porque no hay sistema de archivos
+      return photoUrl ?? photoPath;
+    }
+    
+    // Para móvil/desktop, usar el sistema de archivos
     if (photoPath != null && File(photoPath!).existsSync()) {
       return photoPath;
     }

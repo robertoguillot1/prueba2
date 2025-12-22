@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../viewmodels/ovejas_viewmodel.dart';
 import '../edit/oveja_edit_screen.dart';
 import '../../../../domain/entities/ovinos/oveja.dart';
@@ -384,7 +385,7 @@ class OvejaDetailsScreen extends StatelessWidget {
 
     if (option == null) return;
 
-    File? photo;
+    dynamic photo;
     if (option == 'camera') {
       photo = await photoService.takePhoto();
     } else if (option == 'gallery') {

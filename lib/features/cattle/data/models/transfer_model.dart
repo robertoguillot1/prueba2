@@ -14,6 +14,7 @@ class TransferModel extends TransferEntity {
     String? notes,
     String? transporterName,
     String? vehicleInfo,
+    String? mobilizationGuidePhotoUrl,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) : super(
@@ -28,6 +29,7 @@ class TransferModel extends TransferEntity {
           notes: notes,
           transporterName: transporterName,
           vehicleInfo: vehicleInfo,
+          mobilizationGuidePhotoUrl: mobilizationGuidePhotoUrl,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -45,6 +47,7 @@ class TransferModel extends TransferEntity {
       notes: json['notes'] as String?,
       transporterName: json['transporterName'] as String?,
       vehicleInfo: json['vehicleInfo'] as String?,
+      mobilizationGuidePhotoUrl: json['mobilizationGuidePhotoUrl'] as String?,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
@@ -64,6 +67,7 @@ class TransferModel extends TransferEntity {
       'notes': notes,
       'transporterName': transporterName,
       'vehicleInfo': vehicleInfo,
+      'mobilizationGuidePhotoUrl': mobilizationGuidePhotoUrl,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
@@ -82,6 +86,7 @@ class TransferModel extends TransferEntity {
       notes: entity.notes,
       transporterName: entity.transporterName,
       vehicleInfo: entity.vehicleInfo,
+      mobilizationGuidePhotoUrl: entity.mobilizationGuidePhotoUrl,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -99,6 +104,7 @@ class TransferModel extends TransferEntity {
     String? notes,
     String? transporterName,
     String? vehicleInfo,
+    String? mobilizationGuidePhotoUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -114,6 +120,7 @@ class TransferModel extends TransferEntity {
       notes: notes ?? this.notes,
       transporterName: transporterName ?? this.transporterName,
       vehicleInfo: vehicleInfo ?? this.vehicleInfo,
+      mobilizationGuidePhotoUrl: mobilizationGuidePhotoUrl ?? this.mobilizationGuidePhotoUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
