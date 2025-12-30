@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'dart:io' if (dart.library.html) 'dart:html' as io;
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:image_picker/image_picker.dart';
 import '../../../../../core/di/dependency_injection.dart' as di;
 import '../../../../../core/di/dependency_injection.dart' show sl;
 import '../../../../../features/cattle/domain/entities/bovine_entity.dart';
@@ -13,9 +9,6 @@ import '../../../../../domain/entities/farm/farm.dart';
 import '../../../../../domain/repositories/farm_repository.dart';
 import '../../../../../presentation/cubits/auth/auth_cubit.dart';
 import '../../../../../presentation/cubits/auth/auth_state.dart';
-import '../../../../../core/services/photo_service.dart';
-import '../../../../../core/services/storage_service.dart';
-import '../../../../../core/services/file_helper_stub.dart' if (dart.library.html) '../../../../../core/services/file_helper_stub_web.dart' as file_helper;
 import '../cubits/transfer_cubit.dart';
 import '../cubits/transfer_state.dart';
 
@@ -47,17 +40,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   TransferReason _selectedReason = TransferReason.otro;
   String? _selectedToFarmId;
   
-  // Foto de guía de movilización (solo en móvil/desktop, null en web)
-  dynamic _mobilizationGuidePhoto;
-  Uint8List? _mobilizationGuidePhotoBytes;
-  String? _mobilizationGuidePhotoUrl;
-  bool _uploadingPhoto = false;
-  
-  // Servicios
-  final PhotoService _photoService = PhotoService();
-  final StorageService _storageService = StorageService();
-  final ImagePicker _imagePicker = ImagePicker();
-  
   // Datos de fincas
   List<Farm> _availableFarms = [];
   Farm? _currentFarm;
@@ -79,7 +61,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       _transferDate = transfer.transferDate;
       _selectedReason = transfer.reason;
       _selectedToFarmId = transfer.toFarmId;
-      _mobilizationGuidePhotoUrl = transfer.mobilizationGuidePhotoUrl;
     }
   }
 
@@ -368,17 +349,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Foto de guía de movilización
-                    Text(
-                      'Guía de Movilización (Opcional)',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildMobilizationGuidePhotoUploader(),
-                    const SizedBox(height: 24),
-
                     // Notas
                     TextFormField(
                       controller: _notesController,
@@ -524,251 +494,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     );
   }
 
-  Widget _buildMobilizationGuidePhotoUploader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: _mobilizationGuidePhoto != null || _mobilizationGuidePhotoBytes != null
-              ? Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: kIsWeb && _mobilizationGuidePhotoBytes != null
-                          ? Image.memory(
-                              _mobilizationGuidePhotoBytes!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            )
-                          : !kIsWeb && _mobilizationGuidePhoto != null
-                              ? Image.file(
-                                  _mobilizationGuidePhoto as dynamic,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                )
-                              : _buildEmptyPhotoPlaceholder(),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {
-                          setState(() {
-                            _mobilizationGuidePhoto = null;
-                            _mobilizationGuidePhotoBytes = null;
-                          });
-                        },
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : _mobilizationGuidePhotoUrl != null
-                  ? Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            _mobilizationGuidePhotoUrl!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (context, error, stackTrace) {
-                              return _buildEmptyPhotoPlaceholder();
-                            },
-                          ),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () {
-                              setState(() {
-                                _mobilizationGuidePhotoUrl = null;
-                              });
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : _buildEmptyPhotoPlaceholder(),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _uploadingPhoto ? null : _pickPhotoFromGallery,
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Desde Galería'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _uploadingPhoto ? null : _takePhoto,
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Tomar Foto'),
-              ),
-            ),
-          ],
-        ),
-        if (_uploadingPhoto)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyPhotoPlaceholder() {
-    return InkWell(
-      onTap: _showPhotoOptions,
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.description,
-              size: 48,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Toca para agregar foto\nde la guía de movilización',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showPhotoOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Desde Galería'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickPhotoFromGallery();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Tomar Foto'),
-              onTap: () {
-                Navigator.pop(context);
-                _takePhoto();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _takePhoto() async {
-    try {
-      final XFile? photo = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-      
-      if (photo != null && mounted) {
-        final bytes = await photo.readAsBytes();
-        setState(() {
-          _mobilizationGuidePhotoUrl = null;
-          if (kIsWeb) {
-            _mobilizationGuidePhotoBytes = bytes;
-            _mobilizationGuidePhoto = null;
-          } else {
-            _mobilizationGuidePhoto = _createFile(photo.path);
-            _mobilizationGuidePhotoBytes = null;
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al tomar foto: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickPhotoFromGallery() async {
-    try {
-      final XFile? photo = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-      
-      if (photo != null && mounted) {
-        final bytes = await photo.readAsBytes();
-        setState(() {
-          _mobilizationGuidePhotoUrl = null;
-          if (kIsWeb) {
-            _mobilizationGuidePhotoBytes = bytes;
-            _mobilizationGuidePhoto = null;
-          } else {
-            _mobilizationGuidePhoto = _createFile(photo.path);
-            _mobilizationGuidePhotoBytes = null;
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al seleccionar foto: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   /// Helper para parseo seguro de números (precios, cantidades, etc.)
   double _parseSafeNumber(String text) {
     if (text.trim().isEmpty) return 0.0;
@@ -782,7 +507,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     return double.tryParse(clean) ?? 0.0;
   }
 
-  Future<void> _handleSave(BuildContext context) async {
+  void _handleSave(BuildContext context) {
     print('🔵 [TransferFormScreen] Iniciando guardado de transferencia...');
     
     if (!_formKey.currentState!.validate()) {
@@ -832,91 +557,26 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     print('📝 [TransferFormScreen] Destino: $destinationName');
     print('📝 [TransferFormScreen] Motivo: ${_selectedReason.displayName}');
 
-    // Subir foto si hay una nueva
-    String? photoUrl = _mobilizationGuidePhotoUrl;
-    if (_mobilizationGuidePhoto != null || _mobilizationGuidePhotoBytes != null) {
-      setState(() {
-        _uploadingPhoto = true;
-      });
-
-      try {
-        // Generar un ID temporal para la transferencia si estamos creando
-        final transferId = isEditMode && widget.transfer != null
-            ? widget.transfer!.id
-            : 'temp_${DateTime.now().millisecondsSinceEpoch}';
-        
-        final storagePath = _storageService.generateMobilizationGuidePath(
-          transferId,
-          widget.farmId,
-        );
-        
-        if (kIsWeb && _mobilizationGuidePhotoBytes != null) {
-          // En web, subir desde bytes
-          photoUrl = await _storageService.uploadImageFromBytes(
-            _mobilizationGuidePhotoBytes!,
-            storagePath,
-          );
-        } else if (!kIsWeb && _mobilizationGuidePhoto != null) {
-            // En móvil, subir desde archivo
-            photoUrl = await _storageService.uploadImage(
-              _mobilizationGuidePhoto,
-              storagePath,
-            );
-        }
-
-        if (photoUrl == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Error al subir la foto. ¿Deseas continuar sin la foto?'),
-                backgroundColor: Colors.orange,
-                duration: Duration(seconds: 3),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        print('❌ [TransferFormScreen] Error al subir foto: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al subir la foto: $e'),
-              backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _uploadingPhoto = false;
-          });
-        }
-      }
-    }
-
     // Mostrar feedback de guardado
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
-              SizedBox(width: 16),
-              Text('Guardando transferencia...'),
-            ],
-          ),
-          duration: Duration(seconds: 2),
+            ),
+            SizedBox(width: 16),
+            Text('Guardando transferencia...'),
+          ],
         ),
-      );
-    }
+        duration: Duration(seconds: 2),
+      ),
+    );
 
     try {
       if (isEditMode && widget.transfer != null) {
@@ -937,7 +597,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         vehicleInfo: _vehicleInfoController.text.trim().isEmpty
             ? null
             : _vehicleInfoController.text.trim(),
-        mobilizationGuidePhotoUrl: photoUrl,
         createdAt: widget.transfer!.createdAt,
         updatedAt: DateTime.now(),
       );
@@ -962,7 +621,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
               vehicleInfo: _vehicleInfoController.text.trim().isEmpty
                   ? null
                   : _vehicleInfoController.text.trim(),
-              mobilizationGuidePhotoUrl: photoUrl,
             );
       }
     } catch (e, stackTrace) {
@@ -977,19 +635,6 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         );
       }
     }
-  }
-
-  // Helper para crear File sin problemas de import condicional
-  dynamic _createFile(String path) {
-    if (kIsWeb) return null;
-    // En móvil/desktop, crear File usando un método que funcione
-    // Usar un cast dinámico para evitar problemas de compilación
-    return _createNativeFile(path);
-  }
-  
-  dynamic _createNativeFile(String path) {
-    // Usar el helper que funciona en ambas plataformas
-    return file_helper.FileHelperStub.createFile(path);
   }
 }
 

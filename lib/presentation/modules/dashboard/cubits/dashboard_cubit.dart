@@ -59,9 +59,8 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     // Suscribirse a todos los streams
     // Sistema legacy de bovinos eliminado - usar solo cattleRepository
-    final bovinosStream = getBovinosStream;
-    if (bovinosStream != null) {
-      _bovinosSubscription = bovinosStream!().listen(
+    if (getBovinosStream != null) {
+      _bovinosSubscription = getBovinosStream().listen(
         (bovinos) {
           _bovinos = bovinos;
           _recalculateState();

@@ -35,3 +35,5 @@ class UpdateLoan implements UseCase<Either<Failure, LoanEntity>, UpdateLoanParam
 
 
 
+
+
